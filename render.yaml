@@ -1,31 +1,28 @@
+# Render Blueprint Configuration
+# This file configures backend API deployment on Render
+# Docs: https://render.com/docs/blueprint-spec
+
 services:
-  # Backend API
+  # Backend API Service
   - type: web
     name: job-api
     runtime: node
-    plan: free
+    plan: free  # Free tier (sleeps after 15 min of inactivity)
+    region: oregon  # Choose: oregon, frankfurt, singapore, ohio, virginia
+    rootDir: server  # Important: Set to server directory
     buildCommand: npm install
-    startCommand: node server/index.js
+    startCommand: npm start
+    healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 4000
       - key: MONGO_URI
-        sync: false
+        sync: false  # You'll add this manually in Render dashboard
       - key: JWT_SECRET
-        generateValue: true
+        generateValue: true  # Render will auto-generate a secure key
       - key: CLIENT_ORIGIN
-        value: https://job-client.onrender.com
-    healthCheckPath: /api/health
-
-  # Frontend
-  - type: web
-    name: job-client
-    runtime: static
-    plan: free
-    buildCommand: cd client && npm install && npm run build
-    staticPublishPath: ./client/dist
-    envVars:
-      - key: VITE_API_URL
-        value: https://job-api.onrender.com
+        value: https://your-netlify-site.netlify.app  # Update with your Netlify URL
+    # Auto-deploy on push to main branch
+    autoDeploy: true
