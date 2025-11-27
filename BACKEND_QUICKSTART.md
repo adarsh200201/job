@@ -37,12 +37,12 @@
 
 3. Connect your `job` repository
 
-4. Configure:
+3. Configure:
    ```
    Name: job-api
-   Root Directory: job/server
-   Build Command: npm install
-   Start Command: npm start
+   Root Directory: (leave blank)
+   Build Command: cd server && npm install
+   Start Command: cd server && npm start
    ```
 
 5. Add Environment Variables:

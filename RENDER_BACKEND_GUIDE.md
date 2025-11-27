@@ -116,14 +116,14 @@ Fill in the following settings:
 Name: job-api
 Region: Oregon (US West) - or closest to you
 Branch: main
-Root Directory: job/server
+Root Directory: (leave blank or set to "job")
 ```
 
 **Build & Deploy:**
 ```
 Runtime: Node
-Build Command: npm install
-Start Command: npm start
+Build Command: cd server && npm install
+Start Command: cd server && npm start
 ```
 
 **Instance Type:**
