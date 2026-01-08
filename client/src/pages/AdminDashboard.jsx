@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import api from '../api/index.js';
 
-const initialForm = { title: '', company: '', location: '', type: 'Full-Time', experience: '', description: '', applyLink: '', image: '', whatsapp: '', telegram: '', contact: '' };
+const initialForm = { title: '', company: '', location: '', type: 'Full-Time', experience: '', education: '', batch: '', jobDescription: '', description: '', responsibilities: '', requirements: '', skills: '', salary: '', applyLink: '', lastDate: '', image: '', whatsapp: '', telegram: '', contact: '', metaTitle: '', metaDescription: '' };
 
 export default function AdminDashboard() {
   const { username, logout } = useAuth();
@@ -15,8 +15,8 @@ export default function AdminDashboard() {
   const loadJobs = async () => {
     setLoading(true);
     try {
-      const { data } = await api.get('/jobs');
-      setJobs(data);
+      const response = await api.get('/jobs');
+      setJobs(response.data?.data || []);
     } catch {
       setJobs([]);
     } finally {
@@ -36,7 +36,29 @@ export default function AdminDashboard() {
 
   const startEdit = (job) => {
     setEditingId(job._id);
-    setForm({ title: job.title, company: job.company, location: job.location, type: job.type, experience: job.experience, description: job.description, applyLink: job.applyLink, image: job.image || '', whatsapp: job.whatsapp || '', telegram: job.telegram || '', contact: job.contact || '' });
+    setForm({ 
+      title: job.title, 
+      company: job.company, 
+      location: job.location, 
+      type: job.type, 
+      experience: job.experience, 
+      education: job.education || '',
+      batch: job.batch || '',
+      jobDescription: job.jobDescription || '', 
+      description: job.description || '',
+      responsibilities: Array.isArray(job.responsibilities) ? job.responsibilities.join('\n') : job.responsibilities || '',
+      requirements: Array.isArray(job.requirements) ? job.requirements.join('\n') : job.requirements || '',
+      skills: Array.isArray(job.skills) ? job.skills.join('\n') : job.skills || '',
+      salary: job.salary || '',
+      applyLink: job.applyLink, 
+      lastDate: job.lastDate ? job.lastDate.split('T')[0] : '',
+      image: job.image || '', 
+      whatsapp: job.whatsapp || '', 
+      telegram: job.telegram || '', 
+      contact: job.contact || '',
+      metaTitle: job.metaTitle || '',
+      metaDescription: job.metaDescription || ''
+    });
     setError('');
   };
 
@@ -140,6 +162,50 @@ export default function AdminDashboard() {
             <div className="col-12 col-md-6">
               <label className="form-label">Experience</label>
               <input className="form-control" value={form.experience} onChange={(e) => setForm({ ...form, experience: e.target.value })} required />
+            </div>
+            <div className="col-12 col-md-6">
+              <label className="form-label">Education Requirement</label>
+              <input className="form-control" placeholder="e.g., B.Tech (CSE/IT), MCA" value={form.education} onChange={(e) => setForm({ ...form, education: e.target.value })} />
+            </div>
+            <div className="col-12 col-md-6">
+              <label className="form-label">Batch/Year</label>
+              <input className="form-control" placeholder="e.g., 2025 Batch" value={form.batch} onChange={(e) => setForm({ ...form, batch: e.target.value })} />
+            </div>
+            <div className="col-12 col-md-6">
+              <label className="form-label">Salary (Optional)</label>
+              <input className="form-control" placeholder="e.g., 6-12 LPA" value={form.salary} onChange={(e) => setForm({ ...form, salary: e.target.value })} />
+            </div>
+            <div className="col-12 col-md-6">
+              <label className="form-label">Application Last Date</label>
+              <input className="form-control" type="date" value={form.lastDate} onChange={(e) => setForm({ ...form, lastDate: e.target.value })} />
+            </div>
+            <div className="col-12">
+              <label className="form-label">Job Description (Main Content)</label>
+              <textarea className="form-control" rows={4} placeholder="Full job description with company info and overview" value={form.jobDescription} onChange={(e) => setForm({ ...form, jobDescription: e.target.value })} />
+            </div>
+            <div className="col-12">
+              <label className="form-label">Description (Short Summary)</label>
+              <textarea className="form-control" rows={3} placeholder="Short description shown in list" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+            </div>
+            <div className="col-12">
+              <label className="form-label">Roles & Responsibilities (One per line)</label>
+              <textarea className="form-control" rows={4} placeholder="Line 1&#10;Line 2&#10;Line 3..." value={form.responsibilities} onChange={(e) => setForm({ ...form, responsibilities: e.target.value })} />
+            </div>
+            <div className="col-12">
+              <label className="form-label">Requirements/Eligibility (One per line)</label>
+              <textarea className="form-control" rows={4} placeholder="Requirement 1&#10;Requirement 2&#10;Requirement 3..." value={form.requirements} onChange={(e) => setForm({ ...form, requirements: e.target.value })} />
+            </div>
+            <div className="col-12">
+              <label className="form-label">Required Skills (One per line)</label>
+              <textarea className="form-control" rows={3} placeholder="Skill 1&#10;Skill 2&#10;Skill 3..." value={form.skills} onChange={(e) => setForm({ ...form, skills: e.target.value })} />
+            </div>
+            <div className="col-12">
+              <label className="form-label">Meta Title (SEO)</label>
+              <input className="form-control" placeholder="For search engines" value={form.metaTitle} onChange={(e) => setForm({ ...form, metaTitle: e.target.value })} />
+            </div>
+            <div className="col-12">
+              <label className="form-label">Meta Description (SEO)</label>
+              <input className="form-control" placeholder="For search engines" value={form.metaDescription} onChange={(e) => setForm({ ...form, metaDescription: e.target.value })} />
             </div>
             <div className="col-12">
               <label className="form-label">Description</label>

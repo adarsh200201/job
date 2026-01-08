@@ -3,10 +3,15 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const ctrl = require('../controllers/jobsController');
 
+// Public routes
 router.get('/', ctrl.getJobs);
-router.get('/:id', ctrl.getJobById);
-router.post('/', auth, ctrl.createJob);
-router.put('/:id', auth, ctrl.updateJob);
-router.delete('/:id', auth, ctrl.deleteJob);
+router.get('/:idOrSlug', ctrl.getJobById);
+router.get('/:id/related', ctrl.getRelatedJobs);
+
+// Protected routes (require authentication)
+router.use(auth);
+router.post('/', ctrl.createJob);
+router.put('/:id', ctrl.updateJob);
+router.delete('/:id', ctrl.deleteJob);
 
 module.exports = router;

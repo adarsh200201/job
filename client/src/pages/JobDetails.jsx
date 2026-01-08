@@ -13,9 +13,9 @@ export default function JobDetails() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [jobRes, jobsRes] = await Promise.all([api.get(`/jobs/${id}`), api.get('/jobs')]);
+        const [jobRes, jobsRes] = await Promise.all([api.get(`/jobs/${id}`), api.get('/jobs?limit=100')]);
         setJob(jobRes.data);
-        setRecent(jobsRes.data.filter((j) => j._id !== id));
+        setRecent((jobsRes.data?.data || jobsRes.data).filter((j) => j._id !== id).slice(0, 5));
       } catch {
         setJob(null);
         setRecent([]);
@@ -77,28 +77,92 @@ export default function JobDetails() {
             </div>
           </div>
 
-          <div className="text-muted mb-2">
-            <span className="me-3">{job.company}</span>
-            <span className="me-3">{job.location}</span>
-            <span className="badge bg-info-subtle text-info-emphasis">{job.type}</span>
+          <div className="text-muted mb-3">
+            <span className="me-3"><strong>{job.company}</strong></span>
+            <span className="me-3">📍 {job.location}</span>
+            <span className="me-3">💼 {job.type}</span>
+            {job.batch && <span className="badge bg-info-subtle text-info-emphasis me-2">{job.batch}</span>}
+            {job.experience && <span className="badge bg-secondary-subtle text-secondary-emphasis">{job.experience}</span>}
           </div>
 
-          <article className="card p-3 mb-3">
-            <h2 className="h6">Role description</h2>
-            <p className="mb-0 text-prewrap">{job.description}</p>
-          </article>
+          {job.lastDate && (
+            <div className="alert alert-warning py-2 mb-3">
+              <strong>Application Deadline:</strong> {new Date(job.lastDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+            </div>
+          )}
 
           {job.image && <img src={job.image} alt="job" className="img-fluid mb-3 rounded" />}
 
+          {job.jobDescription && (
+            <article className="card p-3 mb-3">
+              <h2 className="h5 mb-3">Overview</h2>
+              <p className="text-prewrap">{job.jobDescription}</p>
+            </article>
+          )}
+
+          {job.responsibilities && job.responsibilities.length > 0 && (
+            <article className="card p-3 mb-3">
+              <h2 className="h5 mb-3">Roles & Responsibilities</h2>
+              <ul className="list-group list-group-flush">
+                {(Array.isArray(job.responsibilities) ? job.responsibilities : job.responsibilities.split('\n')).filter(r => r.trim()).map((resp, idx) => (
+                  <li key={idx} className="list-group-item border-0 ps-0">✓ {resp.trim()}</li>
+                ))}
+              </ul>
+            </article>
+          )}
+
+          {job.requirements && job.requirements.length > 0 && (
+            <article className="card p-3 mb-3">
+              <h2 className="h5 mb-3">Eligibility Criteria</h2>
+              <ul className="list-group list-group-flush">
+                {(Array.isArray(job.requirements) ? job.requirements : job.requirements.split('\n')).filter(r => r.trim()).map((req, idx) => (
+                  <li key={idx} className="list-group-item border-0 ps-0">✓ {req.trim()}</li>
+                ))}
+              </ul>
+            </article>
+          )}
+
+          {job.skills && job.skills.length > 0 && (
+            <article className="card p-3 mb-3">
+              <h2 className="h5 mb-3">Required Skills</h2>
+              <div className="d-flex flex-wrap gap-2">
+                {(Array.isArray(job.skills) ? job.skills : job.skills.split('\n')).filter(s => s.trim()).map((skill, idx) => (
+                  <span key={idx} className="badge bg-primary">{skill.trim()}</span>
+                ))}
+              </div>
+            </article>
+          )}
+
+          {job.education && (
+            <article className="card p-3 mb-3">
+              <h2 className="h5">Education</h2>
+              <p className="mb-0">{job.education}</p>
+            </article>
+          )}
+
+          {job.salary && (
+            <article className="card p-3 mb-3 bg-light">
+              <h2 className="h5">Salary</h2>
+              <p className="mb-0"><strong>{job.salary}</strong></p>
+            </article>
+          )}
+
+          {job.description && (
+            <article className="card p-3 mb-3">
+              <h2 className="h5">Description</h2>
+              <p className="text-prewrap">{job.description}</p>
+            </article>
+          )}
+
           {job.contact && (
             <div className="card p-3 mb-3">
-              <h3 className="h6">Contact</h3>
+              <h3 className="h5">Contact Information</h3>
               <p className="mb-0">{job.contact}</p>
             </div>
           )}
 
           <div className="mt-3">
-            <Link to="/" className="btn btn-outline-secondary btn-sm">Back to listings</Link>
+            <Link to="/" className="btn btn-outline-secondary btn-sm">← Back to listings</Link>
           </div>
         </div>
 
