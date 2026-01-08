@@ -32,6 +32,13 @@ const JobSchema = new mongoose.Schema(
     // Media
     image: { type: String, trim: true },
     
+    // New "About" field
+    aboutCompany: { type: String, trim: true },
+    howToApply: { type: String, trim: true },
+    finalThoughts: { type: String, trim: true },
+    // Highlighted sentence shown in details (bold)
+    highlightText: { type: String, trim: true },
+
     // Contact Information
     whatsapp: { type: String, trim: true },
     telegram: { type: String, trim: true },

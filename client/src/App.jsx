@@ -6,6 +6,7 @@ import AdminLogin from './pages/AdminLogin.jsx';
 import AdminDashboard from './pages/AdminDashboard.jsx';
 import About from './pages/About.jsx';
 import Contact from './pages/Contact.jsx';
+import Footer from './components/Footer.jsx';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 
 function ProtectedRoute({ children }) {
@@ -15,6 +16,15 @@ function ProtectedRoute({ children }) {
 }
 
 export default function App() {
+  const scrollToSearch = () => {
+    const el = document.getElementById('sidebar-search');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      window.location.href = '/?focus=search';
+    }
+  };
+
   return (
     <AuthProvider>
       <header className="site-header sticky-top">
@@ -29,13 +39,7 @@ export default function App() {
               <li className="nav-item"><Link className="nav-link text-white" to="/?type=Internship">Internship</Link></li>
               <li className="nav-item"><Link className="nav-link text-white" to="/?type=Remote">Work From Home</Link></li>
             </ul>
-            <div className="nav-actions ms-auto d-none d-lg-flex align-items-center">
-              <button className="btn btn-outline-light btn-sm search-btn" aria-label="Search">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-search" viewBox="0 0 16 16">
-                  <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85v.001zm-5.242 1.656a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/>
-                </svg>
-              </button>
-            </div>
+            {/* Search icon removed per request */}
           </div>
         </nav>
       </header>
@@ -57,9 +61,7 @@ export default function App() {
           />
         </Routes>
       </main>
-      <footer className="text-center text-muted py-4">
-        <small>© {new Date().getFullYear()} JobForFreshers Clone</small>
-      </footer>
+      <Footer />
     </AuthProvider>
   );
 }
