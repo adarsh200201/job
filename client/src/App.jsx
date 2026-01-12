@@ -1,13 +1,31 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { Routes, Route, Link, Navigate } from 'react-router-dom';
-import Home from './pages/Home.jsx';
-import JobDetails from './pages/JobDetails.jsx';
-import AdminLogin from './pages/AdminLogin.jsx';
-import AdminDashboard from './pages/AdminDashboard.jsx';
-import About from './pages/About.jsx';
-import Contact from './pages/Contact.jsx';
 import Footer from './components/Footer.jsx';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
+
+// Lazy load page components for code splitting
+const Home = React.lazy(() => import('./pages/Home.jsx'));
+const JobDetails = React.lazy(() => import('./pages/JobDetails.jsx'));
+const AdminLogin = React.lazy(() => import('./pages/AdminLogin.jsx'));
+const AdminDashboard = React.lazy(() => import('./pages/AdminDashboard.jsx'));
+const About = React.lazy(() => import('./pages/About.jsx'));
+const Contact = React.lazy(() => import('./pages/Contact.jsx'));
+const FAQ = React.lazy(() => import('./pages/FAQ.jsx'));
+const Blog = React.lazy(() => import('./pages/Blog.jsx'));
+const PrivacyPolicy = React.lazy(() => import('./pages/PrivacyPolicy.jsx'));
+const Terms = React.lazy(() => import('./pages/Terms.jsx'));
+const Disclaimer = React.lazy(() => import('./pages/Disclaimer.jsx'));
+
+// Loading fallback component
+function LoadingFallback() {
+  return (
+    <div className="text-center py-5">
+      <div className="spinner-border text-primary" role="status">
+        <span className="visually-hidden">Loading…</span>
+      </div>
+    </div>
+  );
+}
 
 function ProtectedRoute({ children }) {
   const { token } = useAuth();
@@ -45,21 +63,28 @@ export default function App() {
       </header>
 
       <main className="container py-4">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/job/:id" element={<JobDetails />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute>
-                <AdminDashboard />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
+        <Suspense fallback={<LoadingFallback />}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/:slug" element={<JobDetails />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/faq" element={<FAQ />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/disclaimer" element={<Disclaimer />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </Suspense>
       </main>
       <Footer />
     </AuthProvider>

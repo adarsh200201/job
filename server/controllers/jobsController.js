@@ -160,11 +160,11 @@ exports.getJobById = async (req, res) => {
 exports.createJob = async (req, res) => {
   try {
     const {
-      title, company, location, type, experience, jobDescription, 
+      title, company, location, type, experience, jobDescription,
       responsibilities, requirements, skills, education, batch,
       salary, applyLink, lastDate, image, whatsapp, telegram, contact,
       metaTitle, metaDescription, isFeatured,
-      aboutCompany, howToApply, finalThoughts, highlightText
+      aboutCompany, whyJoin, description, howToApply, finalThoughts, highlightText
     } = req.body;
     
     // Required fields validation
@@ -204,6 +204,8 @@ exports.createJob = async (req, res) => {
       telegram,
       contact,
       aboutCompany: aboutCompany || '',
+      whyJoin: whyJoin || '',
+      description: description || '',
       howToApply: howToApply || '',
       finalThoughts: finalThoughts || '',
       highlightText: highlightText || '',

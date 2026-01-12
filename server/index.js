@@ -6,6 +6,7 @@ const { connectDB } = require('./utils/db');
 const jobsRoutes = require('./routes/jobs');
 const adminRoutes = require('./routes/admin');
 const uploadRoutes = require('./routes/upload');
+const settingsRoutes = require('./routes/settings');
 const { seedAdminIfNeeded, seedJobsIfNeeded, ensureMinimumJobs, seedDetailedJob } = require('./utils/seed');
 
 dotenv.config();
@@ -43,6 +44,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api/jobs', jobsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/settings', settingsRoutes);
 
 app.use((err, req, res, next) => {
   // eslint-disable-next-line no-console

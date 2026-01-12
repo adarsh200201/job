@@ -14,7 +14,7 @@ export default function SidebarSearch() {
   };
 
   return (
-    <div id="sidebar-search" className="card p-4 mb-3 shadow-sm" style={{ backgroundColor: '#f8f9fa' }}>
+    <div id="sidebar-search" className="card p-4 mb-3 shadow-sm search-card" style={{ backgroundColor: '#f8f9fa' }}>
       <h3 className="h6 mb-3 fw-bold">Search</h3>
       <form onSubmit={submit}>
         <div className="mb-3">

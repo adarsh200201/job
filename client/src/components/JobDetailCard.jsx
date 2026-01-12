@@ -1,5 +1,10 @@
-import React from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useIntersectionObserver } from '../hooks/useIntersectionObserver.js';
+import RichTextDisplay from './RichTextDisplay.jsx';
+import api from '../api/index.js';
+
+const DEFAULT_AD_LINK = 'https://www.effectivegatecpm.com/s738fegejz?key=12ac1ed2eeb4ac73b7d41add24630c1e1e';
 
 function excerpt(text, n = 300) {
   if (!text) return '';
@@ -7,19 +12,40 @@ function excerpt(text, n = 300) {
   return `${text.slice(0, n).trim()}…`;
 }
 
-export default function JobDetailCard({ job }) {
+function JobDetailCard({ job, adLink: propAdLink }) {
   const fallback = 'https://cdn.builder.io/api/v1/image/assets%2F0652c10db86741bd95f51605c9719073%2F196590e2e83d4a159a955d16c0e8ebde?format=webp&width=800';
-  
+  const { elementRef, isVisible } = useIntersectionObserver();
+  const [adLink, setAdLink] = useState(propAdLink || DEFAULT_AD_LINK);
+
+  useEffect(() => {
+    if (!propAdLink) {
+      api.get('/settings/adLink').then(res => {
+        if (res.data?.data) setAdLink(res.data.data);
+      }).catch(() => {});
+    }
+  }, [propAdLink]);
+
+  const handleApply = (e) => {
+    e.preventDefault();
+    // Open ad link in new tab
+    if (adLink) {
+      window.open(adLink, '_blank', 'noopener,noreferrer');
+    }
+    // Redirect current page to apply URL
+    window.location.href = job.applyLink;
+  };
+
   return (
-    <article 
-      className="mb-4 pb-4 border-bottom" 
+    <article
+      ref={elementRef}
+      className="mb-4 pb-4 border-bottom"
       style={{ transition: 'all 0.2s ease' }}
       onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#f8f9fa'; }}
       onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
     >
       <h2 className="h4 mb-2">
-        <Link 
-          to={`/job/${job._id}`} 
+        <Link
+          to={`/${job.slug}`}
           className="text-decoration-none text-dark"
           style={{ transition: 'color 0.2s ease' }}
           onMouseEnter={(e) => e.target.style.color = '#17a2b8'}
@@ -35,12 +61,13 @@ export default function JobDetailCard({ job }) {
       <div className="row g-3">
         <div className="col-md-5 col-lg-4">
           <div style={{ overflow: 'hidden', borderRadius: '0.375rem' }}>
-            <img 
-              src={job.image || fallback} 
-              alt={job.title} 
-              className="img-fluid rounded" 
-              style={{ 
-                width: '100%', 
+            <img
+              src={job.image || fallback}
+              alt={job.title}
+              loading="lazy"
+              className="img-fluid rounded"
+              style={{
+                width: '100%',
                 height: 'auto',
                 transition: 'transform 0.3s ease'
               }}
@@ -63,16 +90,28 @@ export default function JobDetailCard({ job }) {
               {job.salary && <span className="badge bg-warning text-dark">{job.salary}</span>}
             </div>
           </div>
-          
-          {(job.jobDescription || job.description) && (
-            <p className="mb-3" style={{ textAlign: 'justify', lineHeight: '1.6' }}>
-              {excerpt(job.jobDescription || job.description, 400)}
-            </p>
+
+          {(job.description || job.jobDescription) && (
+            <div className="mb-3 job-card-description">
+              {typeof job.description === 'string' && job.description.includes('<') ? (
+                <div style={{ textAlign: 'justify', lineHeight: '1.8' }}>
+                  <RichTextDisplay content={excerpt(job.description, 700)} />
+                </div>
+              ) : typeof job.jobDescription === 'string' && job.jobDescription.includes('<') ? (
+                <div style={{ textAlign: 'justify', lineHeight: '1.8' }}>
+                  <RichTextDisplay content={excerpt(job.jobDescription, 700)} />
+                </div>
+              ) : (
+                <p style={{ textAlign: 'justify', lineHeight: '1.8' }} className="mb-0">
+                  {excerpt(job.description || job.jobDescription, 700)}
+                </p>
+              )}
+            </div>
           )}
-          
+
           <div className="d-flex gap-2">
-            <Link 
-              to={`/job/${job._id}`} 
+            <Link
+              to={`/${job.slug}`}
               className="btn btn-info text-white rounded-pill px-4 shadow-sm" 
               style={{ backgroundColor: '#17a2b8', transition: 'all 0.2s ease' }}
               onMouseEnter={(e) => { e.target.style.backgroundColor = '#138496'; }}
@@ -84,6 +123,7 @@ export default function JobDetailCard({ job }) {
               <a 
                 className="btn btn-success rounded-pill px-4 shadow-sm" 
                 href={job.applyLink} 
+                onClick={handleApply}
                 target="_blank" 
                 rel="noopener noreferrer"
                 style={{ transition: 'all 0.2s ease' }}
@@ -99,3 +139,5 @@ export default function JobDetailCard({ job }) {
     </article>
   );
 }
+
+export default memo(JobDetailCard);

@@ -1,7 +1,30 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import api from '../api/index.js';
 
-export default function JobCard({ job }) {
+const DEFAULT_AD_LINK = 'https://www.effectivegatecpm.com/s738fegejz?key=12ac1ed2eeb4ac73b7d41add24630c1e1e';
+
+export default function JobCard({ job, adLink: propAdLink }) {
+  const [adLink, setAdLink] = useState(propAdLink || DEFAULT_AD_LINK);
+
+  useEffect(() => {
+    if (!propAdLink) {
+      api.get('/settings/adLink').then(res => {
+        if (res.data?.data) setAdLink(res.data.data);
+      }).catch(() => {});
+    }
+  }, [propAdLink]);
+
+  const handleApply = (e) => {
+    e.preventDefault();
+    // Open ad link in new tab
+    if (adLink) {
+      window.open(adLink, '_blank', 'noopener,noreferrer');
+    }
+    // Redirect current page to apply URL
+    window.location.href = job.applyLink;
+  };
+
   return (
     <div className="card h-100 shadow-sm job-card">
       <div className="card-body d-flex flex-column">
@@ -13,8 +36,8 @@ export default function JobCard({ job }) {
         </div>
         <span className="mb-3 align-self-start badge bg-info-subtle text-info-emphasis">{job.type}</span>
         <div className="mt-auto d-flex gap-2">
-          <Link to={`/job/${job._id}`} className="btn btn-outline-secondary btn-sm">Details</Link>
-          <a className="btn btn-primary btn-sm" href={job.applyLink} target="_blank" rel="noopener noreferrer">Apply</a>
+          <Link to={`/job/${job.slug}`} className="btn btn-outline-secondary btn-sm">Details</Link>
+          <a className="btn btn-primary btn-sm" href={job.applyLink} onClick={handleApply} target="_blank" rel="noopener noreferrer">Apply</a>
         </div>
       </div>
     </div>

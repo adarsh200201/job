@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import api from '../api/index.js';
+import { useCache } from '../hooks/useCache.js';
 import JobDetailCard from '../components/JobDetailCard.jsx';
 import RecentJobs from '../components/RecentJobs.jsx';
 import SidebarSearch from '../components/SidebarSearch.jsx';
+import { JobCardSkeleton } from '../components/SkeletonLoader.jsx';
 
 export default function Home() {
   const [jobs, setJobs] = useState([]);
@@ -11,17 +13,23 @@ export default function Home() {
   const [pagination, setPagination] = useState({ currentPage: 1, totalPages: 1, total: 0 });
   const location = useLocation();
   const navigate = useNavigate();
+  const cache = useCache();
 
   useEffect(() => {
     const fetchJobs = async () => {
       setLoading(true);
       try {
         const query = location.search ? location.search : '';
-        const response = await api.get(`/jobs${query}`);
+        console.log(`[Home] Fetching jobs with query: ${query}`);
+        const response = await cache.get(
+          (url) => api.get(url),
+          `/jobs${query}`
+        );
         const jobsArray = response.data?.data || response.data || [];
+        console.log(`[Home] Received ${jobsArray.length} jobs`);
         const sorted = Array.isArray(jobsArray) ? jobsArray.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) : [];
         setJobs(sorted);
-        
+
         // Set pagination data if available
         if (response.data?.totalPages) {
           setPagination({
@@ -30,14 +38,15 @@ export default function Home() {
             total: response.data.total || 0
           });
         }
-      } catch {
+      } catch (error) {
+        console.error('[Home] Error fetching jobs:', error);
         setJobs([]);
       } finally {
         setLoading(false);
       }
     };
     fetchJobs();
-  }, [location.search]);
+  }, [location.search, cache]);
 
   const goToPage = (page) => {
     const params = new URLSearchParams(location.search);
@@ -48,11 +57,16 @@ export default function Home() {
 
   return (
     <div className="jobs-page">
-      {loading && <p className="text-center my-4">Loading jobs…</p>}
-
       <div className="row g-4">
         <div className="col-12 col-lg-8 col-left">
           <section aria-label="Job listings">
+            {loading && jobs.length === 0 && (
+              <>
+                {[...Array(3)].map((_, i) => (
+                  <JobCardSkeleton key={`skeleton-${i}`} />
+                ))}
+              </>
+            )}
             {jobs.length === 0 && !loading && <p className="text-center text-muted">No jobs available.</p>}
             {jobs.map((job) => (
               <JobDetailCard key={job._id} job={job} />
@@ -101,7 +115,7 @@ export default function Home() {
         </div>
 
         <div className="col-12 col-lg-4 col-right">
-          <div style={{ position: 'sticky', top: '20px' }}>
+          <div style={{ position: 'sticky', top: '160px' }}>
             <SidebarSearch />
             <RecentJobs jobs={jobs} />
           </div>

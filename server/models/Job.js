@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const slugify = require('slugify');
 
 const JobSchema = new mongoose.Schema(
   {
@@ -34,6 +35,8 @@ const JobSchema = new mongoose.Schema(
     
     // New "About" field
     aboutCompany: { type: String, trim: true },
+    whyJoin: { type: String, trim: true },
+    description: { type: String, trim: true },
     howToApply: { type: String, trim: true },
     finalThoughts: { type: String, trim: true },
     // Highlighted sentence shown in details (bold)
@@ -66,18 +69,22 @@ const JobSchema = new mongoose.Schema(
   }
 );
 
-// Create slug from title before saving
+// Create slug from title before saving (using consistent slugify method)
 JobSchema.pre('save', function(next) {
   if (!this.slug) {
-    this.slug = this.title
-      .toLowerCase()
-      .replace(/[^\w\s-]/g, '') // Remove special characters
-      .replace(/\s+/g, '-') // Replace spaces with hyphens
-      .replace(/--+/g, '-') // Replace multiple hyphens with single hyphen
-      .trim()
-      .substring(0, 100); // Limit length
+    this.slug = slugify(this.title, {
+      lower: true,
+      strict: true,
+      trim: true
+    });
   }
   next();
 });
+
+// Add indexes for faster queries
+// Note: slug index is already created via 'unique: true' in the schema
+JobSchema.index({ isActive: 1, createdAt: -1 });
+JobSchema.index({ company: 1 });
+JobSchema.index({ location: 1 });
 
 module.exports = mongoose.model('Job', JobSchema);
