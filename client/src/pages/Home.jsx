@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import api from '../api/index.js';
 import { useCache } from '../hooks/useCache.js';
@@ -20,15 +20,12 @@ export default function Home() {
       setLoading(true);
       try {
         const query = location.search ? location.search : '';
-        console.log(`[Home] Fetching jobs with query: ${query}`);
         const response = await cache.get(
           (url) => api.get(url),
           `/jobs${query}`
         );
         const jobsArray = response.data?.data || response.data || [];
-        console.log(`[Home] Received ${jobsArray.length} jobs`);
-        const sorted = Array.isArray(jobsArray) ? jobsArray.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) : [];
-        setJobs(sorted);
+        setJobs(Array.isArray(jobsArray) ? jobsArray : []);
 
         // Set pagination data if available
         if (response.data?.totalPages) {
@@ -39,14 +36,17 @@ export default function Home() {
           });
         }
       } catch (error) {
-        console.error('[Home] Error fetching jobs:', error);
         setJobs([]);
       } finally {
         setLoading(false);
       }
     };
     fetchJobs();
-  }, [location.search, cache]);
+  }, [location.search]);
+
+  const sortedJobs = useMemo(() => {
+    return Array.isArray(jobs) ? [...jobs].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) : [];
+  }, [jobs]);
 
   const goToPage = (page) => {
     const params = new URLSearchParams(location.search);
@@ -67,8 +67,8 @@ export default function Home() {
                 ))}
               </>
             )}
-            {jobs.length === 0 && !loading && <p className="text-center text-muted">No jobs available.</p>}
-            {jobs.map((job) => (
+            {sortedJobs.length === 0 && !loading && <p className="text-center text-muted">No jobs available.</p>}
+            {sortedJobs.map((job) => (
               <JobDetailCard key={job._id} job={job} />
             ))}
             
@@ -115,9 +115,9 @@ export default function Home() {
         </div>
 
         <div className="col-12 col-lg-4 col-right">
-          <div style={{ position: 'sticky', top: '160px' }}>
-            <SidebarSearch />
-            <RecentJobs jobs={jobs} />
+          <SidebarSearch />
+          <div className="sidebar-sticky">
+            <RecentJobs jobs={sortedJobs} />
           </div>
         </div>
       </div>

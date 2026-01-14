@@ -25,30 +25,23 @@ export function useCache() {
 
     // Return cached data if available
     if (globalCache.has(cacheKey)) {
-      console.log(`[Cache] Cache hit for ${url}`);
       return globalCache.get(cacheKey);
     }
 
     // Return ongoing request if it exists (deduplication)
     if (requestMap.current.has(cacheKey)) {
-      console.log(`[Cache] Waiting for ongoing request: ${url}`);
       return requestMap.current.get(cacheKey);
     }
 
     // Make new request with timeout
-    console.log(`[Cache] Making new request: ${url}`);
     const startTime = performance.now();
     const promise = withTimeout(apiCall(url, config), REQUEST_TIMEOUT)
       .then((response) => {
-        const duration = performance.now() - startTime;
-        console.log(`[Cache] Request successful in ${duration.toFixed(2)}ms: ${url}`, response.data);
         globalCache.set(cacheKey, response);
         requestMap.current.delete(cacheKey);
         return response;
       })
       .catch((error) => {
-        const duration = performance.now() - startTime;
-        console.error(`[Cache] Request failed after ${duration.toFixed(2)}ms: ${url}`, error);
         requestMap.current.delete(cacheKey);
         throw error;
       });

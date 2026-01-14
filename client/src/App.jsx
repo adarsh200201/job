@@ -12,7 +12,6 @@ const About = React.lazy(() => import('./pages/About.jsx'));
 const Contact = React.lazy(() => import('./pages/Contact.jsx'));
 const FAQ = React.lazy(() => import('./pages/FAQ.jsx'));
 const Blog = React.lazy(() => import('./pages/Blog.jsx'));
-const PrivacyPolicy = React.lazy(() => import('./pages/PrivacyPolicy.jsx'));
 const Terms = React.lazy(() => import('./pages/Terms.jsx'));
 const Disclaimer = React.lazy(() => import('./pages/Disclaimer.jsx'));
 
@@ -45,9 +44,16 @@ export default function App() {
 
   return (
     <AuthProvider>
-      <header className="site-header sticky-top">
-        <div className="header-banner text-center py-3">
-          <h1 className="m-0 site-title">Job For Fresher</h1>
+      <header className="site-header">
+        <div className="header-banner text-center">
+          <div className="logo-banner-wrapper">
+            <img
+              src="https://cdn.builder.io/api/v1/image/assets%2F1fc54d7ac90b4483b8679a118110a22c%2F79610b8288ef454191194726cdeff87a?format=webp&width=800"
+              alt="NextJobPost Logo"
+              className="logo-img"
+            />
+            <h1 className="m-0 site-title">NextJobPost</h1>
+          </div>
         </div>
         <nav className="main-nav navbar navbar-expand-lg py-2">
           <div className="container">
@@ -71,7 +77,6 @@ export default function App() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/blog" element={<Blog />} />
-            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/disclaimer" element={<Disclaimer />} />
             <Route path="/admin/login" element={<AdminLogin />} />

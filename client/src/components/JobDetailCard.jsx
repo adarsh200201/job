@@ -38,10 +38,16 @@ function JobDetailCard({ job, adLink: propAdLink }) {
   return (
     <article
       ref={elementRef}
-      className="mb-4 pb-4 border-bottom"
+      className="mb-4 pb-4 border-bottom job-card"
       style={{ transition: 'all 0.2s ease' }}
-      onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#f8f9fa'; }}
-      onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = '#f8f9fa';
+        e.currentTarget.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.05)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = 'transparent';
+        e.currentTarget.style.boxShadow = 'none';
+      }}
     >
       <h2 className="h4 mb-2">
         <Link
@@ -77,17 +83,10 @@ function JobDetailCard({ job, adLink: propAdLink }) {
           </div>
         </div>
         <div className="col-md-7 col-lg-8">
-          <div className="mb-3">
-            <div className="mb-2">
+          <div className="mb-0">
+            <div className="mb-0">
               <strong className="text-dark">{job.company}</strong>
               {job.location && <span className="text-muted ms-2">• {job.location}</span>}
-            </div>
-            <div className="d-flex flex-wrap gap-2 mb-3">
-              <span className="badge bg-primary">{job.type}</span>
-              {job.experience && <span className="badge bg-secondary">{job.experience}</span>}
-              {job.education && <span className="badge bg-info">{job.education}</span>}
-              {job.batch && <span className="badge bg-success">{job.batch}</span>}
-              {job.salary && <span className="badge bg-warning text-dark">{job.salary}</span>}
             </div>
           </div>
 
