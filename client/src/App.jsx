@@ -48,11 +48,11 @@ export default function App() {
         <div className="header-banner text-center">
           <div className="logo-banner-wrapper">
             <img
-              src="https://cdn.builder.io/api/v1/image/assets%2F1fc54d7ac90b4483b8679a118110a22c%2F79610b8288ef454191194726cdeff87a?format=webp&width=800"
+              src="https://cdn.builder.io/api/v1/image/assets%2Fc302f9de22234efc941990700131730c%2Fb10aab7ac8894017bd0806e41dd588ee?format=webp&width=800"
               alt="NextJobPost Logo"
               className="logo-img"
             />
-            <h1 className="m-0 site-title">NextJobPost</h1>
+            <h1 className="m-0 site-title"><span className="site-title-next">Next</span><span className="site-title-job">JobPost</span></h1>
           </div>
         </div>
         <nav className="main-nav navbar navbar-expand-lg py-2">

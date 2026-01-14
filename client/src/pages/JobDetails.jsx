@@ -402,10 +402,6 @@ export default function JobDetails() {
             </div>
           )}
 
-          <div className="mb-4">
-            <p><strong>Apply Now: <a href={job.applyLink} onClick={(e) => handleApply(e, job.applyLink)} target="_blank" rel="noopener noreferrer">Click Here</a></strong></p>
-          </div>
-
           {job.finalThoughts && (
             <div className="mb-4">
               <h2 className="job-section-header">💭 Final Thoughts</h2>
