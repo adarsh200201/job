@@ -1,7 +1,8 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { Routes, Route, Link, Navigate } from 'react-router-dom';
 import Footer from './components/Footer.jsx';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
+import { startKeepAlive, stopKeepAlive } from './utils/keepAlive.js';
 
 // Lazy load page components for code splitting
 const Home = React.lazy(() => import('./pages/Home.jsx'));
@@ -33,6 +34,16 @@ function ProtectedRoute({ children }) {
 }
 
 export default function App() {
+  useEffect(() => {
+    // Start keep-alive mechanism when app loads
+    startKeepAlive();
+
+    // Clean up when component unmounts
+    return () => {
+      stopKeepAlive();
+    };
+  }, []);
+
   const scrollToSearch = () => {
     const el = document.getElementById('sidebar-search');
     if (el) {
