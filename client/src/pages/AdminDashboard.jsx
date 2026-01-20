@@ -222,17 +222,59 @@ export default function AdminDashboard() {
   };
 
   const remove = async (id) => {
-    if (!confirm('Delete this job?')) return;
+    if (!confirm('Delete this job? This action cannot be undone.')) return;
+
+    // Store the original jobs list for rollback if delete fails
+    const originalJobs = jobs;
+
+    // Optimistic update: remove job from UI immediately
+    const jobToDelete = jobs.find(j => j._id === id);
+    setJobs(jobs.filter(j => j._id !== id));
+
     try {
-      await api.delete(`/jobs/${id}`);
-      await loadJobs();
-    } catch {
-      alert('Delete failed');
+      const response = await api.delete(`/jobs/${id}`);
+
+      if (response.data?.success) {
+        // Delete succeeded - show success with job details
+        const deletedJob = response.data?.deletedJob;
+        const successMsg = deletedJob
+          ? `✅ Job deleted from database: "${deletedJob.title}" at ${deletedJob.company}`
+          : `✅ Job deleted from database successfully`;
+
+        setSettingsMessage(successMsg);
+        setError('');
+
+        // Auto-clear success message after 4 seconds
+        setTimeout(() => setSettingsMessage(''), 4000);
+      } else {
+        // Delete returned error response
+        throw new Error(response.data?.message || 'Delete failed');
+      }
+    } catch (err) {
+      // Delete failed, rollback the UI
+      setJobs(originalJobs);
+
+      // Show detailed error message
+      const errorMsg = err.response?.data?.message || err.message || 'Failed to delete job. Please try again.';
+      console.error('Delete job error:', errorMsg, err);
+
+      setError(`❌ Delete failed: ${errorMsg}`);
+
+      // Auto-clear error after 5 seconds
+      setTimeout(() => setError(''), 5000);
     }
   };
 
   return (
     <div className="admin-dashboard">
+      {/* Error/Success Messages */}
+      {error && (
+        <div style={{ background: 'rgba(239,68,68,0.1)', border: '2px solid rgba(239,68,68,0.3)', borderRadius: '8px', padding: '1rem', marginBottom: '1.5rem', color: '#991b1b', fontWeight: 600, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span>{error}</span>
+          <button onClick={() => setError('')} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#991b1b' }}>✕</button>
+        </div>
+      )}
+
       {/* Header Section */}
       <div className="admin-header mb-4">
         <div className="d-flex align-items-center justify-content-between">

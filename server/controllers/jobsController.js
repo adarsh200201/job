@@ -301,24 +301,43 @@ exports.updateJob = async (req, res) => {
 // DELETE /api/jobs/:id
 exports.deleteJob = async (req, res) => {
   try {
-    const job = await Job.findByIdAndDelete(req.params.id);
-    
-    if (!job) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Job not found' 
+    const jobId = req.params.id;
+
+    // Log deletion attempt
+    // eslint-disable-next-line no-console
+    console.log(`[DELETE] Attempting to delete job with ID: ${jobId}`);
+
+    // Find and delete the job from database
+    const deletedJob = await Job.findByIdAndDelete(jobId);
+
+    if (!deletedJob) {
+      // eslint-disable-next-line no-console
+      console.warn(`[DELETE] Job not found with ID: ${jobId}`);
+      return res.status(404).json({
+        success: false,
+        message: 'Job not found'
       });
     }
-    
-    res.json({ 
-      success: true, 
-      message: 'Job deleted successfully' 
+
+    // Log successful deletion
+    // eslint-disable-next-line no-console
+    console.log(`[DELETE] ✓ Job successfully deleted from database - Title: "${deletedJob.title}", ID: ${jobId}`);
+
+    res.json({
+      success: true,
+      message: 'Job deleted successfully',
+      deletedJob: {
+        id: deletedJob._id,
+        title: deletedJob.title,
+        company: deletedJob.company
+      }
     });
-    
+
   } catch (e) {
-    console.error('Error deleting job:', e);
-    res.status(400).json({ 
-      success: false, 
+    // eslint-disable-next-line no-console
+    console.error(`[DELETE] Error deleting job:`, e);
+    res.status(400).json({
+      success: false,
       message: 'Failed to delete job',
       error: process.env.NODE_ENV === 'development' ? e.message : undefined
     });
