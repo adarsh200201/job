@@ -141,7 +141,7 @@ export default function AdminDashboard() {
   const loadJobs = async () => {
     setLoading(true);
     try {
-      const response = await api.get('/jobs');
+      const response = await api.get('/jobs?status=all&limit=1000');
       setJobs(response.data?.data || []);
     } catch {
       setJobs([]);

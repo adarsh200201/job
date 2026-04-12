@@ -3,8 +3,12 @@ const slugify = require('slugify');
 
 // Helper function to build filters for job search
 function buildFilters(query) {
-  const filters = { isActive: true }; // Only show active jobs by default
+  const filters = {}; // Default empty filters
   
+  // Only show active jobs by default, unless status=all is passed
+  if (query.status !== 'all') {
+    filters.isActive = true;
+  }  
   // Text search across multiple fields
   if (query.q) {
     const regex = new RegExp(query.q, 'i');
