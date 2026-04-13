@@ -94,15 +94,15 @@ function JobDetailCard({ job, adLink: propAdLink }) {
             <div className="mb-3 job-card-description">
               {typeof job.description === 'string' && job.description.includes('<') ? (
                 <div style={{ textAlign: 'justify', lineHeight: '1.8' }}>
-                  <RichTextDisplay content={excerpt(job.description, 700)} />
+                  <RichTextDisplay content={excerpt(job.description, 150)} />
                 </div>
               ) : typeof job.jobDescription === 'string' && job.jobDescription.includes('<') ? (
                 <div style={{ textAlign: 'justify', lineHeight: '1.8' }}>
-                  <RichTextDisplay content={excerpt(job.jobDescription, 700)} />
+                  <RichTextDisplay content={excerpt(job.jobDescription, 150)} />
                 </div>
               ) : (
                 <p style={{ textAlign: 'justify', lineHeight: '1.8' }} className="mb-0">
-                  {excerpt(job.description || job.jobDescription, 700)}
+                  {excerpt(job.description || job.jobDescription, 150)}
                 </p>
               )}
             </div>
