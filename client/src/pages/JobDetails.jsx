@@ -145,6 +145,49 @@ export default function JobDetails() {
     <div className="job-details container">
       <div className="row g-4">
         <div className="col-12 col-lg-8">
+
+          <div className="job-header-section mb-4">
+            <h1 className="job-title-large mb-3">{job.title}</h1>
+            <div className="job-meta-info mb-3">
+              <span className="job-date-published">
+                {job.createdAt ? new Date(job.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Recently Posted'}
+              </span>
+              <span className="job-meta-sep">•</span>
+              <span className="job-company"><strong>{job.company}</strong></span>
+            </div>
+          </div>
+
+          {job.image && (
+            <div className="job-image-section mb-4">
+              <img 
+                src={job.image} 
+                alt="job" 
+                loading="lazy" 
+                className="img-fluid rounded-3" 
+                onError={(e) => { e.target.onerror = null; e.target.src = 'https://cdn.builder.io/api/v1/image/assets%2F0652c10db86741bd95f51605c9719073%2F196590e2e83d4a159a955d16c0e8ebde?format=webp&width=800'; }}
+              />
+            </div>
+          )}
+
+          {job.lastDate && (
+            <div className="alert alert-warning py-3 mb-4">
+              <strong>⏰ Application Deadline:</strong> {new Date(job.lastDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+            </div>
+          )}
+
+          {/* Short Summary Section */}
+          {job.description && (
+            <div className="mb-4">
+              <div className="job-summary-box">
+                {typeof job.description === 'string' && job.description.includes('<') ? (
+                  <RichTextDisplay content={job.description} />
+                ) : (
+                  <p>{job.description}</p>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* contact links */}
           <div className="my-4 social-group-container">
             <div className="social-group-box whatsapp-box">
@@ -186,43 +229,6 @@ export default function JobDetails() {
               </a>
             </div>
           </div>
-
-
-          <div className="job-header-section mb-4">
-            <h1 className="job-title-large mb-3">{job.title}</h1>
-            <div className="job-meta-info mb-3">
-              <span className="job-date-published">
-                {job.createdAt ? new Date(job.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Recently Posted'}
-              </span>
-              <span className="job-meta-sep">•</span>
-              <span className="job-company"><strong>{job.company}</strong></span>
-            </div>
-          </div>
-
-          {job.image && (
-            <div className="job-image-section mb-4">
-              <img src={job.image} alt="job" loading="lazy" className="img-fluid rounded-3" />
-            </div>
-          )}
-
-          {job.lastDate && (
-            <div className="alert alert-warning py-3 mb-4">
-              <strong>⏰ Application Deadline:</strong> {new Date(job.lastDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-            </div>
-          )}
-
-          {/* Short Summary Section */}
-          {job.description && (
-            <div className="mb-4">
-              <div className="job-summary-box">
-                {typeof job.description === 'string' && job.description.includes('<') ? (
-                  <RichTextDisplay content={job.description} />
-                ) : (
-                  <p>{job.description}</p>
-                )}
-              </div>
-            </div>
-          )}
 
           {/* About Company Section */}
           {job.aboutCompany && (
@@ -310,7 +316,13 @@ export default function JobDetails() {
                     <p>Also read ---</p>
                     <Link to={`/${relatedJob.slug}`} className="related-job-card-link">
                       {relatedJob.image && (
-                        <img src={relatedJob.image} alt={relatedJob.title} loading="lazy" className="related-job-image" />
+                        <img 
+                          src={relatedJob.image} 
+                          alt={relatedJob.title} 
+                          loading="lazy" 
+                          className="related-job-image"
+                          onError={(e) => { e.target.onerror = null; e.target.src = 'https://cdn.builder.io/api/v1/image/assets%2F0652c10db86741bd95f51605c9719073%2F196590e2e83d4a159a955d16c0e8ebde?format=webp&width=800'; }}
+                        />
                       )}
                       <div>
                         <h5 className="related-job-title">{relatedJob.title}</h5>

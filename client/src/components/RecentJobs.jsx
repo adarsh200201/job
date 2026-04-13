@@ -12,7 +12,13 @@ const PostCard = memo(({ job }) => {
   return (
     <div className="recent-post-card">
       <div className="recent-post-image">
-        <img src={src} alt={job.title} className="post-image-img" loading="lazy" />
+        <img 
+          src={src} 
+          alt={job.title} 
+          className="post-image-img" 
+          loading="lazy" 
+          onError={(e) => { e.target.onerror = null; e.target.src = FALLBACK_IMG; }}
+        />
       </div>
       <div className="recent-post-content">
         <Link to={`/${job.slug}`} className="recent-post-title">
