@@ -39,12 +39,34 @@ function JobDetailCard({ job, adLink: propAdLink }) {
     <article
       ref={elementRef}
       className="mb-4 pb-4 border-bottom job-card"
-      style={{ transition: 'all 0.2s ease', borderBottom: '1px solid #eee' }}
+      style={{ transition: 'all 0.2s ease' }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = '#f8f9fa';
+        e.currentTarget.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.05)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = 'transparent';
+        e.currentTarget.style.boxShadow = 'none';
+      }}
     >
+      <h2 className="h4 mb-2">
+        <Link
+          to={`/${job.slug}`}
+          className="text-decoration-none text-dark"
+          style={{ transition: 'color 0.2s ease' }}
+          onMouseEnter={(e) => e.target.style.color = '#17a2b8'}
+          onMouseLeave={(e) => e.target.style.color = '#212529'}
+        >
+          {job.title}
+        </Link>
+      </h2>
+      <div className="mb-3 small text-muted">
+        {new Date(job.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} by <span className="text-primary">Job For Fresher</span>
+      </div>
+      
       <div className="row g-3">
-        {/* Left Column: Image */}
         <div className="col-md-5 col-lg-4">
-          <div style={{ overflow: 'hidden', borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
+          <div style={{ overflow: 'hidden', borderRadius: '0.375rem' }}>
             <img
               src={getImageUrl(job.image) || FALLBACK_IMAGE}
               alt={job.title}
@@ -54,11 +76,10 @@ function JobDetailCard({ job, adLink: propAdLink }) {
                   e.target.src = FALLBACK_IMAGE;
                 }
               }}
-              className="img-fluid"
+              className="img-fluid rounded"
               style={{
                 width: '100%',
-                height: '220px',
-                objectFit: 'cover',
+                height: 'auto',
                 transition: 'transform 0.3s ease'
               }}
               onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
@@ -66,59 +87,52 @@ function JobDetailCard({ job, adLink: propAdLink }) {
             />
           </div>
         </div>
-
-        {/* Right Column: Content */}
-        <div className="col-md-7 col-lg-8 d-flex flex-column">
-          {/* Header Metadata */}
-          <div className="mb-1">
-            <span className="text-secondary fw-bold" style={{ fontSize: '0.9rem' }}>{job.company}</span>
-            {job.location && <span className="text-muted" style={{ fontSize: '0.9rem' }}> • {job.location}</span>}
-          </div>
-
-          {/* Title */}
-          <h2 className="h4 mb-3">
-            <Link
-              to={`/${job.slug}`}
-              className="text-decoration-none text-dark fw-bold"
-              style={{ fontSize: '1.5rem', display: 'block' }}
-            >
-              {job.title}
-            </Link>
-          </h2>
-
-          {/* 3 Lines of Structured Text */}
-          <div className="mb-4" style={{ flex: 1 }}>
-            <div className="mb-2">
-              <div className="fw-bold text-dark small" style={{ marginBottom: '2px' }}>Job Role</div>
-              <div className="text-muted" style={{ fontSize: '0.95rem' }}>{job.title?.split('|')[0] || job.title}</div>
-            </div>
-            <div className="mb-2">
-              <div className="fw-bold text-dark small" style={{ marginBottom: '2px' }}>Job Location</div>
-              <div className="text-muted" style={{ fontSize: '0.95rem' }}>{job.location || 'Multiple Locations'}</div>
-            </div>
-            <div>
-              <div className="fw-bold text-dark small" style={{ marginBottom: '2px' }}>Experience</div>
-              <div className="text-muted" style={{ fontSize: '0.95rem' }}>{job.experience || 'Freshers / Graduates'}</div>
+        <div className="col-md-7 col-lg-8">
+          <div className="mb-0">
+            <div className="mb-0">
+              <strong className="text-dark">{job.company}</strong>
+              {job.location && <span className="text-muted ms-2">• {job.location}</span>}
             </div>
           </div>
 
-          {/* Buttons */}
-          <div className="d-flex gap-3 align-items-center mt-auto">
+          {(job.description || job.jobDescription) && (
+            <div className="mb-3 job-card-description">
+              {typeof job.description === 'string' && job.description.includes('<') ? (
+                <div style={{ textAlign: 'justify', lineHeight: '1.8' }}>
+                  <RichTextDisplay content={excerpt(job.description, 150)} />
+                </div>
+              ) : typeof job.jobDescription === 'string' && job.jobDescription.includes('<') ? (
+                <div style={{ textAlign: 'justify', lineHeight: '1.8' }}>
+                  <RichTextDisplay content={excerpt(job.jobDescription, 150)} />
+                </div>
+              ) : (
+                <p style={{ textAlign: 'justify', lineHeight: '1.8' }} className="mb-0">
+                  {excerpt(job.description || job.jobDescription, 150)}
+                </p>
+              )}
+            </div>
+          )}
+
+          <div className="d-flex gap-2">
             <Link
               to={`/${job.slug}`}
-              className="btn text-white px-4" 
-              style={{ backgroundColor: '#17a2b8', borderRadius: '25px', fontSize: '0.9rem', fontWeight: '600', padding: '10px 25px' }}
+              className="btn btn-info text-white rounded-pill px-4 shadow-sm" 
+              style={{ backgroundColor: '#17a2b8', transition: 'all 0.2s ease' }}
+              onMouseEnter={(e) => { e.target.style.backgroundColor = '#138496'; }}
+              onMouseLeave={(e) => { e.target.style.backgroundColor = '#17a2b8'; }}
             >
               Read more
             </Link>
             {job.applyLink && (
               <a 
-                className="btn btn-success px-4" 
+                className="btn btn-success rounded-pill px-4 shadow-sm" 
                 href={job.applyLink} 
                 onClick={handleApply}
                 target="_blank" 
                 rel="noopener noreferrer"
-                style={{ borderRadius: '25px', backgroundColor: '#198754', fontSize: '0.9rem', fontWeight: '600', padding: '10px 25px' }}
+                style={{ transition: 'all 0.2s ease' }}
+                onMouseEnter={(e) => { e.target.style.transform = 'scale(1.05)'; }}
+                onMouseLeave={(e) => { e.target.style.transform = 'scale(1)'; }}
               >
                 Apply Now
               </a>
