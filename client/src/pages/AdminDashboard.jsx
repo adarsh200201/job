@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import api from '../api/index.js';
 import RichTextEditor from '../components/RichTextEditor.jsx';
+import { getImageUrl } from '../utils/imageUtils.js';
 
 const initialForm = { title: '', company: '', location: '', type: 'Full-Time', experience: '', education: '', batch: '', jobDescription: '', description: '', responsibilities: '', requirements: '', skills: '', salary: '', applyLink: '', lastDate: '', image: '', whatsapp: 'https://chat.whatsapp.com/LVpuUJluTpUEdIc4daAemQ', telegram: 'https://t.me/nextjobpost', contact: '', metaTitle: '', metaDescription: '', aboutCompany: '', whyJoin: '', howToApply: '', finalThoughts: '', highlightText: '' };
 
@@ -573,7 +574,7 @@ export default function AdminDashboard() {
                       <div className="col-12">
                         <label className="form-label">✓ Image Preview</label>
                         <div className="image-preview-container">
-                          <img src={form.image} alt="Job preview" className="image-preview" />
+                          <img src={getImageUrl(form.image)} alt="Job preview" className="image-preview" />
                         </div>
                       </div>
                     )}

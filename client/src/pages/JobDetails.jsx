@@ -5,6 +5,7 @@ import { useCache } from '../hooks/useCache.js';
 import RecentJobs from '../components/RecentJobs.jsx';
 import RichTextDisplay from '../components/RichTextDisplay.jsx';
 import { JobDetailsSkeleton } from '../components/SkeletonLoader.jsx';
+import { getImageUrl, FALLBACK_IMAGE } from '../utils/imageUtils.js';
 
 const DEFAULT_AD_LINK = 'https://www.effectivegatecpm.com/s738fegejz?key=12ac1ed2eeb4ac73b7d41add24630c1e1e';
 
@@ -14,13 +15,17 @@ const AlsoReadCard = ({ relatedJob }) => {
   return (
     <div className="also-read-box my-4 p-3 rounded" style={{ border: '2px dashed #dc3545', position: 'relative' }}>
       <span style={{ position: 'absolute', top: '-11px', left: '15px', backgroundColor: '#fff', padding: '0 8px', color: '#dc3545', fontSize: '0.85rem' }}>Also read ---</span>
-      <Link to={`/${relatedJob.slug}`} className="d-flex align-items-center gap-3 text-decoration-none text-dark">
+    <Link to={`/${relatedJob.slug}`} className="d-flex align-items-center gap-3 text-decoration-none text-dark">
         {relatedJob.image && (
           <img 
-            src={relatedJob.image} 
+            src={getImageUrl(relatedJob.image)} 
             alt={relatedJob.title} 
             style={{ width: '80px', height: '56px', objectFit: 'cover', borderRadius: '4px' }} 
-            onError={(e) => { e.target.onerror = null; e.target.src = 'https://cdn.builder.io/api/v1/image/assets%2F0652c10db86741bd95f51605c9719073%2F196590e2e83d4a159a955d16c0e8ebde?format=webp&width=800'; }} 
+            onError={(e) => { 
+              if (e.target.src !== FALLBACK_IMAGE) {
+                e.target.src = FALLBACK_IMAGE; 
+              }
+            }} 
           />
         )}
         <div>
@@ -214,12 +219,16 @@ export default function JobDetails() {
           {job.image && (
             <div className="job-image-section mb-4">
               <img 
-                src={job.image} 
+                src={getImageUrl(job.image)} 
                 alt="job banner" 
                 loading="lazy" 
                 className="img-fluid rounded-4 shadow-sm w-100" 
                 style={{ maxHeight: '400px', objectFit: 'cover' }}
-                onError={(e) => { e.target.onerror = null; e.target.src = 'https://cdn.builder.io/api/v1/image/assets%2F0652c10db86741bd95f51605c9719073%2F196590e2e83d4a159a955d16c0e8ebde?format=webp&width=800'; }}
+                onError={(e) => { 
+                  if (e.target.src !== FALLBACK_IMAGE) {
+                    e.target.src = FALLBACK_IMAGE; 
+                  }
+                }}
               />
             </div>
           )}

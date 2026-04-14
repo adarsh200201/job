@@ -1,10 +1,8 @@
 import React, { useMemo, memo } from 'react';
 import { Link } from 'react-router-dom';
-
-const FALLBACK_IMG = 'https://cdn.builder.io/api/v1/image/assets%2F0652c10db86741bd95f51605c9719073%2F196590e2e83d4a159a955d16c0e8ebde?format=webp&width=800';
+import { getImageUrl, FALLBACK_IMAGE } from '../utils/imageUtils.js';
 
 const PostCard = memo(({ job }) => {
-  const src = job.image || FALLBACK_IMG;
   const date = useMemo(() => {
     return new Date(job.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
   }, [job.createdAt]);
@@ -13,11 +11,15 @@ const PostCard = memo(({ job }) => {
     <div className="recent-post-card">
       <div className="recent-post-image">
         <img 
-          src={src} 
+          src={getImageUrl(job.image) || FALLBACK_IMAGE} 
           alt={job.title} 
           className="post-image-img" 
           loading="lazy" 
-          onError={(e) => { e.target.onerror = null; e.target.src = FALLBACK_IMG; }}
+          onError={(e) => { 
+            if (e.target.src !== FALLBACK_IMAGE) {
+              e.target.src = FALLBACK_IMAGE; 
+            }
+          }}
         />
       </div>
       <div className="recent-post-content">

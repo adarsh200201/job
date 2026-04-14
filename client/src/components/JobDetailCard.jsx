@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver.js';
 import RichTextDisplay from './RichTextDisplay.jsx';
 import api from '../api/index.js';
+import { getImageUrl, FALLBACK_IMAGE } from '../utils/imageUtils.js';
 
 const DEFAULT_AD_LINK = 'https://www.effectivegatecpm.com/s738fegejz?key=12ac1ed2eeb4ac73b7d41add24630c1e1e';
 
@@ -13,7 +14,6 @@ function excerpt(text, n = 300) {
 }
 
 function JobDetailCard({ job, adLink: propAdLink }) {
-  const fallback = 'https://cdn.builder.io/api/v1/image/assets%2F0652c10db86741bd95f51605c9719073%2F196590e2e83d4a159a955d16c0e8ebde?format=webp&width=800';
   const { elementRef, isVisible } = useIntersectionObserver();
   const [adLink, setAdLink] = useState(propAdLink || DEFAULT_AD_LINK);
 
@@ -68,9 +68,14 @@ function JobDetailCard({ job, adLink: propAdLink }) {
         <div className="col-md-5 col-lg-4">
           <div style={{ overflow: 'hidden', borderRadius: '0.375rem' }}>
             <img
-              src={job.image || fallback}
+              src={getImageUrl(job.image) || FALLBACK_IMAGE}
               alt={job.title}
               loading="lazy"
+              onError={(e) => {
+                if (e.target.src !== FALLBACK_IMAGE) {
+                  e.target.src = FALLBACK_IMAGE;
+                }
+              }}
               className="img-fluid rounded"
               style={{
                 width: '100%',
