@@ -35,6 +35,10 @@ app.use(
   })
 );
 app.use(express.json());
+  // Serve the uploads directory explicitly
+app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
+
+// Serve other static files from public
 app.use(express.static(path.join(__dirname, '../public')));
 
 app.get('/api/health', (req, res) => {
