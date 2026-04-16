@@ -20,10 +20,8 @@ export const getImageUrl = (imagePath) => {
   } else if (import.meta.env.DEV) {
     serverRoot = 'http://localhost:4000';
   } else {
-    // If no base URL is defined in production, we assume backend is on the same host
-    // but we still need to handle cases where frontend and backend are separate.
-    // Based on .env.production, the backend is on Render.
-    serverRoot = ''; 
+    // FALLBACK: Hardcode the production backend URL for reliability
+    serverRoot = 'https://job-tdg8.onrender.com';
   }
 
   // Ensure imagePath starts with /
