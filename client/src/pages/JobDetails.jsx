@@ -235,148 +235,137 @@ export default function JobDetails() {
 
           {/* Short Summary Intro */}
           {job.description && (
-            <div className="mb-5" style={{ fontSize: '1.1rem', lineHeight: '1.8', color: '#2d3748', borderLeft: '4px solid #5bc0de', paddingLeft: '1.5rem' }}>
+            <div className="mb-4" style={{ fontSize: '1.05rem', lineHeight: '1.7', color: '#333' }}>
               {typeof job.description === 'string' && job.description.includes('<') ? (
                 <RichTextDisplay content={job.description} />
               ) : (
-                <p className="mb-0"><strong>{job.company}</strong> {job.description.replace(new RegExp('^' + job.company + '?', 'i'), '')}</p>
+                <p><strong>{job.company}</strong> {job.description.replace(new RegExp('^' + job.company + '?', 'i'), '')}</p>
               )}
             </div>
           )}
 
-          {/* Structured Summary Cards Grid */}
-          <div className="row g-3 mb-5">
-            {[
-              { label: 'Location', value: job.location, icon: '📍', color: '#eef2ff', textColor: '#4338ca' },
-              { label: 'Qualification', value: job.education, icon: '🎓', color: '#fff7ed', textColor: '#c2410c' },
-              { label: 'Batch', value: job.batch, icon: '📅', color: '#f0fdf4', textColor: '#15803d' },
-              { label: 'Experience', value: job.experience, icon: '💼', color: '#fdf2f8', textColor: '#be185d' },
-              { label: 'Salary', value: job.salary, icon: '💰', color: '#ecfdf5', textColor: '#047857' },
-              { label: 'Last Date', value: job.lastDate ? new Date(job.lastDate).toLocaleDateString() : 'N/A', icon: '⏳', color: '#fff1f2', textColor: '#be123c' }
-            ].map((item, i) => (
-              <div key={i} className="col-6 col-md-4">
-                <div style={{ 
-                  backgroundColor: item.color, 
-                  padding: '1.25rem', 
-                  borderRadius: '12px', 
-                  height: '100%',
-                  border: `1px solid ${item.textColor}20`,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '0.25rem'
-                }}>
-                  <span style={{ fontSize: '1.2rem', marginBottom: '0.25rem' }}>{item.icon}</span>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#64748b' }}>{item.label}</span>
-                  <span style={{ fontSize: '0.95rem', fontWeight: 800, color: item.textColor }}>{item.value || 'Not Specified'}</span>
-                </div>
-              </div>
-            ))}
-          </div>
+          {/* Middle Placement */}
+          {socialLinksBlock}
 
-          <AlsoReadCard relatedJob={intersperseJobs[0]} />
+          {/* Removed Social Links block from here and moved it to top */}
+          {job.lastDate && (
+            <p className="mb-4" style={{ fontSize: '1.05rem', lineHeight: '1.7', color: '#333' }}>
+              If you are a <strong>Graduation - {job.education || 'Any Degree'}</strong> this is your chance to <strong>build your future with {job.company}</strong>. The detailed eligibility criteria, responsibilities, and application process for the {job.company} Off Campus Drive {job.batch ? job.batch.replace(/Batch|batch/, '').trim() : ''} are provided below.
+            </p>
+          )}
+
+          {/* OVERVIEW SECTION */}
+          <div className="mb-4">
+            <h2 className="capsule-header p-3 rounded" style={{ backgroundColor: '#5bc0de', color: '#fff', fontSize: '1.2rem', fontWeight: 'bold' }}>
+              {capitalize(job.company)} Off Campus Recruitment {job.batch ? job.batch.replace(/Batch|batch/, '').trim() : ''} – Overview
+            </h2>
+            <ul className="job-overview-list list-unstyled ps-4" style={{ lineHeight: '2' }}>
+              {job.company && <li style={{listStyleType: 'disc'}}><strong>Company Name:</strong> {job.company}</li>}
+              {job.type && <li style={{listStyleType: 'disc'}}><strong>Role:</strong> {job.type}</li>}
+              {job.education && <li style={{listStyleType: 'disc'}}><strong>Qualification:</strong> {job.education}</li>}
+              {job.experience && <li style={{listStyleType: 'disc'}}><strong>Experience:</strong> {job.experience}</li>}
+              
+              <AlsoReadCard relatedJob={intersperseJobs[0]} />
+
+              {job.batch && <li style={{listStyleType: 'disc'}}><strong>Batch:</strong> {job.batch}</li>}
+              {job.location && <li style={{listStyleType: 'disc'}}><strong>Location:</strong> {job.location}</li>}
+              {job.salary && <li style={{listStyleType: 'disc'}}><strong>Salary:</strong> {job.salary}</li>}
+              {job.lastDate && <li style={{listStyleType: 'disc'}}><strong>Application Deadline:</strong> {new Date(job.lastDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</li>}
+            </ul>
+          </div>
 
           {/* ABOUT COMPANY */}
           {job.aboutCompany && (
-            <div className="mb-5 p-4 rounded-4" style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
-              <h2 className="mb-4 d-flex align-items-center gap-2" style={{ fontSize: '1.4rem', fontWeight: 800, color: '#1e293b' }}>
-                <span style={{ width: '8px', height: '24px', backgroundColor: '#5bc0de', borderRadius: '4px' }}></span>
-                About {job.company}
+            <div className="mb-4 text-dark" style={{ lineHeight: '1.7' }}>
+              <h2 className="capsule-header p-3 rounded" style={{ backgroundColor: '#5bc0de', color: '#fff', fontSize: '1.2rem', fontWeight: 'bold' }}>
+                About {job.company} Off Campus Drive {job.batch ? job.batch.replace(/Batch|batch/, '').trim() : ''}
               </h2>
-              <div className="rich-text-content" style={{ color: '#475569', lineHeight: '1.7' }}>
+              <div className="rich-text-section ps-2">
                 <RichTextDisplay content={job.aboutCompany} />
-              </div>
-            </div>
-          )}
-
-          {/* JOB DESCRIPTION / ROLE OVERVIEW */}
-          {job.jobDescription && (
-            <div className="mb-5">
-              <h2 className="mb-4 d-flex align-items-center gap-2" style={{ fontSize: '1.4rem', fontWeight: 800, color: '#1e293b' }}>
-                <span style={{ width: '8px', height: '24px', backgroundColor: '#5bc0de', borderRadius: '4px' }}></span>
-                Role Overview & Focus Areas
-              </h2>
-              <div className="rich-text-content ps-2" style={{ color: '#334155' }}>
-                <RichTextDisplay content={job.jobDescription} />
               </div>
               
               <AlsoReadCard relatedJob={intersperseJobs[1]} />
             </div>
           )}
 
-          {/* RESPONSIBILITIES */}
-          {job.responsibilities && (
-            <div className="mb-5">
-              <h2 className="mb-4 d-flex align-items-center gap-2" style={{ fontSize: '1.4rem', fontWeight: 800, color: '#1e293b' }}>
-                <span style={{ width: '8px', height: '24px', backgroundColor: '#5bc0de', borderRadius: '4px' }}></span>
-                Key Responsibilities
+          {/* JOB DESCRIPTION */}
+          {job.jobDescription && (
+            <div className="mb-4 text-dark" style={{ lineHeight: '1.7' }}>
+              <h2 className="capsule-header p-3 rounded" style={{ backgroundColor: '#5bc0de', color: '#fff', fontSize: '1.2rem', fontWeight: 'bold' }}>
+                Job Description
               </h2>
-              <div className="ps-2">
-                {renderList(job.responsibilities)}
+              <div className="rich-text-section ps-2">
+                <RichTextDisplay content={job.jobDescription} />
               </div>
             </div>
           )}
 
+          {/* RESPONSIBILITIES */}
+          {job.responsibilities && job.responsibilities.length > 0 && (
+            <div className="mb-4 text-dark">
+              <h2 className="capsule-header p-3 rounded" style={{ backgroundColor: '#5bc0de', color: '#fff', fontSize: '1.2rem', fontWeight: 'bold' }}>
+                Roles & Responsibilities for {job.company} Off Campus Drive {job.batch ? job.batch.replace(/Batch|batch/, '').trim() : ''}
+              </h2>
+              {renderList(job.responsibilities)}
+            </div>
+          )}
+
           {/* ELIGIBILITY CRITERIA */}
-          {job.requirements && (
-            <div className="mb-5">
-              <h2 className="mb-4 d-flex align-items-center gap-2" style={{ fontSize: '1.4rem', fontWeight: 800, color: '#1e293b' }}>
-                <span style={{ width: '8px', height: '24px', backgroundColor: '#ff9800', borderRadius: '4px' }}></span>
+          {job.requirements && job.requirements.length > 0 && (
+            <div className="mb-4 text-dark">
+              <h2 className="capsule-header p-3 rounded" style={{ backgroundColor: '#5bc0de', color: '#fff', fontSize: '1.2rem', fontWeight: 'bold' }}>
                 Eligibility Criteria
               </h2>
-              <div className="ps-2">
-                {renderList(job.requirements)}
-              </div>
+              {renderList(job.requirements)}
             </div>
           )}
 
           {/* WHY JOIN SECTION */}
           {job.whyJoin && (
-            <div className="mb-5 p-4 rounded-4" style={{ backgroundColor: '#fffbeb', border: '1px solid #fde68a' }}>
-              <h2 className="mb-4 d-flex align-items-center gap-2" style={{ fontSize: '1.4rem', fontWeight: 800, color: '#92400e' }}>
-                🌟 Why Join {job.company}?
+            <div className="mb-4 text-dark">
+              <h2 className="capsule-header p-3 rounded" style={{ backgroundColor: '#5bc0de', color: '#fff', fontSize: '1.2rem', fontWeight: 'bold' }}>
+                Why Join {job.company}?
               </h2>
-              <div className="ps-2">
-                {renderList(job.whyJoin)}
-              </div>
-              
+              {renderList(job.whyJoin)}
+
               <AlsoReadCard relatedJob={intersperseJobs[2]} />
             </div>
           )}
 
-          {/* HOW TO APPLY */}
-          {job.howToApply && (
-            <div className="mb-5 alert alert-info border-0 rounded-4 p-4 shadow-sm" style={{ backgroundColor: '#f0f9ff' }}>
-              <h2 className="mb-3" style={{ fontSize: '1.3rem', fontWeight: 800, color: '#0369a1' }}>
-                🚀 How to Apply
+          {job.contact && (
+            <div className="mb-4 text-dark">
+              <h2 className="capsule-header p-3 rounded" style={{ backgroundColor: '#5bc0de', color: '#fff', fontSize: '1.2rem', fontWeight: 'bold' }}>
+                Contact Information
               </h2>
-              <div className="rich-text-content" style={{ color: '#0c4a6e' }}>
+              <p className="ps-2">{job.contact}</p>
+            </div>
+          )}
+
+          {job.howToApply && (
+            <div className="mb-4 text-dark">
+              <h2 className="capsule-header p-3 rounded" style={{ backgroundColor: '#5bc0de', color: '#fff', fontSize: '1.2rem', fontWeight: 'bold' }}>
+                How to Apply for {job.company} Off Campus Drive {job.batch ? job.batch.replace(/Batch|batch/, '').trim() : ''}
+              </h2>
+              <div className="rich-text-section ps-2">
                 <RichTextDisplay content={job.howToApply} />
               </div>
             </div>
           )}
 
-          {/* APPLY BUTTON FOOTER */}
-          <div className="my-5 py-5 text-center border-top border-bottom" style={{ backgroundColor: '#fafbfc', margin: '0 -15px' }}>
-            <h4 className="mb-4 fw-bold">Ready to take the next step?</h4>
-            <a 
-              href={job.applyLink} 
-              onClick={(e) => handleApply(e, job.applyLink)} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="btn btn-lg px-5 py-3 shadow-lg hover-up" 
-              style={{ 
-                backgroundColor: '#5bc0de', 
-                color: '#fff', 
-                fontSize: '1.25rem', 
-                fontWeight: 800, 
-                borderRadius: '50px',
-                border: 'none',
-                transition: 'transform 0.2s ease, box-shadow 0.2s ease'
-              }}
-            >
-              Apply for this Position
-            </a>
-            <p className="mt-3 text-muted small">Application closing on: {job.lastDate ? new Date(job.lastDate).toLocaleDateString() : 'Soon'}</p>
+          {job.finalThoughts && (
+            <div className="mb-4 text-dark">
+              <h2 className="capsule-header p-3 rounded" style={{ backgroundColor: '#5bc0de', color: '#fff', fontSize: '1.2rem', fontWeight: 'bold' }}>
+                Final Thoughts
+              </h2>
+              <div className="rich-text-section ps-2">
+                <RichTextDisplay content={job.finalThoughts} />
+              </div>
+            </div>
+          )}
+
+          <div className="my-5 mb-5 ps-2">
+            <h5 className="mb-3">Interested candidates can apply online using the following link.</h5>
+            <a href={job.applyLink} onClick={(e) => handleApply(e, job.applyLink)} target="_blank" rel="noopener noreferrer" className="btn text-white fw-bold d-inline-block shadow" style={{ backgroundColor: '#5bc0de', padding: '12px 30px', fontSize: '1.1rem', borderRadius: '4px' }}>Apply Now</a>
           </div>
 
         </div>
