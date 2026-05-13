@@ -17,6 +17,8 @@ const FAQ = React.lazy(() => import('./pages/FAQ.jsx'));
 const Blog = React.lazy(() => import('./pages/Blog.jsx'));
 const Terms = React.lazy(() => import('./pages/Terms.jsx'));
 const Disclaimer = React.lazy(() => import('./pages/Disclaimer.jsx'));
+const Login = React.lazy(() => import('./pages/Login.jsx'));
+const SignUp = React.lazy(() => import('./pages/SignUp.jsx'));
 
 // Loading fallback component
 function LoadingFallback() {
@@ -84,8 +86,8 @@ function AppLayout({ scrollToSearch }) {
               </span>
             </Link>
             <div className="nav-top-actions">
-              <Link to="/admin/login" className="btn-nav-signup">Sign up</Link>
-              <Link to="/admin/login" className="btn-nav-login">Log in</Link>
+              <Link to="/signup" className="btn-nav-signup">Sign up</Link>
+              <Link to="/login" className="btn-nav-login">Log in</Link>
             </div>
           </div>
         </div>
@@ -100,7 +102,6 @@ function AppLayout({ scrollToSearch }) {
               <li><Link className="nav-link" to="/about">About</Link></li>
               <li><Link className="nav-link" to="/blog">Career Advice</Link></li>
             </ul>
-            <Link to="/admin" className="btn-nav-employers">Employers / Post Job →</Link>
           </div>
         </nav>
 
@@ -119,6 +120,8 @@ function AppLayout({ scrollToSearch }) {
             <Route path="/blog" element={<Blog />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/disclaimer" element={<Disclaimer />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignUp />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route
               path="/admin"
