@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
+const QUICK_FILTERS = ['Full-Time', 'Internship', 'Remote', 'Part-Time'];
+
 export default function SidebarSearch() {
   const [term, setTerm] = useState('');
   const navigate = useNavigate();
@@ -9,31 +11,48 @@ export default function SidebarSearch() {
   const submit = (e) => {
     e && e.preventDefault();
     const params = new URLSearchParams(location.search);
-    if (term) params.set('q', term); else params.delete('q');
+    if (term.trim()) params.set('q', term.trim()); else params.delete('q');
+    navigate(`/?${params.toString()}`);
+  };
+
+  const setQuick = (type) => {
+    const params = new URLSearchParams();
+    params.set('type', type);
     navigate(`/?${params.toString()}`);
   };
 
   return (
-    <div id="sidebar-search" className="card p-4 mb-3 shadow-sm search-card" style={{ backgroundColor: '#f8f9fa' }}>
-      <h3 className="h6 mb-3 fw-bold">Search</h3>
-      <form onSubmit={submit}>
-        <div className="mb-3">
-          <input 
-            className="form-control form-control-lg" 
-            placeholder="Search" 
-            value={term} 
+    <div id="sidebar-search" className="sbs-card">
+      {/* Header */}
+      <div className="sbs-header">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <span>Search Jobs</span>
+      </div>
+
+      <form onSubmit={submit} className="sbs-form">
+        <div className="sbs-input-wrap">
+          <svg className="sbs-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input
+            className="sbs-input"
+            placeholder="Role, company, keyword…"
+            value={term}
             onChange={(e) => setTerm(e.target.value)}
-            style={{ border: '1px solid #dee2e6', borderRadius: '0.375rem' }}
           />
         </div>
-        <button 
-          className="btn btn-info text-white w-100 rounded-pill" 
-          type="submit"
-          style={{ backgroundColor: '#17a2b8', padding: '0.5rem 1.5rem' }}
-        >
-          Search
-        </button>
+        <button className="sbs-btn" type="submit">Search Jobs</button>
       </form>
+
+      {/* Quick filters */}
+      <div className="sbs-section">
+        <p className="sbs-label">Quick Filters</p>
+        <div className="sbs-quick-filters">
+          {QUICK_FILTERS.map((f) => (
+            <button key={f} className="sbs-filter-chip" onClick={() => setQuick(f)} type="button">
+              {f}
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

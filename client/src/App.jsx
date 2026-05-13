@@ -1,6 +1,8 @@
 import React, { Suspense, useEffect } from 'react';
-import { Routes, Route, Link, Navigate } from 'react-router-dom';
+import { Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
 import Footer from './components/Footer.jsx';
+import PreFooterSections from './components/PreFooterSections.jsx';
+import HeroSearch from './components/HeroSearch.jsx';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { startKeepAlive, stopKeepAlive } from './utils/keepAlive.js';
 
@@ -55,28 +57,55 @@ export default function App() {
 
   return (
     <AuthProvider>
+      <AppLayout scrollToSearch={scrollToSearch} />
+    </AuthProvider>
+  );
+}
+
+function AppLayout({ scrollToSearch }) {
+  const location = useLocation();
+  const isHome = location.pathname === '/';
+
+  return (
+    <>
+      {/* Monster.com-style two-row header */}
       <header className="site-header">
-        <div className="header-banner text-center">
-          <div className="logo-banner-wrapper">
-            <img
-              src="https://cdn.builder.io/api/v1/image/assets%2Fc302f9de22234efc941990700131730c%2Fb10aab7ac8894017bd0806e41dd588ee?format=webp&width=800"
-              alt="NextJobPost Logo"
-              className="logo-img"
-            />
-            <h1 className="m-0 site-title"><span className="site-title-next">Next</span><span className="site-title-job">JobPost</span></h1>
+        {/* Top bar: white, logo left + auth buttons right */}
+        <div className="nav-top-bar">
+          <div className="nav-top-inner">
+            <Link to="/" className="nav-logo-link">
+              <img
+                src="https://cdn.builder.io/api/v1/image/assets%2Fc302f9de22234efc941990700131730c%2Fb10aab7ac8894017bd0806e41dd588ee?format=webp&width=800"
+                alt="NextJobPost Logo"
+                className="logo-img-nav"
+              />
+              <span className="nav-brand">
+                <span className="nav-brand-next">Next</span><span className="nav-brand-job">Job</span><span className="nav-brand-post">Post</span>
+              </span>
+            </Link>
+            <div className="nav-top-actions">
+              <Link to="/admin/login" className="btn-nav-signup">Sign up</Link>
+              <Link to="/admin/login" className="btn-nav-login">Log in</Link>
+            </div>
           </div>
         </div>
-        <nav className="main-nav navbar navbar-expand-lg py-2">
-          <div className="container">
-            <ul className="nav mx-auto">
-              <li className="nav-item"><Link className="nav-link text-white" to="/">Home</Link></li>
-              <li className="nav-item"><Link className="nav-link text-white" to="/?type=Full-Time">Jobs</Link></li>
-              <li className="nav-item"><Link className="nav-link text-white" to="/?type=Internship">Internship</Link></li>
-              <li className="nav-item"><Link className="nav-link text-white" to="/?type=Remote">Work From Home</Link></li>
+
+        {/* Secondary bar: light gray with nav links */}
+        <nav className="nav-secondary-bar">
+          <div className="nav-secondary-inner">
+            <ul className="nav-links">
+              <li><Link className="nav-link" to="/">Find Jobs</Link></li>
+              <li><Link className="nav-link" to="/?type=Internship">Internships</Link></li>
+              <li><Link className="nav-link" to="/?type=Remote">Work From Home</Link></li>
+              <li><Link className="nav-link" to="/about">About</Link></li>
+              <li><Link className="nav-link" to="/blog">Career Advice</Link></li>
             </ul>
-            {/* Search icon removed per request */}
+            <Link to="/admin" className="btn-nav-employers">Employers / Post Job →</Link>
           </div>
         </nav>
+
+        {/* Hero search - only on homepage */}
+        {isHome && <HeroSearch />}
       </header>
 
       <main className="container py-4">
@@ -102,7 +131,8 @@ export default function App() {
           </Routes>
         </Suspense>
       </main>
+      <PreFooterSections />
       <Footer />
-    </AuthProvider>
+    </>
   );
 }

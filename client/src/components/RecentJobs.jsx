@@ -1,60 +1,61 @@
 import React, { useMemo, memo } from 'react';
 import { Link } from 'react-router-dom';
-import { getImageUrl, FALLBACK_IMAGE } from '../utils/imageUtils.js';
+import { getImageUrl, FALLBACK_IMAGE, getFallbackImage } from '../utils/imageUtils.js';
+
+function timeAgo(dateStr) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const days = Math.floor(diff / 86400000);
+  if (days === 0) return 'Today';
+  if (days === 1) return '1d ago';
+  if (days < 7) return `${days}d ago`;
+  if (days < 30) return `${Math.floor(days / 7)}w ago`;
+  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
 
 const PostCard = memo(({ job }) => {
-  const date = useMemo(() => {
-    return new Date(job.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-  }, [job.createdAt]);
+  const ago = useMemo(() => timeAgo(job.createdAt), [job.createdAt]);
 
   return (
-    <div className="recent-post-card">
-      <div className="recent-post-image">
-        <img 
-          src={getImageUrl(job.image) || FALLBACK_IMAGE} 
-          alt={job.title} 
-          className="post-image-img" 
-          loading="lazy" 
+    <Link to={`/${job.slug}`} className="rj-card">
+      <div className="rj-img-wrap">
+        <img
+          src={getImageUrl(job.image) || getFallbackImage(job.title)}
+          alt={job.title}
+          className="rj-img"
+          loading="lazy"
           onError={(e) => { 
-            if (e.target.src !== FALLBACK_IMAGE) {
-              e.target.src = FALLBACK_IMAGE; 
-            }
+            const fb = getFallbackImage(job.title);
+            if (e.target.src !== fb) e.target.src = fb; 
           }}
         />
       </div>
-      <div className="recent-post-content">
-        <Link to={`/${job.slug}`} className="recent-post-title">
-          {job.title}
-        </Link>
-        <div className="recent-post-meta">
-          <span className="post-author">by NextJobPost</span>
-          <span className="post-date">{date}</span>
-        </div>
+      <div className="rj-info">
+        <span className="rj-title">{job.title}</span>
+        <span className="rj-meta">
+          {job.company && <span className="rj-company">{job.company}</span>}
+          <span className="rj-ago">{ago}</span>
+        </span>
       </div>
-    </div>
+    </Link>
   );
 });
 
 const RecentJobs = memo(function RecentJobs({ jobs = [] }) {
   const recent = useMemo(() => jobs.slice(0, 8), [jobs]);
 
-  if (recent.length === 0) {
-    return (
-      <aside className="recent-jobs-container">
-        <h3 className="recent-posts-title">Recent Posts</h3>
-        <div className="text-muted text-center py-4">No recent posts</div>
-      </aside>
-    );
-  }
-
   return (
-    <aside className="recent-jobs-container">
-      <h3 className="recent-posts-title">Recent Posts</h3>
-      <div className="recent-posts-list">
-        {recent.map((j) => (
-          <PostCard key={j._id} job={j} />
-        ))}
+    <aside className="rj-container">
+      <div className="rj-header">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        <span>Recent Posts</span>
       </div>
+      {recent.length === 0 ? (
+        <div className="rj-empty">No recent posts yet</div>
+      ) : (
+        <div className="rj-list">
+          {recent.map((j) => <PostCard key={j._id} job={j} />)}
+        </div>
+      )}
     </aside>
   );
 });

@@ -167,12 +167,12 @@ export default function AdminDashboard() {
 
   const startEdit = (job) => {
     setEditingId(job._id);
-    setForm({ 
-      title: job.title, 
-      company: job.company, 
-      location: job.location, 
-      type: job.type, 
-      experience: job.experience, 
+    setForm({
+      title: job.title,
+      company: job.company,
+      location: job.location,
+      type: job.type,
+      experience: job.experience,
       education: job.education || '',
       batch: job.batch || '',
       jobDescription: job.jobDescription || '',
@@ -186,11 +186,11 @@ export default function AdminDashboard() {
       requirements: Array.isArray(job.requirements) ? job.requirements.join('\n') : job.requirements || '',
       skills: Array.isArray(job.skills) ? job.skills.join('\n') : job.skills || '',
       salary: job.salary || '',
-      applyLink: job.applyLink, 
+      applyLink: job.applyLink,
       lastDate: job.lastDate ? job.lastDate.split('T')[0] : '',
-      image: job.image || '', 
+      image: job.image || '',
       whatsapp: job.whatsapp || 'https://chat.whatsapp.com/LVpuUJluTpUEdIc4daAemQ',
-      telegram: job.telegram || 'https://t.me/nextjobpost', 
+      telegram: job.telegram || 'https://t.me/nextjobpost',
       contact: job.contact || '',
       metaTitle: job.metaTitle || '',
       metaDescription: job.metaDescription || ''
@@ -337,17 +337,17 @@ export default function AdminDashboard() {
               <h3 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 700 }}>⚙️ Site Settings</h3>
               <button onClick={() => setShowSettings(false)} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer' }}>✕</button>
             </div>
-            
+
             <div style={{ marginBottom: '1.5rem' }}>
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>
                 📢 Ad Link (Opens with Apply Now button)
               </label>
-              <input 
-                type="url" 
-                className="form-control" 
-                value={adLink} 
-                onChange={(e) => setAdLink(e.target.value)} 
-                placeholder="https://your-ad-link.com"
+              <input
+                type="url"
+                className="form-control"
+                value={adLink}
+                onChange={(e) => setAdLink(e.target.value)}
+                placeholder="https://www.effectivegatecpm.com/s738fegejz?key=12ac1ed2eeb4ac73b7d41add24630c1e1e"
                 style={{ padding: '0.75rem' }}
               />
               <small className="text-muted d-block mt-1">
@@ -365,9 +365,9 @@ export default function AdminDashboard() {
               <button className="btn btn-outline-secondary" onClick={() => setShowSettings(false)}>
                 Cancel
               </button>
-              <button 
-                className="btn btn-primary" 
-                onClick={saveSettings} 
+              <button
+                className="btn btn-primary"
+                onClick={saveSettings}
                 disabled={settingsSaving}
                 style={{ background: 'linear-gradient(90deg, #1677b6, #2a9df4)', border: 'none' }}
               >
@@ -722,49 +722,49 @@ export default function AdminDashboard() {
                 </thead>
                 <tbody>
                   {filteredJobs.map((j) => (
-                  <tr key={j._id} style={{ borderBottom: '1px solid #f0f4f8', transition: 'all 200ms ease' }}>
-                    <td style={{ padding: '1rem', fontWeight: 600, color: '#162c4a' }}>
-                      {j.title.length > 30 ? j.title.substring(0, 30) + '...' : j.title}
-                    </td>
-                    <td style={{ padding: '1rem', color: '#465a6b' }}>{j.company}</td>
-                    <td style={{ padding: '1rem', color: '#465a6b' }}>{j.location}</td>
-                    <td style={{ padding: '1rem' }}>
-                      <span style={{
-                        display: 'inline-block',
-                        padding: '0.35rem 0.75rem',
-                        borderRadius: '6px',
-                        fontSize: '0.85rem',
-                        fontWeight: 700,
-                        background: j.type === 'Full-Time' ? 'rgba(22,119,182,0.1)' : j.type === 'Internship' ? 'rgba(245,158,11,0.1)' : 'rgba(108,117,125,0.1)',
-                        color: j.type === 'Full-Time' ? '#1677b6' : j.type === 'Internship' ? '#f59e0b' : '#465a6b'
-                      }}>
-                        {j.type}
-                      </span>
-                    </td>
-                    <td style={{ padding: '1rem' }}>
-                      <span style={{
-                        display: 'inline-block',
-                        padding: '0.35rem 0.75rem',
-                        borderRadius: '6px',
-                        fontSize: '0.85rem',
-                        fontWeight: 700,
-                        background: j.isActive ? 'rgba(25,169,116,0.1)' : 'rgba(239,68,68,0.1)',
-                        color: j.isActive ? '#19a974' : '#ef4444'
-                      }}>
-                        {j.isActive ? '✓ Active' : '◯ Inactive'}
-                      </span>
-                    </td>
-                    <td style={{ padding: '1rem', textAlign: 'right' }}>
-                      <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                        <button className="btn btn-sm" style={{ borderRadius: '6px', padding: '0.4rem 0.8rem', fontWeight: 600, background: 'rgba(22,119,182,0.1)', color: '#1677b6', border: 'none', cursor: 'pointer' }} onClick={() => startEdit(j)}>
-                          ✏️ Edit
-                        </button>
-                        <button className="btn btn-sm" style={{ borderRadius: '6px', padding: '0.4rem 0.8rem', fontWeight: 600, background: 'rgba(239,68,68,0.1)', color: '#ef4444', border: 'none', cursor: 'pointer' }} onClick={() => remove(j._id)}>
-                          🗑️ Delete
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
+                    <tr key={j._id} style={{ borderBottom: '1px solid #f0f4f8', transition: 'all 200ms ease' }}>
+                      <td style={{ padding: '1rem', fontWeight: 600, color: '#162c4a' }}>
+                        {j.title.length > 30 ? j.title.substring(0, 30) + '...' : j.title}
+                      </td>
+                      <td style={{ padding: '1rem', color: '#465a6b' }}>{j.company}</td>
+                      <td style={{ padding: '1rem', color: '#465a6b' }}>{j.location}</td>
+                      <td style={{ padding: '1rem' }}>
+                        <span style={{
+                          display: 'inline-block',
+                          padding: '0.35rem 0.75rem',
+                          borderRadius: '6px',
+                          fontSize: '0.85rem',
+                          fontWeight: 700,
+                          background: j.type === 'Full-Time' ? 'rgba(22,119,182,0.1)' : j.type === 'Internship' ? 'rgba(245,158,11,0.1)' : 'rgba(108,117,125,0.1)',
+                          color: j.type === 'Full-Time' ? '#1677b6' : j.type === 'Internship' ? '#f59e0b' : '#465a6b'
+                        }}>
+                          {j.type}
+                        </span>
+                      </td>
+                      <td style={{ padding: '1rem' }}>
+                        <span style={{
+                          display: 'inline-block',
+                          padding: '0.35rem 0.75rem',
+                          borderRadius: '6px',
+                          fontSize: '0.85rem',
+                          fontWeight: 700,
+                          background: j.isActive ? 'rgba(25,169,116,0.1)' : 'rgba(239,68,68,0.1)',
+                          color: j.isActive ? '#19a974' : '#ef4444'
+                        }}>
+                          {j.isActive ? '✓ Active' : '◯ Inactive'}
+                        </span>
+                      </td>
+                      <td style={{ padding: '1rem', textAlign: 'right' }}>
+                        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                          <button className="btn btn-sm" style={{ borderRadius: '6px', padding: '0.4rem 0.8rem', fontWeight: 600, background: 'rgba(22,119,182,0.1)', color: '#1677b6', border: 'none', cursor: 'pointer' }} onClick={() => startEdit(j)}>
+                            ✏️ Edit
+                          </button>
+                          <button className="btn btn-sm" style={{ borderRadius: '6px', padding: '0.4rem 0.8rem', fontWeight: 600, background: 'rgba(239,68,68,0.1)', color: '#ef4444', border: 'none', cursor: 'pointer' }} onClick={() => remove(j._id)}>
+                            🗑️ Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
                   ))}
                 </tbody>
               </table>

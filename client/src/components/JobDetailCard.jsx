@@ -3,14 +3,26 @@ import { Link } from 'react-router-dom';
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver.js';
 import RichTextDisplay from './RichTextDisplay.jsx';
 import api from '../api/index.js';
-import { getImageUrl, FALLBACK_IMAGE } from '../utils/imageUtils.js';
+import { getImageUrl, FALLBACK_IMAGE, getFallbackImage } from '../utils/imageUtils.js';
 
 const DEFAULT_AD_LINK = 'https://www.effectivegatecpm.com/s738fegejz?key=12ac1ed2eeb4ac73b7d41add24630c1e1e';
 
-function excerpt(text, n = 300) {
+function excerpt(text, n = 160) {
   if (!text) return '';
-  if (text.length <= n) return text;
-  return `${text.slice(0, n).trim()}…`;
+  // Strip HTML tags for plain preview
+  const plain = text.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  if (plain.length <= n) return plain;
+  return `${plain.slice(0, n).trim()}…`;
+}
+
+function timeAgo(dateStr) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const days = Math.floor(diff / 86400000);
+  if (days === 0) return 'Today';
+  if (days === 1) return '1 day ago';
+  if (days < 7) return `${days} days ago`;
+  if (days < 30) return `${Math.floor(days / 7)}w ago`;
+  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
 function JobDetailCard({ job, adLink: propAdLink }) {
@@ -27,114 +39,98 @@ function JobDetailCard({ job, adLink: propAdLink }) {
 
   const handleApply = (e) => {
     e.preventDefault();
-    // Open ad link in new tab
-    if (adLink) {
-      window.open(adLink, '_blank', 'noopener,noreferrer');
-    }
-    // Redirect current page to apply URL
+    if (adLink) window.open(adLink, '_blank', 'noopener,noreferrer');
     window.location.href = job.applyLink;
   };
 
+  const typeColor = {
+    'Full-Time': { bg: '#ecfdf5', color: '#059669', dot: '#10b981' },
+    'Part-Time': { bg: '#fef3c7', color: '#d97706', dot: '#f59e0b' },
+    'Internship': { bg: '#eff6ff', color: '#2563eb', dot: '#3b82f6' },
+    'Remote': { bg: '#f5f3ff', color: '#7c3aed', dot: '#8b5cf6' },
+  }[job.type] || { bg: '#f0fdf4', color: '#16a34a', dot: '#22c55e' };
+
   return (
-    <article
-      ref={elementRef}
-      className="mb-4 pb-4 border-bottom job-card"
-      style={{ transition: 'all 0.2s ease' }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = '#f8f9fa';
-        e.currentTarget.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.05)';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.backgroundColor = 'transparent';
-        e.currentTarget.style.boxShadow = 'none';
-      }}
-    >
-      <h2 className="h4 mb-2">
-        <Link
-          to={`/${job.slug}`}
-          className="text-decoration-none text-dark"
-          style={{ transition: 'color 0.2s ease' }}
-          onMouseEnter={(e) => e.target.style.color = '#17a2b8'}
-          onMouseLeave={(e) => e.target.style.color = '#212529'}
-        >
-          {job.title}
-        </Link>
-      </h2>
-      <div className="mb-3 small text-muted">
-        {new Date(job.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} by <span className="text-primary">Job For Fresher</span>
-      </div>
-      
-      <div className="row g-3">
-        <div className="col-md-5 col-lg-4">
-          <div style={{ overflow: 'hidden', borderRadius: '0.375rem' }}>
-            <img
-              src={getImageUrl(job.image) || FALLBACK_IMAGE}
-              alt={job.title}
-              loading="lazy"
-              onError={(e) => {
-                if (e.target.src !== FALLBACK_IMAGE) {
-                  e.target.src = FALLBACK_IMAGE;
-                }
-              }}
-              className="img-fluid rounded"
-              style={{
-                width: '100%',
-                height: 'auto',
-                transition: 'transform 0.3s ease'
-              }}
-              onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
-              onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
-            />
-          </div>
+    <article ref={elementRef} className="jc-card">
+      {/* Top row: image + meta */}
+      <div className="jc-body">
+        {/* Thumbnail */}
+        <div className="jc-thumb-wrap">
+          <img
+            src={getImageUrl(job.image) || getFallbackImage(job.title)}
+            alt={job.title}
+            loading="lazy"
+            className="jc-thumb"
+            onError={(e) => { 
+              const fb = getFallbackImage(job.title);
+              if (e.target.src !== fb) e.target.src = fb; 
+            }}
+          />
+          {/* Hiring badge overlay */}
+          <span className="jc-hiring-badge">🔥 Hiring Now</span>
         </div>
-        <div className="col-md-7 col-lg-8">
-          <div className="mb-0">
-            <div className="mb-0">
-              <strong className="text-dark">{job.company}</strong>
-              {job.location && <span className="text-muted ms-2">• {job.location}</span>}
-            </div>
+
+        {/* Content */}
+        <div className="jc-content">
+          {/* Title */}
+          <h2 className="jc-title">
+            <Link to={`/${job.slug}`} className="jc-title-link">{job.title}</Link>
+          </h2>
+
+          {/* Company + Location row */}
+          <div className="jc-company-row">
+            <span className="jc-company">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+              {job.company || 'Company'}
+            </span>
+            {job.location && (
+              <span className="jc-location">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                {job.location}
+              </span>
+            )}
+            <span className="jc-posted">{timeAgo(job.createdAt)}</span>
           </div>
 
+          {/* Chips row */}
+          <div className="jc-chips">
+            {job.type && (
+              <span className="jc-chip" style={{ background: typeColor.bg, color: typeColor.color }}>
+                <span className="jc-chip-dot" style={{ background: typeColor.dot }} />
+                {job.type}
+              </span>
+            )}
+            {job.experience && (
+              <span className="jc-chip jc-chip-gray">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+                {job.experience}
+              </span>
+            )}
+            {job.education && (
+              <span className="jc-chip jc-chip-gray">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                {job.education}
+              </span>
+            )}
+          </div>
+
+          {/* Excerpt */}
           {(job.description || job.jobDescription) && (
-            <div className="mb-3 job-card-description">
-              {typeof job.description === 'string' && job.description.includes('<') ? (
-                <div style={{ textAlign: 'justify', lineHeight: '1.8' }}>
-                  <RichTextDisplay content={excerpt(job.description, 150)} />
-                </div>
-              ) : typeof job.jobDescription === 'string' && job.jobDescription.includes('<') ? (
-                <div style={{ textAlign: 'justify', lineHeight: '1.8' }}>
-                  <RichTextDisplay content={excerpt(job.jobDescription, 150)} />
-                </div>
-              ) : (
-                <p style={{ textAlign: 'justify', lineHeight: '1.8' }} className="mb-0">
-                  {excerpt(job.description || job.jobDescription, 150)}
-                </p>
-              )}
-            </div>
+            <p className="jc-excerpt">
+              {excerpt(job.description || job.jobDescription, 130)}
+            </p>
           )}
 
-          <div className="d-flex gap-2">
-            <Link
-              to={`/${job.slug}`}
-              className="btn btn-info text-white rounded-pill px-4 shadow-sm" 
-              style={{ backgroundColor: '#17a2b8', transition: 'all 0.2s ease' }}
-              onMouseEnter={(e) => { e.target.style.backgroundColor = '#138496'; }}
-              onMouseLeave={(e) => { e.target.style.backgroundColor = '#17a2b8'; }}
-            >
-              Read more
+          {/* Actions */}
+          <div className="jc-actions">
+            <Link to={`/${job.slug}`} className="jc-btn-outline">
+              View Details
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </Link>
             {job.applyLink && (
-              <a 
-                className="btn btn-success rounded-pill px-4 shadow-sm" 
-                href={job.applyLink} 
-                onClick={handleApply}
-                target="_blank" 
-                rel="noopener noreferrer"
-                style={{ transition: 'all 0.2s ease' }}
-                onMouseEnter={(e) => { e.target.style.transform = 'scale(1.05)'; }}
-                onMouseLeave={(e) => { e.target.style.transform = 'scale(1)'; }}
-              >
+              <a href={job.applyLink} onClick={handleApply} target="_blank" rel="noopener noreferrer" className="jc-btn-primary">
                 Apply Now
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </a>
             )}
           </div>

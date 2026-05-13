@@ -32,4 +32,24 @@ export const getImageUrl = (imagePath) => {
   return serverRoot ? `${serverRoot}${normalizedPath}` : normalizedPath;
 };
 
-export const FALLBACK_IMAGE = 'https://cdn.builder.io/api/v1/image/assets%2F0652c10db86741bd95f51605c9719073%2F196590e2e83d4a159a955d16c0e8ebde?format=webp&width=800';
+export const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800';
+
+const FALLBACK_IMAGES = [
+  'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800', // Laptop code
+  'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800', // Office
+  'https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=800', // Handshake
+  'https://images.unsplash.com/photo-1504384308090-c564bd248a0d?auto=format&fit=crop&w=800', // Code
+  'https://images.unsplash.com/photo-1553877522-43269d4ea984?auto=format&fit=crop&w=800'  // Meeting
+];
+
+export const getFallbackImage = (title) => {
+  if (!title) return FALLBACK_IMAGE;
+  
+  // Simple hash function to get consistent index for a title
+  let hash = 0;
+  for (let i = 0; i < title.length; i++) {
+    hash = title.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = Math.abs(hash) % FALLBACK_IMAGES.length;
+  return FALLBACK_IMAGES[index];
+};
