@@ -77,7 +77,7 @@ function AppLayout({ scrollToSearch }) {
           <div className="nav-top-inner">
             <Link to="/" className="nav-logo-link">
               <img
-                src="https://cdn.builder.io/api/v1/image/assets%2Fc302f9de22234efc941990700131730c%2Fb10aab7ac8894017bd0806e41dd588ee?format=webp&width=800"
+                src="/logo.png"
                 alt="NextJobPost Logo"
                 className="logo-img-nav"
               />

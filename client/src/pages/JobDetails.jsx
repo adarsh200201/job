@@ -5,7 +5,7 @@ import { useCache } from '../hooks/useCache.js';
 import RecentJobs from '../components/RecentJobs.jsx';
 import RichTextDisplay from '../components/RichTextDisplay.jsx';
 import { JobDetailsSkeleton } from '../components/SkeletonLoader.jsx';
-import { getImageUrl, FALLBACK_IMAGE, getFallbackImage } from '../utils/imageUtils.js';
+import { getImageUrl } from '../utils/imageUtils.js';
 
 const DEFAULT_AD_LINK = 'https://www.effectivegatecpm.com/s738fegejz?key=12ac1ed2eeb4ac73b7d41add24630c1e1e';
 
@@ -18,15 +18,10 @@ const AlsoReadCard = ({ relatedJob }) => {
     <Link to={`/${relatedJob.slug}`} className="d-flex align-items-center gap-3 text-decoration-none text-dark">
         {relatedJob.image && (
           <img 
-            src={getImageUrl(relatedJob.image) || getFallbackImage(relatedJob.title)} 
+            src={getImageUrl(relatedJob.image)} 
             alt={relatedJob.title} 
             style={{ width: '80px', height: '56px', objectFit: 'cover', borderRadius: '4px' }} 
-            onError={(e) => { 
-              const fb = getFallbackImage(relatedJob.title);
-              if (e.target.src !== fb) {
-                e.target.src = fb; 
-              }
-            }} 
+            onError={(e) => { e.target.style.display = 'none'; }}
           />
         )}
         <div>
@@ -220,17 +215,12 @@ export default function JobDetails() {
           {job.image && (
             <div className="job-image-section mb-4">
               <img 
-                src={getImageUrl(job.image) || getFallbackImage(job.title)} 
+                src={getImageUrl(job.image)} 
                 alt="job banner" 
                 loading="lazy" 
                 className="img-fluid rounded-4 shadow-sm w-100" 
                 style={{ maxHeight: '400px', objectFit: 'cover' }}
-                onError={(e) => { 
-                  const fb = getFallbackImage(job.title);
-                  if (e.target.src !== fb) {
-                    e.target.src = fb; 
-                  }
-                }}
+                onError={(e) => { e.target.style.display = 'none'; }}
               />
             </div>
           )}

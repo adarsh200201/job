@@ -1,6 +1,6 @@
 import React, { useMemo, memo } from 'react';
 import { Link } from 'react-router-dom';
-import { getImageUrl, FALLBACK_IMAGE, getFallbackImage } from '../utils/imageUtils.js';
+import { getImageUrl } from '../utils/imageUtils.js';
 
 function timeAgo(dateStr) {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -18,16 +18,15 @@ const PostCard = memo(({ job }) => {
   return (
     <Link to={`/${job.slug}`} className="rj-card">
       <div className="rj-img-wrap">
-        <img
-          src={getImageUrl(job.image) || getFallbackImage(job.title)}
-          alt={job.title}
-          className="rj-img"
-          loading="lazy"
-          onError={(e) => { 
-            const fb = getFallbackImage(job.title);
-            if (e.target.src !== fb) e.target.src = fb; 
-          }}
-        />
+        {job.image && (
+          <img
+            src={getImageUrl(job.image)}
+            alt={job.title}
+            className="rj-img"
+            loading="lazy"
+            onError={(e) => { e.target.style.display = 'none'; }}
+          />
+        )}
       </div>
       <div className="rj-info">
         <span className="rj-title">{job.title}</span>

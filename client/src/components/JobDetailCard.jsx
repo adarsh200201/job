@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver.js';
 import RichTextDisplay from './RichTextDisplay.jsx';
 import api from '../api/index.js';
-import { getImageUrl, FALLBACK_IMAGE, getFallbackImage } from '../utils/imageUtils.js';
+import { getImageUrl } from '../utils/imageUtils.js';
 
 const DEFAULT_AD_LINK = 'https://www.effectivegatecpm.com/s738fegejz?key=12ac1ed2eeb4ac73b7d41add24630c1e1e';
 
@@ -56,16 +56,15 @@ function JobDetailCard({ job, adLink: propAdLink }) {
       <div className="jc-body">
         {/* Thumbnail */}
         <div className="jc-thumb-wrap">
-          <img
-            src={getImageUrl(job.image) || getFallbackImage(job.title)}
-            alt={job.title}
-            loading="lazy"
-            className="jc-thumb"
-            onError={(e) => { 
-              const fb = getFallbackImage(job.title);
-              if (e.target.src !== fb) e.target.src = fb; 
-            }}
-          />
+          {job.image && (
+            <img
+              src={getImageUrl(job.image)}
+              alt={job.title}
+              loading="lazy"
+              className="jc-thumb"
+              onError={(e) => { e.target.style.display = 'none'; }}
+            />
+          )}
           {/* Hiring badge overlay */}
           <span className="jc-hiring-badge">🔥 Hiring Now</span>
         </div>
