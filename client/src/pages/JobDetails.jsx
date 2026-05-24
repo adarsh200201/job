@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import api from '../api/index.js';
 import { useCache } from '../hooks/useCache.js';
 import RecentJobs from '../components/RecentJobs.jsx';
@@ -193,8 +194,65 @@ export default function JobDetails() {
     </div>
   );
 
+  const getEmploymentType = (type) => {
+    if (!type) return "FULL_TIME";
+    const t = type.toLowerCase();
+    if (t.includes("intern")) return "INTERN";
+    if (t.includes("contract")) return "CONTRACT";
+    if (t.includes("part")) return "PART_TIME";
+    return "FULL_TIME";
+  };
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "JobPosting",
+    "title": job.title,
+    "description": job.jobDescription || job.description,
+    "datePosted": job.createdAt || new Date().toISOString(),
+    "validThrough": job.lastDate || undefined,
+    "employmentType": getEmploymentType(job.type),
+    "hiringOrganization": {
+      "@type": "Organization",
+      "name": job.company,
+      "logo": `${window.location.origin}/logo.png`
+    },
+    "jobLocation": {
+      "@type": "Place",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": job.location || "Pan India",
+        "addressCountry": "IN"
+      }
+    },
+    "directApply": true,
+    "jobLocationType": (job.location && job.location.toLowerCase().includes("remote")) ? "TELECOMMUTE" : undefined
+  };
+
   return (
     <div className="job-details container my-4">
+      <Helmet>
+        <title>{job.metaTitle || `${job.title} at ${job.company} | NextJobPost`}</title>
+        <meta name="description" content={job.metaDescription || job.shortSummary || `Apply for the ${job.title} job opening at ${job.company} in ${job.location}. Find eligibility criteria, responsibilities, and apply now.`} />
+        <link rel="canonical" href={window.location.href} />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="article" />
+        <meta property="og:title" content={job.metaTitle || `${job.title} at ${job.company} | NextJobPost`} />
+        <meta property="og:description" content={job.metaDescription || job.shortSummary || `Apply for the ${job.title} job opening at ${job.company} in ${job.location}.`} />
+        <meta property="og:image" content={getImageUrl(job.image) || `${window.location.origin}/logo.png`} />
+        <meta property="og:url" content={window.location.href} />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={job.metaTitle || `${job.title} at ${job.company} | NextJobPost`} />
+        <meta name="twitter:description" content={job.metaDescription || job.shortSummary || `Apply for the ${job.title} job opening at ${job.company} in ${job.location}.`} />
+        <meta name="twitter:image" content={getImageUrl(job.image) || `${window.location.origin}/logo.png`} />
+
+        {/* Structured Data (Google Jobs Schema) */}
+        <script type="application/ld+json">
+          {JSON.stringify(jsonLd)}
+        </script>
+      </Helmet>
       <div className="row g-4">
         <div className="col-12 col-lg-8">
 

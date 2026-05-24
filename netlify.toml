@@ -8,6 +8,19 @@
 [build.environment]
   NODE_VERSION = "18"
 
+# Redirect sitemap and robots.txt to backend
+[[redirects]]
+  from = "/sitemap.xml"
+  to = "https://job-tdg8.onrender.com/sitemap.xml"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/robots.txt"
+  to = "https://job-tdg8.onrender.com/robots.txt"
+  status = 200
+  force = true
+
 # Redirect all requests to index.html for React Router
 [[redirects]]
   from = "/*"

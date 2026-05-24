@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import api from '../api/index.js';
 import { useCache } from '../hooks/useCache.js';
 import JobDetailCard from '../components/JobDetailCard.jsx';
@@ -57,6 +58,25 @@ export default function Home() {
 
   return (
     <div className="jobs-page">
+      <Helmet>
+        <title>NextJobPost - Latest Fresher Jobs & Internships</title>
+        <meta name="description" content="Discover and apply to the latest off-campus job drives, internships, and entry-level career opportunities for freshers across India. Find your next job today!" />
+        <meta name="keywords" content="fresher jobs, internships, off campus drive, entry level jobs, software engineer jobs, IT jobs, careers, job listings" />
+        <link rel="canonical" href={window.location.origin} />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="NextJobPost - Latest Fresher Jobs & Internships" />
+        <meta property="og:description" content="Discover and apply to the latest off-campus job drives, internships, and entry-level career opportunities for freshers across India." />
+        <meta property="og:image" content={`${window.location.origin}/logo.png`} />
+        <meta property="og:url" content={window.location.href} />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="NextJobPost - Latest Fresher Jobs & Internships" />
+        <meta name="twitter:description" content="Discover and apply to the latest off-campus job drives, internships, and entry-level career opportunities for freshers across India." />
+        <meta name="twitter:image" content={`${window.location.origin}/logo.png`} />
+      </Helmet>
       <div className="row g-4">
         <div className="col-12 col-lg-8 col-left">
           <section aria-label="Job listings">
