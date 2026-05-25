@@ -42,11 +42,14 @@ export default function JobDetails() {
   const cache = useCache();
 
   const handleApply = (e, applyUrl) => {
+    // Ad popunder disabled for now
+    /*
     e.preventDefault();
     if (adLink) {
       window.open(adLink, '_blank', 'noopener,noreferrer');
     }
     window.location.href = applyUrl;
+    */
   };
 
   useEffect(() => {

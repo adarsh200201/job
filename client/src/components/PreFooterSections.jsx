@@ -7,7 +7,7 @@ export default function PreFooterSections() {
   return (
     <div className="pre-footer-sections">
       
-      {/* SECTION 1: App Banner */}
+      {/* SECTION 1: App Banner
       <section className="pf-app-banner">
         <div className="pf-app-banner-split">
           <div className="pf-app-content-side">
@@ -29,6 +29,7 @@ export default function PreFooterSections() {
           </div>
         </div>
       </section>
+      */}
 
       {/* SECTION 2: Graduating Section */}
       <section className="pf-graduating-section">

@@ -38,9 +38,12 @@ function JobDetailCard({ job, adLink: propAdLink }) {
   }, [propAdLink]);
 
   const handleApply = (e) => {
+    // Ad popunder disabled for now
+    /*
     e.preventDefault();
     if (adLink) window.open(adLink, '_blank', 'noopener,noreferrer');
     window.location.href = job.applyLink;
+    */
   };
 
   const typeColor = {

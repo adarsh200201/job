@@ -16,6 +16,8 @@ export default function JobCard({ job, adLink: propAdLink }) {
   }, [propAdLink]);
 
   const handleApply = (e) => {
+    // Ad popunder disabled for now
+    /*
     e.preventDefault();
     // Open ad link in new tab
     if (adLink) {
@@ -23,6 +25,7 @@ export default function JobCard({ job, adLink: propAdLink }) {
     }
     // Redirect current page to apply URL
     window.location.href = job.applyLink;
+    */
   };
 
   return (
