@@ -7,30 +7,6 @@ export default function PreFooterSections() {
   return (
     <div className="pre-footer-sections">
       
-      {/* SECTION 1: App Banner
-      <section className="pf-app-banner">
-        <div className="pf-app-banner-split">
-          <div className="pf-app-content-side">
-            <div className="pf-app-content">
-              <h2 className="pf-app-title">Get the app.</h2>
-              <p className="pf-app-subtitle">Get the power of NextJobPost on-the-go, featuring one-touch apply.</p>
-              <div className="pf-app-buttons">
-                <a href="#" className="pf-app-btn"><img src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" alt="Download on the App Store" /></a>
-                <a href="#" className="pf-app-btn"><img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Get it on Google Play" /></a>
-              </div>
-            </div>
-          </div>
-          <div className="pf-app-image-side">
-            <img 
-              src="/app_mockup.png" 
-              alt="NextJobPost App on Phone" 
-              className="pf-app-image-cover"
-            />
-          </div>
-        </div>
-      </section>
-      */}
-
       {/* SECTION 2: Graduating Section */}
       <section className="pf-graduating-section">
         <div className="pf-container">

@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import api from '../api/index.js';
 
 export default function StudentCareerCenter() {
   const [activeStep, setActiveStep] = useState(0);
+  const [internships, setInternships] = useState([]);
+  const [loadingInternships, setLoadingInternships] = useState(true);
 
   const steps = [
     {
@@ -120,32 +123,50 @@ B.Tech Computer Science | IIT (Graduated 2024)
     document.body.removeChild(element);
   };
 
-  const highValueInternships = [
+  const fallbackInternships = [
     {
       title: "DevOps Engineer Intern",
       company: "CloudScale Systems",
-      loc: "Remote (India)",
-      stipend: "₹25,000 / month",
-      duration: "6 Months",
-      link: "/?q=DevOps"
+      location: "Remote (India)",
+      salary: "₹25,000 / month",
+      slug: "?q=DevOps"
     },
     {
       title: "Software Engineer Intern",
       company: "NextJobPost Tech",
-      loc: "Bangalore (On-site)",
-      stipend: "₹35,000 / month",
-      duration: "6 Months",
-      link: "/?q=Software+Engineer"
+      location: "Bangalore (On-site)",
+      salary: "₹35,000 / month",
+      slug: "?q=Software+Engineer"
     },
     {
       title: "UI/UX Designer Intern",
       company: "PixelPerfect Studios",
-      loc: "Remote (India)",
-      stipend: "₹18,000 / month",
-      duration: "3 Months",
-      link: "/?q=UI/UX"
+      location: "Remote (India)",
+      salary: "₹18,000 / month",
+      slug: "?q=UI/UX"
     }
   ];
+
+  useEffect(() => {
+    const fetchInternships = async () => {
+      setLoadingInternships(true);
+      try {
+        const response = await api.get('/jobs?type=Internship&limit=4');
+        const jobsArray = response.data?.data || response.data || [];
+        if (jobsArray.length > 0) {
+          setInternships(jobsArray);
+        } else {
+          setInternships(fallbackInternships);
+        }
+      } catch (error) {
+        console.error("Failed to fetch internships", error);
+        setInternships(fallbackInternships);
+      } finally {
+        setLoadingInternships(false);
+      }
+    };
+    fetchInternships();
+  }, []);
 
   return (
     <div className="student-career-center" style={{ fontFamily: 'Inter, system-ui, sans-serif', color: '#1e293b' }}>
@@ -314,48 +335,69 @@ B.Tech Computer Science | IIT (Graduated 2024)
             </h3>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {highValueInternships.map((intern, idx) => (
-                <div key={idx} style={{
-                  padding: '1rem',
-                  borderRadius: '8px',
-                  backgroundColor: '#f9fafb',
-                  border: '1px solid #f3f4f6',
-                  transition: 'transform 200ms ease'
-                }}>
-                  <span style={{
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    color: '#6d28d9',
-                    backgroundColor: '#faf5ff',
-                    padding: '0.2rem 0.6rem',
-                    borderRadius: '10px',
-                    display: 'inline-block',
-                    marginBottom: '0.4rem'
-                  }}>
-                    {intern.stipend}
-                  </span>
-                  <h4 style={{ fontSize: '0.95rem', fontWeight: 700, margin: '0 0 0.2rem 0', color: '#111827' }}>
-                    {intern.title}
-                  </h4>
-                  <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: '0 0 0.6rem 0' }}>
-                    {intern.company} • {intern.loc}
-                  </p>
-                  <Link
-                    to={intern.link}
+              {loadingInternships ? (
+                <div style={{ textAlign: 'center', padding: '1rem' }}>
+                  <div className="spinner-border spinner-border-sm text-primary" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                  </div>
+                </div>
+              ) : (
+                internships.map((intern, idx) => (
+                  <div 
+                    key={idx} 
                     style={{
-                      fontSize: '0.8rem',
-                      fontWeight: 600,
-                      color: '#4f46e5',
-                      textDecoration: 'none',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.25rem'
+                      padding: '1rem',
+                      borderRadius: '8px',
+                      backgroundColor: '#f9fafb',
+                      border: '1px solid #f3f4f6',
+                      transition: 'all 200ms ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = '#6d28d9';
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(109,40,217,0.05)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = '#f3f4f6';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = 'none';
                     }}
                   >
-                    View Internship →
-                  </Link>
-                </div>
-              ))}
+                    <span style={{
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      color: '#6d28d9',
+                      backgroundColor: '#faf5ff',
+                      padding: '0.2rem 0.6rem',
+                      borderRadius: '10px',
+                      display: 'inline-block',
+                      marginBottom: '0.4rem'
+                    }}>
+                      {intern.salary || intern.stipend || 'Stipend: Best in Industry'}
+                    </span>
+                    <h4 style={{ fontSize: '0.95rem', fontWeight: 700, margin: '0 0 0.2rem 0', color: '#111827' }}>
+                      {intern.title}
+                    </h4>
+                    <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: '0 0 0.6rem 0' }}>
+                      {intern.company} • {intern.location || intern.loc || 'Remote'}
+                    </p>
+                    <Link
+                      to={intern._id ? `/${intern.slug}` : `/${intern.slug}`}
+                      style={{
+                        fontSize: '0.8rem',
+                        fontWeight: 600,
+                        color: '#4f46e5',
+                        textDecoration: 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.25rem'
+                      }}
+                    >
+                      Apply Now →
+                    </Link>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 

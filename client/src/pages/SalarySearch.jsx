@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import api from '../api/index.js';
 
 export default function SalarySearch() {
   const [selectedRole, setSelectedRole] = useState("Software Engineer");
+  const [liveJobs, setLiveJobs] = useState([]);
+  const [loadingJobs, setLoadingJobs] = useState(true);
+  const [filterText, setFilterText] = useState("");
 
   const salaryData = {
     "Software Engineer": {
@@ -104,6 +108,38 @@ export default function SalarySearch() {
 
   const roles = Object.keys(salaryData);
   const currentData = salaryData[selectedRole];
+
+  // Reset filter when selected role changes
+  useEffect(() => {
+    setFilterText("");
+  }, [selectedRole]);
+
+  // Fetch live openings
+  useEffect(() => {
+    const fetchLiveJobs = async () => {
+      setLoadingJobs(true);
+      try {
+        const response = await api.get(`/jobs?q=${encodeURIComponent(selectedRole)}&limit=30`);
+        const jobsArray = response.data?.data || response.data || [];
+        
+        let filtered = jobsArray;
+        if (filterText) {
+          const lowerFilter = filterText.toLowerCase();
+          filtered = jobsArray.filter(job => 
+            job.company?.toLowerCase().includes(lowerFilter) || 
+            job.location?.toLowerCase().includes(lowerFilter)
+          );
+        }
+        setLiveJobs(filtered.slice(0, 4));
+      } catch (error) {
+        console.error("Failed to fetch live jobs", error);
+        setLiveJobs([]);
+      } finally {
+        setLoadingJobs(false);
+      }
+    };
+    fetchLiveJobs();
+  }, [selectedRole, filterText]);
 
   return (
     <div className="salary-search" style={{ fontFamily: 'Inter, system-ui, sans-serif', color: '#1e293b' }}>
@@ -239,19 +275,36 @@ export default function SalarySearch() {
             borderRadius: '12px',
             boxShadow: '0 4px 20px rgba(0,0,0,0.05)'
           }}>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1.5rem', color: '#1e1b4b' }}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.5rem', color: '#1e1b4b' }}>
               Top Hiring Hubs for {selectedRole}
             </h3>
+            <p style={{ fontSize: '0.8rem', color: '#6b7280', marginBottom: '1.5rem' }}>
+              💡 Click on a location below to show matching live jobs.
+            </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {currentData.locations.map((loc, idx) => (
-                <div key={idx} style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  paddingBottom: '0.75rem',
-                  borderBottom: '1px solid #f3f4f6'
-                }}>
+                <div 
+                  key={idx} 
+                  onClick={() => setFilterText(loc.name)}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '0.5rem',
+                    borderRadius: '8px',
+                    borderBottom: '1px solid #f3f4f6',
+                    cursor: 'pointer',
+                    backgroundColor: filterText === loc.name ? '#e0e7ff' : 'transparent',
+                    transition: 'all 200ms ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (filterText !== loc.name) e.currentTarget.style.backgroundColor = '#f8fafc';
+                  }}
+                  onMouseLeave={(e) => {
+                    if (filterText !== loc.name) e.currentTarget.style.backgroundColor = 'transparent';
+                  }}
+                >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                     <span style={{
                       width: '24px',
@@ -284,19 +337,36 @@ export default function SalarySearch() {
             borderRadius: '12px',
             boxShadow: '0 4px 20px rgba(0,0,0,0.05)'
           }}>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1.5rem', color: '#1e1b4b' }}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.5rem', color: '#1e1b4b' }}>
               Top Paying Companies
             </h3>
+            <p style={{ fontSize: '0.8rem', color: '#6b7280', marginBottom: '1.5rem' }}>
+              💡 Click on a company below to show matching live jobs.
+            </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {currentData.companies.map((comp, idx) => (
-                <div key={idx} style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  paddingBottom: '0.75rem',
-                  borderBottom: '1px solid #f3f4f6'
-                }}>
+                <div 
+                  key={idx} 
+                  onClick={() => setFilterText(comp.name)}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '0.5rem',
+                    borderRadius: '8px',
+                    borderBottom: '1px solid #f3f4f6',
+                    cursor: 'pointer',
+                    backgroundColor: filterText === comp.name ? '#e0e7ff' : 'transparent',
+                    transition: 'all 200ms ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (filterText !== comp.name) e.currentTarget.style.backgroundColor = '#f8fafc';
+                  }}
+                  onMouseLeave={(e) => {
+                    if (filterText !== comp.name) e.currentTarget.style.backgroundColor = 'transparent';
+                  }}
+                >
                   <span style={{ fontWeight: 600, color: '#374151' }}>{comp.name}</span>
                   <span style={{ fontWeight: 700, color: '#10b981' }}>{comp.avg} / yr</span>
                 </div>
@@ -307,33 +377,168 @@ export default function SalarySearch() {
 
       </div>
 
+      {/* Dynamic Openings Section */}
+      <section style={{
+        background: '#ffffff',
+        padding: '2.5rem 2rem',
+        borderRadius: '16px',
+        boxShadow: '0 10px 30px rgba(0,0,0,0.04)',
+        marginTop: '3rem',
+        border: '1px solid #f1f5f9'
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+          <div>
+            <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#1e1b4b', margin: 0 }}>
+              🔥 Live Openings for {selectedRole} {filterText ? `at/in ${filterText}` : ''}
+            </h3>
+            <p style={{ fontSize: '0.9rem', color: '#6b7280', margin: '4px 0 0 0' }}>
+              Real-time opportunities synced from our active job board.
+            </p>
+          </div>
+          {filterText && (
+            <button 
+              onClick={() => setFilterText("")}
+              style={{
+                padding: '0.5rem 1rem',
+                fontSize: '0.85rem',
+                fontWeight: 700,
+                color: '#ffffff',
+                backgroundColor: '#ef4444',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                transition: 'all 200ms ease',
+                boxShadow: '0 4px 12px rgba(239,68,68,0.2)'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#dc2626'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ef4444'}
+            >
+              Clear Filter ×
+            </button>
+          )}
+        </div>
+
+        {loadingJobs ? (
+          <div style={{ textAlign: 'center', padding: '3rem' }}>
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Loading live jobs...</span>
+            </div>
+          </div>
+        ) : liveJobs.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '3.5rem 1rem', background: '#f8fafc', borderRadius: '12px', border: '1.5px dashed #cbd5e1' }}>
+            <p style={{ color: '#6b7280', fontSize: '0.95rem', margin: 0, fontWeight: 500 }}>
+              No direct matches found for "{selectedRole}" {filterText ? `with filter "${filterText}"` : ''} at the moment.
+            </p>
+            <Link to="/" style={{ color: '#4f46e5', fontWeight: 700, fontSize: '0.95rem', textDecoration: 'none', marginTop: '12px', display: 'inline-block' }}>
+              Browse all active listings &rarr;
+            </Link>
+          </div>
+        ) : (
+          <div className="row g-3">
+            {liveJobs.map((job) => (
+              <div key={job._id} className="col-md-6">
+                <div 
+                  style={{
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '12px',
+                    padding: '1.5rem',
+                    background: '#ffffff',
+                    transition: 'all 250ms ease',
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    boxShadow: '0 4px 10px rgba(0,0,0,0.01)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = '#4f46e5';
+                    e.currentTarget.style.boxShadow = '0 12px 24px rgba(79,70,229,0.06)';
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = '#e2e8f0';
+                    e.currentTarget.style.boxShadow = '0 4px 10px rgba(0,0,0,0.01)';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }}
+                >
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#4f46e5', backgroundColor: '#e0e7ff', padding: '4px 10px', borderRadius: '6px' }}>
+                        {job.type}
+                      </span>
+                      <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 500 }}>
+                        {new Date(job.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                      </span>
+                    </div>
+                    <h4 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1e1b4b', margin: '4px 0' }}>
+                      {job.title}
+                    </h4>
+                    <p style={{ fontSize: '0.9rem', color: '#4b5563', margin: '2px 0 12px 0', fontWeight: 600 }}>
+                      🏢 {job.company}
+                    </p>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', fontSize: '0.85rem', color: '#64748b', marginBottom: '1.25rem' }}>
+                      <span>📍 {job.location}</span>
+                      {job.salary && <span>💰 {job.salary}</span>}
+                      {job.experience && <span>⏳ {job.experience}</span>}
+                    </div>
+                  </div>
+                  <Link 
+                    to={`/${job.slug}`}
+                    style={{
+                      width: '100%',
+                      padding: '0.65rem',
+                      textAlign: 'center',
+                      backgroundColor: '#4f46e5',
+                      color: '#ffffff',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontWeight: 700,
+                      fontSize: '0.9rem',
+                      textDecoration: 'none',
+                      display: 'block',
+                      transition: 'all 200ms ease',
+                      boxShadow: '0 4px 12px rgba(79,70,229,0.15)'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4338ca'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#4f46e5'}
+                  >
+                    Apply Now &rarr;
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
       {/* CTA Box */}
       <section style={{
         backgroundColor: '#faf5ff',
         border: '1.5px dashed #c084fc',
         borderRadius: '12px',
-        padding: '2rem',
+        padding: '2.5rem 2rem',
         textAlign: 'center',
-        marginTop: '3rem'
+        marginTop: '3.5rem'
       }}>
-        <h4 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#5b21b6', marginBottom: '0.5rem' }}>
+        <h4 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#5b21b6', marginBottom: '0.5rem' }}>
           Ready to aim for the higher end?
         </h4>
-        <p style={{ fontSize: '0.9rem', color: '#6b7280', marginBottom: '1.25rem' }}>
+        <p style={{ fontSize: '0.95rem', color: '#6b7280', marginBottom: '1.5rem' }}>
           Explore our entry-level listings and find job profiles matching your target salary scale.
         </p>
         <Link
           to="/"
           style={{
             display: 'inline-block',
-            padding: '0.6rem 1.5rem',
+            padding: '0.75rem 2rem',
             backgroundColor: '#6d28d9',
             color: '#ffffff',
             fontWeight: 700,
-            borderRadius: '6px',
+            borderRadius: '8px',
             textDecoration: 'none',
-            fontSize: '0.9rem',
-            transition: 'background-color 200ms ease'
+            fontSize: '0.95rem',
+            transition: 'background-color 200ms ease',
+            boxShadow: '0 4px 12px rgba(109,40,217,0.15)'
           }}
           onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#5b21b6'}
           onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6d28d9'}

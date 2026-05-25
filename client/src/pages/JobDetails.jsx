@@ -40,6 +40,37 @@ export default function JobDetails() {
   const [recent, setRecent] = useState([]);
   const [adLink, setAdLink] = useState(DEFAULT_AD_LINK);
   const cache = useCache();
+  const [hasApplied, setHasApplied] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (job?._id) {
+      setHasApplied(localStorage.getItem(`applied_${job._id}`) === 'true');
+      setIsSaved(localStorage.getItem(`saved_${job._id}`) === 'true');
+    }
+  }, [job]);
+
+  const handleApplyAction = () => {
+    if (job?._id) {
+      localStorage.setItem(`applied_${job._id}`, 'true');
+      setHasApplied(true);
+    }
+  };
+
+  const handleSaveAction = () => {
+    if (job?._id) {
+      const nextSaved = !isSaved;
+      localStorage.setItem(`saved_${job._id}`, String(nextSaved));
+      setIsSaved(nextSaved);
+    }
+  };
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const handleApply = (e, applyUrl) => {
     // Ad popunder disabled for now
@@ -414,9 +445,183 @@ export default function JobDetails() {
             </div>
           )}
 
-          <div className="my-5 mb-5 ps-2">
-            <h5 className="mb-3">Interested candidates can apply online using the following link.</h5>
-            <a href={job.applyLink} onClick={(e) => handleApply(e, job.applyLink)} target="_blank" rel="noopener noreferrer" className="btn text-white fw-bold d-inline-block shadow" style={{ backgroundColor: '#5bc0de', padding: '12px 30px', fontSize: '1.1rem', borderRadius: '4px' }}>Apply Now</a>
+          <div className="my-5 p-4 rounded-4 shadow-sm" style={{
+            background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+            border: '1px solid #e2e8f0'
+          }}>
+            <h4 className="fw-bold mb-3" style={{ fontSize: '1.25rem', color: '#1e293b' }}>
+              ⚡ Job Action Center
+            </h4>
+            <p style={{ fontSize: '0.95rem', color: '#475569', marginBottom: '1.5rem' }}>
+              Take the next step in your career. Apply directly, save this role, or share it with your network!
+            </p>
+
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <a 
+                href={job.applyLink} 
+                onClick={(e) => {
+                  handleApply(e, job.applyLink);
+                  handleApplyAction();
+                }} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="btn text-white fw-bold d-inline-flex align-items-center justify-content-center shadow-sm" 
+                style={{ 
+                  backgroundColor: '#6d28d9', 
+                  padding: '12px 32px', 
+                  fontSize: '1.1rem', 
+                  borderRadius: '8px',
+                  transition: 'all 200ms ease',
+                  border: 'none',
+                  flex: '1 1 auto',
+                  minWidth: '200px'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#5b21b6'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6d28d9'}
+              >
+                🚀 Apply Now
+              </a>
+
+              <button 
+                onClick={handleSaveAction}
+                className="btn d-inline-flex align-items-center justify-content-center fw-bold"
+                style={{
+                  padding: '12px 24px',
+                  fontSize: '1rem',
+                  borderRadius: '8px',
+                  backgroundColor: isSaved ? '#fef3c7' : '#ffffff',
+                  border: '1.5px solid #d97706',
+                  color: '#d97706',
+                  transition: 'all 200ms ease',
+                  cursor: 'pointer',
+                  flex: '1 1 auto'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#fef3c7';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = isSaved ? '#fef3c7' : '#ffffff';
+                }}
+              >
+                {isSaved ? '⭐ Saved for Later' : '⏳ Save for Later'}
+              </button>
+            </div>
+
+            {/* Status Alerts */}
+            {hasApplied && (
+              <div className="alert alert-success d-flex align-items-center gap-2 mb-4" style={{ borderRadius: '8px', fontSize: '0.95rem' }}>
+                <span>🎉 <strong>Applied!</strong> Awesome job! Best of luck with your application. Share this with a friend!</span>
+              </div>
+            )}
+
+            <hr style={{ borderTop: '1px solid #cbd5e1', margin: '1.5rem 0' }} />
+
+            {/* Social Share Group */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <h5 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#475569', margin: 0 }}>
+                📢 Share this job opening:
+              </h5>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                {/* WhatsApp Share */}
+                <a 
+                  href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`🔥 *${job.title}* at *${job.company}*\n📍 ${job.location || 'India'}\n💰 ${job.salary || 'Best in Industry'}\n\n👉 Apply Here: ${window.location.href}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '6px',
+                    backgroundColor: '#25D366',
+                    color: '#ffffff',
+                    fontWeight: 600,
+                    fontSize: '0.88rem',
+                    textDecoration: 'none',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    boxShadow: '0 2px 4px rgba(37,211,102,0.15)',
+                    transition: 'all 200ms ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
+                  onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                >
+                  WhatsApp
+                </a>
+
+                {/* Telegram Share */}
+                <a 
+                  href={`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(`🔥 ${job.title} at ${job.company}\n📍 ${job.location || 'India'}\n💰 ${job.salary || 'Best in Industry'}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '6px',
+                    backgroundColor: '#0088cc',
+                    color: '#ffffff',
+                    fontWeight: 600,
+                    fontSize: '0.88rem',
+                    textDecoration: 'none',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    boxShadow: '0 2px 4px rgba(0,136,204,0.15)',
+                    transition: 'all 200ms ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
+                  onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                >
+                  Telegram
+                </a>
+
+                {/* LinkedIn Share */}
+                <a 
+                  href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '6px',
+                    backgroundColor: '#0a66c2',
+                    color: '#ffffff',
+                    fontWeight: 600,
+                    fontSize: '0.88rem',
+                    textDecoration: 'none',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    boxShadow: '0 2px 4px rgba(10,102,194,0.15)',
+                    transition: 'all 200ms ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
+                  onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                >
+                  LinkedIn
+                </a>
+
+                {/* Copy Link */}
+                <button 
+                  onClick={handleCopyLink}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '6px',
+                    backgroundColor: copied ? '#10b981' : '#475569',
+                    color: '#ffffff',
+                    fontWeight: 600,
+                    fontSize: '0.88rem',
+                    border: 'none',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    boxShadow: '0 2px 4px rgba(71,85,105,0.15)',
+                    transition: 'all 200ms ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
+                  onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                >
+                  {copied ? '✅ Link Copied' : '🔗 Copy Link'}
+                </button>
+              </div>
+            </div>
           </div>
 
         </div>
