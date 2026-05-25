@@ -1,10 +1,20 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
+const envBaseURL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL;
+const baseURL = envBaseURL || (import.meta.env.DEV ? 'http://localhost:4000/api' : '/api');
+
 export default function SignUp() {
+  const handleGoogle = () => {
+    const oauthUrl = baseURL.startsWith('http') 
+      ? `${baseURL}/auth/google` 
+      : `${window.location.origin}${baseURL}/auth/google`;
+    window.location.href = oauthUrl;
+  };
+
   return (
     <div className="auth-page-container">
-      {/* Header matching Monster/CareerBuilder style */}
+      {/* Header */}
       <div className="auth-header-bar">
         <div className="auth-header-inner">
           <Link to="/" className="auth-logo">
@@ -29,7 +39,7 @@ export default function SignUp() {
           {/* Left Column: Create Account & Social */}
           <div className="auth-left-col">
             <h1 className="auth-title">Create An Account</h1>
-            
+
             <ul className="auth-benefits-list">
               <li><span className="bullet-dot">•</span> Easily see skills match</li>
               <li><span className="bullet-dot">•</span> Receive jobs that match your interests</li>
@@ -38,7 +48,7 @@ export default function SignUp() {
             </ul>
 
             <div className="auth-social-buttons">
-              <button className="btn-social btn-google">
+              <button id="btn-signup-google" className="btn-social btn-google" onClick={handleGoogle}>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="20px" height="20px" className="social-icon">
                   <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
                   <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
@@ -47,39 +57,25 @@ export default function SignUp() {
                 </svg>
                 Continue with Google
               </button>
-              
-
             </div>
           </div>
 
           {/* Right Column: Email Sign Up */}
           <div className="auth-right-col">
             <h2 className="auth-subtitle">Or Sign Up With Email</h2>
-            
+
             <form className="auth-form" onSubmit={(e) => e.preventDefault()}>
               <div className="form-group">
                 <label htmlFor="email">Email address</label>
-                <input 
-                  type="email" 
-                  id="email" 
-                  placeholder="Enter email address" 
-                  className="auth-input"
-                />
+                <input type="email" id="email" placeholder="Enter email address" className="auth-input" />
               </div>
 
               <div className="form-group">
                 <label htmlFor="password">Password</label>
-                <input 
-                  type="password" 
-                  id="password" 
-                  placeholder="Enter password" 
-                  className="auth-input"
-                />
+                <input type="password" id="password" placeholder="Enter password" className="auth-input" />
               </div>
 
-              <button type="submit" className="btn-auth-submit">
-                Create Account
-              </button>
+              <button type="submit" className="btn-auth-submit">Create Account</button>
             </form>
           </div>
         </div>
@@ -87,7 +83,7 @@ export default function SignUp() {
         {/* Footer Text */}
         <div className="auth-footer-text">
           <p>
-            By continuing you are agreeing to our <Link to="/terms">Terms of Use</Link> and <Link to="/disclaimer">Privacy Policy</Link>. By continuing, you consent to our sending you job recommendations based on jobs you apply to and preferences you share, career advice and content, and updates about our services and features. You may unsubscribe at any time by clicking the relevant link at the bottom of the emails we send you or by updating your email options in your communication preferences.
+            By continuing you are agreeing to our <Link to="/terms">Terms of Use</Link> and <Link to="/disclaimer">Privacy Policy</Link>. By continuing, you consent to our sending you job recommendations based on jobs you apply to and preferences you share, career advice and content, and updates about our services and features. You may unsubscribe at any time.
           </p>
         </div>
       </div>

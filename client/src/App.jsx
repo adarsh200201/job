@@ -19,6 +19,7 @@ const Terms = React.lazy(() => import('./pages/Terms.jsx'));
 const Disclaimer = React.lazy(() => import('./pages/Disclaimer.jsx'));
 const Login = React.lazy(() => import('./pages/Login.jsx'));
 const SignUp = React.lazy(() => import('./pages/SignUp.jsx'));
+const AuthCallback = React.lazy(() => import('./pages/AuthCallback.jsx'));
 
 // Loading fallback component
 function LoadingFallback() {
@@ -27,6 +28,32 @@ function LoadingFallback() {
       <div className="spinner-border text-primary" role="status">
         <span className="visually-hidden">Loading…</span>
       </div>
+    </div>
+  );
+}
+
+function NavActions() {
+  const { token, username, logout } = useAuth();
+  if (token) {
+    return (
+      <div className="nav-top-actions">
+        <span className="nav-user-name" style={{ fontWeight: 600, color: '#1e293b', marginRight: '0.5rem' }}>
+          👋 {username}
+        </span>
+        <button
+          onClick={logout}
+          className="btn-nav-login"
+          style={{ cursor: 'pointer', border: 'none', background: 'transparent' }}
+        >
+          Log out
+        </button>
+      </div>
+    );
+  }
+  return (
+    <div className="nav-top-actions">
+      <Link to="/signup" className="btn-nav-signup">Sign up</Link>
+      <Link to="/login" className="btn-nav-login">Log in</Link>
     </div>
   );
 }
@@ -85,10 +112,7 @@ function AppLayout({ scrollToSearch }) {
                 <span className="nav-brand-next">Next</span><span className="nav-brand-job">Job</span><span className="nav-brand-post">Post</span>
               </span>
             </Link>
-            <div className="nav-top-actions">
-              <Link to="/signup" className="btn-nav-signup">Sign up</Link>
-              <Link to="/login" className="btn-nav-login">Log in</Link>
-            </div>
+            <NavActions />
           </div>
         </div>
 
@@ -122,6 +146,7 @@ function AppLayout({ scrollToSearch }) {
             <Route path="/disclaimer" element={<Disclaimer />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route
               path="/admin"

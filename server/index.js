@@ -1,16 +1,19 @@
+const dotenv = require('dotenv');
+dotenv.config();
+
 const express = require('express');
 const cors = require('cors');
-const dotenv = require('dotenv');
 const path = require('path');
+const session = require('express-session');
+const passport = require('./config/passport');
 const { connectDB } = require('./utils/db');
 const jobsRoutes = require('./routes/jobs');
 const adminRoutes = require('./routes/admin');
 const uploadRoutes = require('./routes/upload');
 const settingsRoutes = require('./routes/settings');
 const seoRoutes = require('./routes/seo');
+const authRoutes = require('./routes/auth');
 const { seedAdminIfNeeded, seedJobsIfNeeded, ensureMinimumJobs, seedDetailedJob } = require('./utils/seed');
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -36,6 +39,18 @@ app.use(
   })
 );
 app.use(express.json());
+
+// Session (required by passport even for stateless JWT flow)
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || 'njp_secret',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: process.env.NODE_ENV === 'production', maxAge: 60000 },
+  })
+);
+app.use(passport.initialize());
+app.use(passport.session());
   // Serve the uploads directory explicitly
 app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 
@@ -50,6 +65,7 @@ app.use('/api/jobs', jobsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/auth', authRoutes);
 app.use('/', seoRoutes);
 
 app.use((err, req, res, next) => {
