@@ -37,9 +37,12 @@ function NavActions() {
   if (token) {
     return (
       <div className="nav-top-actions">
-        <span className="nav-user-name" style={{ fontWeight: 600, color: '#1e293b', marginRight: '0.5rem' }}>
+        <Link
+          to="/admin"
+          className="nav-user-name"
+        >
           👋 {username}
-        </span>
+        </Link>
         <button
           onClick={logout}
           className="btn-nav-login"
