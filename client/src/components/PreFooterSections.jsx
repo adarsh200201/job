@@ -45,11 +45,11 @@ export default function PreFooterSections() {
             <div className="pf-grad-content">
               <h2 className="pf-grad-title">Just graduating? We can help.</h2>
               <div className="pf-grad-buttons">
-                <Link to="/?type=Internship" className="pf-btn-outline">
+                <Link to="/student-career-center" className="pf-btn-outline">
                   Visit the Student Career Center
                   <span className="pf-btn-icon">→</span>
                 </Link>
-                <Link to="/blog" className="pf-btn-outline">
+                <Link to="/salaries" className="pf-btn-outline">
                   Search salaries
                   <span className="pf-btn-icon">→</span>
                 </Link>

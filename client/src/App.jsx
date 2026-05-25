@@ -20,6 +20,8 @@ const Disclaimer = React.lazy(() => import('./pages/Disclaimer.jsx'));
 const Login = React.lazy(() => import('./pages/Login.jsx'));
 const SignUp = React.lazy(() => import('./pages/SignUp.jsx'));
 const AuthCallback = React.lazy(() => import('./pages/AuthCallback.jsx'));
+const StudentCareerCenter = React.lazy(() => import('./pages/StudentCareerCenter.jsx'));
+const SalarySearch = React.lazy(() => import('./pages/SalarySearch.jsx'));
 
 // Loading fallback component
 function LoadingFallback() {
@@ -140,6 +142,8 @@ function AppLayout({ scrollToSearch }) {
         <Suspense fallback={<LoadingFallback />}>
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/student-career-center" element={<StudentCareerCenter />} />
+            <Route path="/salaries" element={<SalarySearch />} />
             <Route path="/:slug" element={<JobDetails />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
