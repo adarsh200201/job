@@ -3,13 +3,14 @@ import { Link } from 'react-router-dom';
 import { getImageUrl } from '../utils/imageUtils.js';
 
 function timeAgo(dateStr) {
-  const diff = Date.now() - new Date(dateStr).getTime();
+  const date = new Date(dateStr);
+  const diff = Date.now() - date.getTime();
   const days = Math.floor(diff / 86400000);
-  if (days === 0) return 'Today';
+  if (days === 0) return date.toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
   if (days === 1) return '1d ago';
   if (days < 7) return `${days}d ago`;
   if (days < 30) return `${Math.floor(days / 7)}w ago`;
-  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
 const PostCard = memo(({ job }) => {

@@ -293,12 +293,17 @@ export default function JobDetails() {
 
           <div className="job-header-section mb-4 mt-2">
             <h1 className="fw-bold mb-2" style={{ fontSize: '1.75rem', lineHeight: '1.4' }}>{job.title}</h1>
-            <div className="job-meta-info text-muted" style={{ fontSize: '0.95rem' }}>
-              <span className="job-date-published">
+            <div className="job-meta-info" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.4rem' }}>
+              {/* Calendar Icon */}
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="#7c3aed" strokeWidth="2" style={{ flexShrink: 0 }}>
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+              <span style={{ fontWeight: '500', color: '#374151', fontSize: '0.88rem' }}>
                 {job.createdAt ? new Date(job.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Recently Posted'}
               </span>
-              <span className="mx-2">by</span>
-              <span className="text-primary">NextJobPost</span>
+              <span style={{ color: '#d1d5db', fontSize: '0.8rem' }}>•</span>
+              <span style={{ fontSize: '0.88rem', color: '#6b7280' }}>Posted by</span>
+              <span style={{ fontWeight: '600', color: '#7c3aed', fontSize: '0.88rem' }}>NextJobPost</span>
             </div>
           </div>
 
