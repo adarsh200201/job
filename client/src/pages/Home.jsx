@@ -7,6 +7,7 @@ import JobDetailCard from '../components/JobDetailCard.jsx';
 import RecentJobs from '../components/RecentJobs.jsx';
 import SidebarSearch from '../components/SidebarSearch.jsx';
 import { JobCardSkeleton } from '../components/SkeletonLoader.jsx';
+import { trackEvent } from '../utils/analytics.js';
 
 export default function Home() {
   const [jobs, setJobs] = useState([]);
@@ -27,6 +28,16 @@ export default function Home() {
         );
         const jobsArray = response.data?.data || response.data || [];
         setJobs(Array.isArray(jobsArray) ? jobsArray : []);
+
+        // Track Search/Filter action
+        if (location.search) {
+          const params = new URLSearchParams(location.search);
+          const searchParams = {};
+          params.forEach((value, key) => {
+            searchParams[key] = value;
+          });
+          trackEvent('Job Search Filtered', searchParams);
+        }
 
         // Set pagination data if available
         if (response.data?.totalPages) {

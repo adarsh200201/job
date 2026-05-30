@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const ctrl = require('../controllers/adminController');
-const auth = require('../middleware/auth');
+const auth = require('../middleware/adminAuth');
 
 router.post('/login', ctrl.login);
 // Protected seed endpoint — admin must be authenticated

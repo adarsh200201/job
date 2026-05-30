@@ -1,6 +1,8 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const passport = require('../config/passport');
+const User = require('../models/User');
+const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -63,6 +65,51 @@ router.get('/me', (req, res) => {
     res.json({ ok: true, user: decoded });
   } catch {
     res.status(401).json({ message: 'Invalid token' });
+  }
+});
+
+// ── Get User Profile ────────────────────────────────────────────────────────
+router.get('/profile', authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json({ ok: true, user });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch profile' });
+  }
+});
+
+// ── Update User Profile / Onboarding ──────────────────────────────────────
+router.put('/profile', authMiddleware, async (req, res) => {
+  try {
+    const { name, phone, location, preferredRole, skills, experienceLevel, education } = req.body;
+    
+    let processedSkills = [];
+    if (Array.isArray(skills)) {
+      processedSkills = skills.map(s => s.trim()).filter(Boolean);
+    } else if (typeof skills === 'string') {
+      processedSkills = skills.split(',').map(s => s.trim()).filter(Boolean);
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user.id,
+      {
+        name,
+        phone,
+        location,
+        preferredRole,
+        skills: processedSkills,
+        experienceLevel,
+        education,
+        onboardingCompleted: true
+      },
+      { new: true }
+    );
+
+    if (!updatedUser) return res.status(404).json({ message: 'User not found' });
+    res.json({ ok: true, user: updatedUser });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to update profile' });
   }
 });
 

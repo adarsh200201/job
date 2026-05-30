@@ -21,8 +21,8 @@ export default function AuthCallback() {
       return;
     }
 
-    login(token, name);
-    navigate('/', { replace: true });
+    login(token, name, false);
+    navigate('/dashboard', { replace: true });
   }, []);
 
   return (

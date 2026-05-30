@@ -17,7 +17,7 @@ export default function AdminLogin() {
     setError('');
     try {
       const { data } = await api.post('/admin/login', { username, password });
-      login(data.token, data.username);
+      login(data.token, data.username, true);
       navigate('/admin');
     } catch (e) {
       setError('Invalid credentials');

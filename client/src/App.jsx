@@ -1,10 +1,11 @@
 import React, { Suspense, useEffect } from 'react';
-import { Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Link, NavLink, Navigate, useLocation } from 'react-router-dom';
 import Footer from './components/Footer.jsx';
 import PreFooterSections from './components/PreFooterSections.jsx';
 import HeroSearch from './components/HeroSearch.jsx';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { startKeepAlive, stopKeepAlive } from './utils/keepAlive.js';
+import { trackPageView } from './utils/analytics.js';
 
 // Lazy load page components for code splitting
 const Home = React.lazy(() => import('./pages/Home.jsx'));
@@ -22,8 +23,10 @@ const SignUp = React.lazy(() => import('./pages/SignUp.jsx'));
 const AuthCallback = React.lazy(() => import('./pages/AuthCallback.jsx'));
 const StudentCareerCenter = React.lazy(() => import('./pages/StudentCareerCenter.jsx'));
 const SalarySearch = React.lazy(() => import('./pages/SalarySearch.jsx'));
+const UserDashboard = React.lazy(() => import('./pages/UserDashboard.jsx'));
+const Onboarding = React.lazy(() => import('./pages/Onboarding.jsx'));
 
-// Loading fallback component
+// Loading fallback
 function LoadingFallback() {
   return (
     <div className="text-center py-5">
@@ -34,15 +37,13 @@ function LoadingFallback() {
   );
 }
 
+// Header auth buttons
 function NavActions() {
-  const { token, username, logout } = useAuth();
+  const { token, username, logout, isAdmin } = useAuth();
   if (token) {
     return (
       <div className="nav-top-actions">
-        <Link
-          to="/admin"
-          className="nav-user-name"
-        >
+        <Link to={isAdmin ? '/admin' : '/dashboard'} className="nav-user-name">
           👋 {username}
         </Link>
         <button
@@ -63,88 +64,82 @@ function NavActions() {
   );
 }
 
-function ProtectedRoute({ children }) {
+// Admin-only protected route
+function AdminRoute({ children }) {
+  const { token, isAdmin } = useAuth();
+  if (!token || !isAdmin) return <Navigate to="/admin/login" replace />;
+  return children;
+}
+
+// User-only protected route
+function UserRoute({ children }) {
   const { token } = useAuth();
-  if (!token) return <Navigate to="/admin/login" replace />;
+  if (!token) return <Navigate to="/login" replace />;
   return children;
 }
 
 export default function App() {
   useEffect(() => {
-    // Start keep-alive mechanism when app loads
     startKeepAlive();
-
-    // Clean up when component unmounts
-    return () => {
-      stopKeepAlive();
-    };
+    return () => { stopKeepAlive(); };
   }, []);
-
-  const scrollToSearch = () => {
-    const el = document.getElementById('sidebar-search');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    } else {
-      window.location.href = '/?focus=search';
-    }
-  };
 
   return (
     <AuthProvider>
-      <AppLayout scrollToSearch={scrollToSearch} />
+      <AppLayout />
     </AuthProvider>
   );
 }
 
-function AppLayout({ scrollToSearch }) {
+function AppLayout() {
   const location = useLocation();
   const isHome = location.pathname === '/';
 
+  useEffect(() => {
+    trackPageView(location.pathname);
+  }, [location.pathname, location.search]);
+
   return (
     <>
-      {/* Monster.com-style two-row header */}
       <header className="site-header">
-        {/* Top bar: white, logo left + auth buttons right */}
+        {/* Top bar */}
         <div className="nav-top-bar">
           <div className="nav-top-inner">
             <Link to="/" className="nav-logo-link">
-              <img
-                src="/logo.png"
-                alt="NextJobPost Logo"
-                className="logo-img-nav"
-              />
+              <img src="/logo.png" alt="NextJobPost Logo" className="logo-img-nav" />
               <span className="nav-brand">
-                <span className="nav-brand-next">Next</span><span className="nav-brand-job">Job</span><span className="nav-brand-post">Post</span>
+                <span className="nav-brand-next">Next</span>
+                <span className="nav-brand-job">Job</span>
+                <span className="nav-brand-post">Post</span>
               </span>
             </Link>
             <NavActions />
           </div>
         </div>
 
-        {/* Secondary bar: light gray with nav links */}
+        {/* Secondary nav */}
         <nav className="nav-secondary-bar">
           <div className="nav-secondary-inner">
             <ul className="nav-links">
-              <li><Link className="nav-link" to="/">Find Jobs</Link></li>
-              <li><Link className="nav-link" to="/?type=Internship">Internships</Link></li>
-              <li><Link className="nav-link" to="/?type=Remote">Work From Home</Link></li>
-              <li><Link className="nav-link" to="/about">About</Link></li>
-              <li><Link className="nav-link" to="/blog">Career Advice</Link></li>
+              <li><NavLink className="nav-link" to="/" end>Find Jobs</NavLink></li>
+              <li><NavLink className="nav-link" to="/?type=Internship">Internships</NavLink></li>
+              <li><NavLink className="nav-link" to="/?type=Remote">Work From Home</NavLink></li>
+              <li><NavLink className="nav-link" to="/about">About</NavLink></li>
+              <li><NavLink className="nav-link" to="/blog">Career Advice</NavLink></li>
             </ul>
           </div>
         </nav>
 
-        {/* Hero search - only on homepage */}
         {isHome && <HeroSearch />}
       </header>
 
       <main className="container py-4">
         <Suspense fallback={<LoadingFallback />}>
           <Routes>
+            {/* Public */}
             <Route path="/" element={<Home />} />
             <Route path="/student-career-center" element={<StudentCareerCenter />} />
             <Route path="/salaries" element={<SalarySearch />} />
-            <Route path="/:slug" element={<JobDetails />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/faq" element={<FAQ />} />
@@ -155,14 +150,16 @@ function AppLayout({ scrollToSearch }) {
             <Route path="/signup" element={<SignUp />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/admin/login" element={<AdminLogin />} />
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute>
-                  <AdminDashboard />
-                </ProtectedRoute>
-              }
-            />
+
+            {/* Admin only */}
+            <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+
+            {/* Regular user only */}
+            <Route path="/dashboard" element={<UserRoute><UserDashboard /></UserRoute>} />
+            <Route path="/onboarding" element={<UserRoute><Onboarding /></UserRoute>} />
+
+            {/* Job detail catch-all */}
+            <Route path="/:slug" element={<JobDetails />} />
           </Routes>
         </Suspense>
       </main>

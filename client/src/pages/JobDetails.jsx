@@ -7,6 +7,7 @@ import RecentJobs from '../components/RecentJobs.jsx';
 import RichTextDisplay from '../components/RichTextDisplay.jsx';
 import { JobDetailsSkeleton } from '../components/SkeletonLoader.jsx';
 import { getImageUrl } from '../utils/imageUtils.js';
+import { trackEvent } from '../utils/analytics.js';
 
 const DEFAULT_AD_LINK = 'https://www.effectivegatecpm.com/s738fegejz?key=12ac1ed2eeb4ac73b7d41add24630c1e1e';
 
@@ -55,6 +56,13 @@ export default function JobDetails() {
     if (job?._id) {
       localStorage.setItem(`applied_${job._id}`, 'true');
       setHasApplied(true);
+      trackEvent('Apply Job Clicked', {
+        jobId: job._id,
+        title: job.title,
+        company: job.company,
+        location: job.location,
+        salary: job.salary
+      });
     }
   };
 
@@ -63,6 +71,11 @@ export default function JobDetails() {
       const nextSaved = !isSaved;
       localStorage.setItem(`saved_${job._id}`, String(nextSaved));
       setIsSaved(nextSaved);
+      trackEvent(nextSaved ? 'Job Saved' : 'Job Unsaved', {
+        jobId: job._id,
+        title: job.title,
+        company: job.company
+      });
     }
   };
 
@@ -70,6 +83,10 @@ export default function JobDetails() {
     navigator.clipboard.writeText(window.location.href);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+    trackEvent('Job Link Copied', {
+      jobId: job?._id,
+      title: job?.title
+    });
   };
 
   const handleApply = (e, applyUrl) => {
@@ -101,6 +118,7 @@ export default function JobDetails() {
   }, []);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     if (!slug) {
       setJob(null);
       setRecent([]);
@@ -180,6 +198,14 @@ export default function JobDetails() {
 
   const capitalize = (s) => (s && s[0].toUpperCase() + s.slice(1)) || '';
 
+  const handleSocialJoinClick = (platform) => {
+    trackEvent('Social Group Join Clicked', {
+      platform,
+      jobId: job?._id,
+      company: job?.company
+    });
+  };
+
   const socialLinksBlock = (job.whatsapp || job.telegram) && (
     <div className="mb-4 social-group-container">
       {/* WhatsApp Box */}
@@ -192,6 +218,7 @@ export default function JobDetails() {
         </div>
         <a
           href={job.whatsapp ? (job.whatsapp.startsWith('http') ? job.whatsapp : 'https://wa.me/' + job.whatsapp.replace(/[^0-9+]/g, '')) : 'https://chat.whatsapp.com/LVpuUJluTpUEdIc4daAemQ'}
+          onClick={() => handleSocialJoinClick('WhatsApp')}
           target="_blank"
           rel="noopener noreferrer"
           className="social-btn"
@@ -213,6 +240,7 @@ export default function JobDetails() {
         </div>
         <a
           href={job.telegram ? (job.telegram.startsWith('http') ? job.telegram : 'https://t.me/' + job.telegram.replace(/^@/, '')) : 'https://t.me/nextjobpost'}
+          onClick={() => handleSocialJoinClick('Telegram')}
           target="_blank"
           rel="noopener noreferrer"
           className="social-btn"
@@ -261,7 +289,7 @@ export default function JobDetails() {
   };
 
   return (
-    <div className="job-details container my-4">
+    <div className="job-details container mt-0 mb-4 animate-fade-in-up">
       <Helmet>
         <title>{job.metaTitle || `${job.title} at ${job.company} | NextJobPost`}</title>
         <meta name="description" content={job.metaDescription || job.shortSummary || `Apply for the ${job.title} job opening at ${job.company} in ${job.location}. Find eligibility criteria, responsibilities, and apply now.`} />
@@ -287,9 +315,6 @@ export default function JobDetails() {
       </Helmet>
       <div className="row g-4">
         <div className="col-12 col-lg-8">
-
-          {/* Top Placement */}
-          {socialLinksBlock}
 
           <div className="job-header-section mb-4 mt-2">
             <h1 className="fw-bold mb-2" style={{ fontSize: '1.75rem', lineHeight: '1.4' }}>{job.title}</h1>
@@ -331,10 +356,8 @@ export default function JobDetails() {
             </div>
           )}
 
-          {/* Middle Placement */}
+          {/* Social Group Links – below image */}
           {socialLinksBlock}
-
-          {/* Removed Social Links block from here and moved it to top */}
           {job.lastDate && (
             <p className="mb-4" style={{ fontSize: '1.05rem', lineHeight: '1.7', color: '#333' }}>
               If you are a <strong>Graduation - {job.education || 'Any Degree'}</strong> this is your chance to <strong>build your future with {job.company}</strong>. The detailed eligibility criteria, responsibilities, and application process for the {job.company} Off Campus Drive {job.batch ? job.batch.replace(/Batch|batch/, '').trim() : ''} are provided below.
@@ -519,6 +542,7 @@ export default function JobDetails() {
               </div>
             )}
 
+
             <hr style={{ borderTop: '1px solid #cbd5e1', margin: '1.5rem 0' }} />
 
             {/* Social Share Group */}
@@ -530,6 +554,7 @@ export default function JobDetails() {
                 {/* WhatsApp Share */}
                 <a 
                   href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`🔥 *${job.title}* at *${job.company}*\n📍 ${job.location || 'India'}\n💰 ${job.salary || 'Best in Industry'}\n\n👉 Apply Here: ${window.location.href}`)}`}
+                  onClick={() => trackEvent('Job Shared', { platform: 'WhatsApp', jobId: job._id, title: job.title })}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
@@ -555,6 +580,7 @@ export default function JobDetails() {
                 {/* Telegram Share */}
                 <a 
                   href={`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(`🔥 ${job.title} at ${job.company}\n📍 ${job.location || 'India'}\n💰 ${job.salary || 'Best in Industry'}`)}`}
+                  onClick={() => trackEvent('Job Shared', { platform: 'Telegram', jobId: job._id, title: job.title })}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
@@ -580,6 +606,7 @@ export default function JobDetails() {
                 {/* LinkedIn Share */}
                 <a 
                   href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`}
+                  onClick={() => trackEvent('Job Shared', { platform: 'LinkedIn', jobId: job._id, title: job.title })}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{

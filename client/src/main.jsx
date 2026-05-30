@@ -5,6 +5,10 @@ import { HelmetProvider } from 'react-helmet-async';
 import App from './App.jsx';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/global.css';
+import { initMixpanel } from './utils/analytics.js';
+
+// Initialize Mixpanel
+initMixpanel();
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>

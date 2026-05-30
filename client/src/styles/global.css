@@ -159,7 +159,7 @@ main {
 }
 
 .nav-top-inner {
-  max-width: 1200px;
+  max-width: 1320px;
   margin: 0 auto;
   padding: 0 1.5rem;
   display: flex;
@@ -275,26 +275,27 @@ main {
   color: #6d28d9;
 }
 
-/* ── Row 2: light gray secondary nav ── */
+/* ── Row 2: Premium Floating Pill Secondary Nav ── */
 .nav-secondary-bar {
-  background: #f3f4f6;
-  border-bottom: 1px solid #e5e7eb;
+  background: #ffffff;
+  border-bottom: 1px solid #f1f5f9;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.02);
 }
 
 .nav-secondary-inner {
-  max-width: 1200px;
+  max-width: 1320px;
   margin: 0 auto;
   padding: 0 1.5rem;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  height: 44px;
+  justify-content: flex-start;
+  height: 48px; /* Slightly taller for modern breathing space */
 }
 
 .nav-links {
   list-style: none;
   display: flex;
-  gap: 0.1rem;
+  gap: 0.6rem; /* Clean modern pill spacing */
   margin: 0;
   padding: 0;
   align-items: center;
@@ -305,20 +306,33 @@ main {
 }
 
 .nav-link {
-  color: #374151 !important;
-  padding: 0.4rem 0.9rem;
-  font-size: 0.93rem;
-  font-weight: 500;
-  border-radius: 5px;
-  transition: color 160ms ease, background 160ms ease;
+  color: #475569 !important; /* Modern Slate-600 */
+  padding: 0.45rem 1.1rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  border-radius: 9999px; /* Seamless round pills */
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
   text-decoration: none !important;
   display: block;
   white-space: nowrap;
+  letter-spacing: -0.01em;
 }
 
 .nav-link:hover {
+  color: #6d28d9 !important; /* Vibrant Brand Purple */
+  background: rgba(109, 40, 217, 0.08); /* Premium soft glow */
+  transform: translateY(-1px); /* Sophisticated lift */
+}
+
+.nav-link:active {
+  transform: translateY(0px);
+}
+
+/* Premium Active Link styling */
+.nav-link.active {
   color: #6d28d9 !important;
-  background: rgba(109, 40, 217, 0.06);
+  background: rgba(109, 40, 217, 0.12); /* Solid interactive indicator */
+  box-shadow: inset 0 0 0 1px rgba(109, 40, 217, 0.15);
 }
 
 /* "Employers / Post Job →" link on the right */
@@ -684,8 +698,23 @@ main {
   .search-card .form-control { font-size: 1rem; }
 }
 
-/* Modern Job Details Styling */
-.job-details { padding: 2rem 0; width: 100%; }
+/* Modern Job Details Styling with fadeInUp Animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.job-details { padding: 0.25rem 0 2rem 0; width: 100%; }
 .job-details .row { display: flex; flex-wrap: wrap; }
 .job-details .col-12 { flex: 0 0 100%; max-width: 100%; }
 @media (min-width: 992px) {
@@ -1815,7 +1844,7 @@ main {
 }
 
 .pf-container {
-  max-width: 1200px;
+  max-width: 1320px;
   margin: 0 auto;
 }
 
@@ -2651,6 +2680,31 @@ main {
   }
   .social-group-icon-text {
     justify-content: center !important;
+  }
+  .social-btn {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 0.65rem !important;
+  }
+}
+
+/* WhatsApp & Telegram Mobile Adjustments - Keep in same place but remove labels and make side-by-side */
+@media (max-width: 768px) {
+  .social-group-container {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.5rem !important;
+  }
+  .social-group-box {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    text-align: center !important;
+  }
+  .social-group-icon-text {
+    display: none !important;
   }
   .social-btn {
     width: 100% !important;
