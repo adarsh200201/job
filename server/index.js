@@ -40,6 +40,15 @@ app.use(
 );
 app.use(express.json());
 
+// Prerender middleware for SEO crawler bots (Option 1)
+const prerenderNode = require('prerender-node');
+if (process.env.PRERENDER_TOKEN) {
+  app.use(prerenderNode.set('prerenderToken', process.env.PRERENDER_TOKEN));
+} else {
+  // eslint-disable-next-line no-console
+  console.warn('⚠️  PRERENDER_TOKEN not set in server env — crawlers might not be optimized via Prerender.io.');
+}
+
 // Session (required by passport even for stateless JWT flow)
 app.use(
   session({
