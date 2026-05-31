@@ -89,6 +89,21 @@ export default function Home() {
         <meta name="twitter:title" content="NextJobPost - Latest Fresher Jobs & Internships" />
         <meta name="twitter:description" content="Discover and apply to the latest off-campus job drives, internships, and entry-level career opportunities for freshers across India." />
         <meta name="twitter:image" content={`${window.location.origin}/logo.png`} />
+
+        {/* Structured Data (Organization Schema) */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "NextJobPost",
+            "url": window.location.origin,
+            "logo": `${window.location.origin}/logo.png`,
+            "sameAs": [
+              "https://www.linkedin.com/in/next-job-post-199b5b371",
+              "https://t.me/nextjobpost"
+            ]
+          })}
+        </script>
       </Helmet>
       <div className="row g-4">
         <div className="col-12 col-lg-8 col-left">
