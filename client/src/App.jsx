@@ -6,6 +6,7 @@ import HeroSearch from './components/HeroSearch.jsx';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { startKeepAlive, stopKeepAlive } from './utils/keepAlive.js';
 import { trackPageView } from './utils/analytics.js';
+import ScrollToTop from './components/ScrollToTop.jsx';
 
 // Lazy load page components for code splitting
 const Home = React.lazy(() => import('./pages/Home.jsx'));
@@ -101,6 +102,7 @@ function AppLayout() {
 
   return (
     <>
+      <ScrollToTop />
       <header className="site-header">
         {/* Top bar */}
         <div className="nav-top-bar">
