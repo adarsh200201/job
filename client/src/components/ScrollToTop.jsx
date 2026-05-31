@@ -5,11 +5,8 @@ export default function ScrollToTop() {
   const { pathname, search } = useLocation();
 
   useEffect(() => {
-    // Scroll to the top of the page smoothly whenever the route path or query parameters change
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
+    // Scroll to the top of the page instantly whenever the route path or query parameters change
+    window.scrollTo(0, 0);
   }, [pathname, search]);
 
   return null;

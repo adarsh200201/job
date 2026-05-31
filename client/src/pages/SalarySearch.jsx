@@ -116,6 +116,7 @@ export default function SalarySearch() {
 
   // Fetch live openings
   useEffect(() => {
+    window.prerenderReady = false; // Mark as not ready while we fetch live jobs for salary role
     const fetchLiveJobs = async () => {
       setLoadingJobs(true);
       try {
@@ -136,6 +137,7 @@ export default function SalarySearch() {
         setLiveJobs([]);
       } finally {
         setLoadingJobs(false);
+        window.prerenderReady = true; // Signal that salary details and jobs are loaded
       }
     };
     fetchLiveJobs();

@@ -98,6 +98,32 @@ function AppLayout() {
 
   useEffect(() => {
     trackPageView(location.pathname);
+
+    // List of predefined static pages that don't do async data fetching
+    const staticPaths = [
+      '/student-career-center',
+      '/about',
+      '/contact',
+      '/faq',
+      '/blog',
+      '/terms',
+      '/disclaimer',
+      '/login',
+      '/signup',
+      '/auth/callback',
+      '/admin/login',
+      '/admin',
+      '/dashboard',
+      '/onboarding'
+    ];
+
+    if (staticPaths.includes(location.pathname)) {
+      window.prerenderReady = true;
+    } else {
+      // Dynamic pages (Home, JobDetails, SalarySearch) fetch their own data
+      // and will set window.prerenderReady to true when finished.
+      window.prerenderReady = false;
+    }
   }, [location.pathname, location.search]);
 
   return (

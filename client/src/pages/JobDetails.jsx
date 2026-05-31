@@ -123,10 +123,12 @@ export default function JobDetails() {
       setJob(null);
       setRecent([]);
       setLoading(false);
+      window.prerenderReady = true;
       return;
     }
 
     let isMounted = true;
+    window.prerenderReady = false; // Mark as not ready while we fetch this specific job
 
     const fetchData = async () => {
       setLoading(true);
@@ -141,27 +143,29 @@ export default function JobDetails() {
         }
 
         if (!isMounted) return;
-        const currentJob = jobRes?.data?.data || jobRes?.data || null;
+        const potentialJob = jobRes?.data?.data || jobRes?.data || null;
+        // Verify we actually got a valid job object containing a title field
+        const currentJob = (potentialJob && typeof potentialJob === 'object' && potentialJob.title) ? potentialJob : null;
 
-        if (!currentJob) {
-          if (isMounted) { setJob(null); setLoading(false); }
-          return;
-        }
+        if (currentJob) {
+          if (isMounted) { setJob(currentJob); }
 
-        if (isMounted) { setJob(currentJob); }
+          const recentRes = await cache.get((url) => api.get(url), '/jobs?limit=10');
+          const allJobs = recentRes.data?.data || recentRes.data || [];
+          const otherJobs = Array.isArray(allJobs) ? allJobs.filter((j) => j.slug !== slug) : [];
 
-        const recentRes = await cache.get((url) => api.get(url), '/jobs?limit=10');
-        const allJobs = recentRes.data?.data || recentRes.data || [];
-        const otherJobs = Array.isArray(allJobs) ? allJobs.filter((j) => j.slug !== slug) : [];
-
-        if (isMounted) {
-          setRecent(otherJobs.slice(0, 5));
+          if (isMounted) {
+            setRecent(otherJobs.slice(0, 5));
+          }
+        } else {
+          if (isMounted) { setJob(null); }
         }
 
       } catch (error) {
         if (isMounted) { setJob(null); setRecent([]); }
       } finally {
         if (isMounted) { setLoading(false); }
+        window.prerenderReady = true; // Signal to prerenderer that rendering is complete
       }
     };
 

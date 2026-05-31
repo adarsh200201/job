@@ -18,6 +18,7 @@ export default function Home() {
   const cache = useCache();
 
   useEffect(() => {
+    window.prerenderReady = false; // Mark as not ready while we fetch jobs list
     const fetchJobs = async () => {
       setLoading(true);
       try {
@@ -51,6 +52,7 @@ export default function Home() {
         setJobs([]);
       } finally {
         setLoading(false);
+        window.prerenderReady = true; // Signal that content is loaded
       }
     };
     fetchJobs();
