@@ -7,7 +7,8 @@ import JobDetailCard from '../components/JobDetailCard.jsx';
 import RecentJobs from '../components/RecentJobs.jsx';
 import SidebarSearch from '../components/SidebarSearch.jsx';
 import { JobCardSkeleton } from '../components/SkeletonLoader.jsx';
-import { trackEvent } from '../utils/analytics.js';
+import { trackJobSearch, trackCategoryViewed } from '../utils/analytics.js';
+import SidebarAd from '../components/SidebarAd.jsx';
 
 export default function Home() {
   const [jobs, setJobs] = useState([]);
@@ -31,13 +32,12 @@ export default function Home() {
         setJobs(Array.isArray(jobsArray) ? jobsArray : []);
 
         // Track Search/Filter action
-        if (location.search) {
-          const params = new URLSearchParams(location.search);
-          const searchParams = {};
-          params.forEach((value, key) => {
-            searchParams[key] = value;
-          });
-          trackEvent('Job Search Filtered', searchParams);
+        const params = new URLSearchParams(location.search);
+        if (params.has('q')) {
+          trackJobSearch(params.get('q'), jobsArray.length);
+        }
+        if (params.has('type')) {
+          trackCategoryViewed(params.get('type'));
         }
 
         // Set pagination data if available
@@ -164,8 +164,9 @@ export default function Home() {
 
         <div className="col-12 col-lg-4 col-right">
           <SidebarSearch />
-          <div className="sidebar-sticky">
+          <div className="sidebar-sticky" style={{ display: 'flex', flexDirection: 'column', gap: '2rem', width: '100%' }}>
             <RecentJobs jobs={sortedJobs} />
+            <SidebarAd />
           </div>
         </div>
       </div>

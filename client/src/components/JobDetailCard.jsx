@@ -4,6 +4,7 @@ import { useIntersectionObserver } from '../hooks/useIntersectionObserver.js';
 import RichTextDisplay from './RichTextDisplay.jsx';
 import api from '../api/index.js';
 import { getImageUrl } from '../utils/imageUtils.js';
+import { trackApplyJobClicked } from '../utils/analytics.js';
 
 const DEFAULT_AD_LINK = 'https://www.effectivegatecpm.com/s738fegejz?key=12ac1ed2eeb4ac73b7d41add24630c1e1e';
 
@@ -39,12 +40,11 @@ function JobDetailCard({ job, adLink: propAdLink }) {
   }, [propAdLink]);
 
   const handleApply = (e) => {
-    // Ad popunder disabled for now
-    /*
-    e.preventDefault();
-    if (adLink) window.open(adLink, '_blank', 'noopener,noreferrer');
-    window.location.href = job.applyLink;
-    */
+    // Track Apply Job Clicked
+    trackApplyJobClicked(job);
+
+    // Save apply state locally
+    localStorage.setItem(`applied_${job._id}`, 'true');
   };
 
   const typeColor = {

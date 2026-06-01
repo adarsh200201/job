@@ -5,7 +5,7 @@ import PreFooterSections from './components/PreFooterSections.jsx';
 import HeroSearch from './components/HeroSearch.jsx';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { startKeepAlive, stopKeepAlive } from './utils/keepAlive.js';
-import { trackPageView } from './utils/analytics.js';
+import { trackPageView, useScrollDepth } from './utils/analytics.js';
 import ScrollToTop from './components/ScrollToTop.jsx';
 
 // Lazy load page components for code splitting
@@ -96,12 +96,15 @@ function AppLayout() {
   const location = useLocation();
   const isHome = location.pathname === '/';
 
-  useEffect(() => {
-    trackPageView(location.pathname);
+  // Track scroll depth globally on all pages
+  useScrollDepth(location.pathname);
 
-    // List of predefined static pages that don't do async data fetching
+  useEffect(() => {
+    // List of predefined static/core pages (Home is included here for page view tracking)
     const staticPaths = [
+      '/',
       '/student-career-center',
+      '/salaries',
       '/about',
       '/contact',
       '/faq',
@@ -117,11 +120,23 @@ function AppLayout() {
       '/onboarding'
     ];
 
-    if (staticPaths.includes(location.pathname)) {
+    const isJobDetail = !staticPaths.includes(location.pathname);
+
+    // Track Page View for core/static pages. JobDetails page view is tracked in its own component once loaded.
+    if (!isJobDetail) {
+      const params = new URLSearchParams(location.search);
+      const category = params.get('type') || params.get('q') || 'General';
+      
+      trackPageView(location.pathname, {
+        category: category
+      });
+    }
+
+    // Prerender.io lifecycle signaling:
+    // Page / is dynamic but we list it in staticPaths above. We still need it to set prerenderReady to false initially.
+    if (staticPaths.includes(location.pathname) && location.pathname !== '/') {
       window.prerenderReady = true;
     } else {
-      // Dynamic pages (Home, JobDetails, SalarySearch) fetch their own data
-      // and will set window.prerenderReady to true when finished.
       window.prerenderReady = false;
     }
   }, [location.pathname, location.search]);

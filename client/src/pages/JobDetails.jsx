@@ -7,7 +7,15 @@ import RecentJobs from '../components/RecentJobs.jsx';
 import RichTextDisplay from '../components/RichTextDisplay.jsx';
 import { JobDetailsSkeleton } from '../components/SkeletonLoader.jsx';
 import { getImageUrl } from '../utils/imageUtils.js';
-import { trackEvent } from '../utils/analytics.js';
+import { 
+  trackEvent,
+  trackPageView, 
+  trackJobDetailViewed, 
+  trackApplyJobClicked, 
+  trackJobShared, 
+  trackAdClicked 
+} from '../utils/analytics.js';
+import SidebarAd from '../components/SidebarAd.jsx';
 
 const DEFAULT_AD_LINK = 'https://www.effectivegatecpm.com/s738fegejz?key=12ac1ed2eeb4ac73b7d41add24630c1e1e';
 
@@ -56,13 +64,7 @@ export default function JobDetails() {
     if (job?._id) {
       localStorage.setItem(`applied_${job._id}`, 'true');
       setHasApplied(true);
-      trackEvent('Apply Job Clicked', {
-        jobId: job._id,
-        title: job.title,
-        company: job.company,
-        location: job.location,
-        salary: job.salary
-      });
+      trackApplyJobClicked(job);
     }
   };
 
@@ -71,6 +73,7 @@ export default function JobDetails() {
       const nextSaved = !isSaved;
       localStorage.setItem(`saved_${job._id}`, String(nextSaved));
       setIsSaved(nextSaved);
+      // Keep simple interaction logs
       trackEvent(nextSaved ? 'Job Saved' : 'Job Unsaved', {
         jobId: job._id,
         title: job.title,
@@ -83,10 +86,7 @@ export default function JobDetails() {
     navigator.clipboard.writeText(window.location.href);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-    trackEvent('Job Link Copied', {
-      jobId: job?._id,
-      title: job?.title
-    });
+    trackJobShared('Copy Link', job);
   };
 
   const handleApply = (e, applyUrl) => {
@@ -149,6 +149,14 @@ export default function JobDetails() {
 
         if (currentJob) {
           if (isMounted) { setJob(currentJob); }
+
+          // Track Job Detail Viewed and dynamic Page View events
+          trackJobDetailViewed(currentJob);
+          trackPageView(window.location.pathname, {
+            category: currentJob.type,
+            jobId: currentJob._id,
+            jobTitle: currentJob.title
+          });
 
           const recentRes = await cache.get((url) => api.get(url), '/jobs?limit=10');
           const allJobs = recentRes.data?.data || recentRes.data || [];
@@ -558,7 +566,7 @@ export default function JobDetails() {
                 {/* WhatsApp Share */}
                 <a 
                   href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`🔥 *${job.title}* at *${job.company}*\n📍 ${job.location || 'India'}\n💰 ${job.salary || 'Best in Industry'}\n\n👉 Apply Here: ${window.location.href}`)}`}
-                  onClick={() => trackEvent('Job Shared', { platform: 'WhatsApp', jobId: job._id, title: job.title })}
+                  onClick={() => trackJobShared('WhatsApp', job)}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
@@ -584,7 +592,7 @@ export default function JobDetails() {
                 {/* Telegram Share */}
                 <a 
                   href={`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(`🔥 ${job.title} at ${job.company}\n📍 ${job.location || 'India'}\n💰 ${job.salary || 'Best in Industry'}`)}`}
-                  onClick={() => trackEvent('Job Shared', { platform: 'Telegram', jobId: job._id, title: job.title })}
+                  onClick={() => trackJobShared('Telegram', job)}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
@@ -610,7 +618,7 @@ export default function JobDetails() {
                 {/* LinkedIn Share */}
                 <a 
                   href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`}
-                  onClick={() => trackEvent('Job Shared', { platform: 'LinkedIn', jobId: job._id, title: job.title })}
+                  onClick={() => trackJobShared('LinkedIn', job)}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
@@ -663,8 +671,9 @@ export default function JobDetails() {
         </div>
 
         <div className="col-12 col-lg-4 col-right">
-          <div className="sidebar-sticky">
+          <div className="sidebar-sticky" style={{ display: 'flex', flexDirection: 'column', gap: '2rem', width: '100%' }}>
             <RecentJobs jobs={recent} />
+            <SidebarAd />
           </div>
         </div>
       </div>
