@@ -87,4 +87,7 @@ JobSchema.index({ isActive: 1, createdAt: -1 });
 JobSchema.index({ company: 1 });
 JobSchema.index({ location: 1 });
 
+// Automatically delete job postings after 10 days (864,000 seconds)
+JobSchema.index({ createdAt: 1 }, { expireAfterSeconds: 864000 });
+
 module.exports = mongoose.model('Job', JobSchema);
