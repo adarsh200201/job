@@ -5,7 +5,7 @@ const JobSchema = new mongoose.Schema(
   {
     // Basic Information
     title: { type: String, required: true, trim: true },
-    slug: { type: String, required: true, unique: true, trim: true },
+    slug: { type: String, unique: true, trim: true },
     company: { type: String, required: true, trim: true },
     location: { type: String, required: true, trim: true },
     type: { 
@@ -72,11 +72,10 @@ const JobSchema = new mongoose.Schema(
 // Create slug from title before saving (using consistent slugify method)
 JobSchema.pre('save', function(next) {
   if (!this.slug) {
-    this.slug = slugify(this.title, {
-      lower: true,
-      strict: true,
-      trim: true
-    });
+    const crypto = require('crypto');
+    const base = slugify(this.title, { lower: true, strict: true, trim: true });
+    const suffix = crypto.randomBytes(3).toString('hex'); // e.g. "a1b2c3"
+    this.slug = `${base}-${suffix}`;
   }
   next();
 });
