@@ -179,12 +179,11 @@ exports.createJob = async (req, res) => {
       });
     }
     
-    // Create slug from title if not provided
-    const slug = slugify(title, {
-      lower: true,
-      strict: true,
-      trim: true
-    });
+    // Create slug from title with a unique suffix to prevent duplicate key errors
+    const crypto = require('crypto');
+    const slugBase = slugify(title, { lower: true, strict: true, trim: true });
+    const slugSuffix = crypto.randomBytes(3).toString('hex'); // e.g. "a1b2c3"
+    const slug = `${slugBase}-${slugSuffix}`;
     
     // Create job
     const job = await Job.create({
@@ -239,7 +238,7 @@ exports.createJob = async (req, res) => {
     res.status(400).json({
       success: false,
       message: 'Failed to create job',
-      error: process.env.NODE_ENV === 'development' ? e.message : undefined
+      error: e.message  // Always expose for debugging
     });
   }
 };
