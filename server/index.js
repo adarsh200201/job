@@ -15,6 +15,43 @@ const seoRoutes = require('./routes/seo');
 const authRoutes = require('./routes/auth');
 const { seedAdminIfNeeded, seedJobsIfNeeded, ensureMinimumJobs, seedDetailedJob } = require('./utils/seed');
 
+/* ─── Auto DB Cleanup (prevents Atlas 512 MB quota breach) ─── */
+async function autoCleanupDB() {
+  try {
+    const mongoose = require('mongoose');
+    if (mongoose.connection.readyState !== 1) return;
+    const db = mongoose.connection.db;
+
+    // Delete jobs older than 7 days
+    const Job = require('./models/Job');
+    const cutoff7d = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const deleted = await Job.deleteMany({ createdAt: { $lt: cutoff7d } });
+    if (deleted.deletedCount > 0) console.log(`🧹 [AutoCleanup] Deleted ${deleted.deletedCount} old jobs (>7 days)`);
+
+    // Delete all scrapeditems (regenerable cache)
+    try {
+      const r = await db.collection('scrapeditems').deleteMany({});
+      if (r.deletedCount > 0) console.log(`🧹 [AutoCleanup] Cleared ${r.deletedCount} scrapeditems`);
+    } catch { /* skip */ }
+
+    // Delete old scraperlogs
+    try {
+      const cutoff3d = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+      const r2 = await db.collection('scraperlogs').deleteMany({ createdAt: { $lt: cutoff3d } });
+      if (r2.deletedCount > 0) console.log(`🧹 [AutoCleanup] Cleared ${r2.deletedCount} old scraper logs`);
+    } catch { /* skip */ }
+  } catch (err) {
+    console.error('⚠️  [AutoCleanup] Error:', err.message);
+  }
+}
+
+function scheduleAutoCleanup() {
+  // Run once on startup after a short delay, then every 12 hours
+  setTimeout(autoCleanupDB, 5000);
+  setInterval(autoCleanupDB, 12 * 60 * 60 * 1000);
+  console.log('🕒 [AutoCleanup] Scheduled — runs every 12 hours');
+}
+
 const app = express();
 const PORT = process.env.PORT || 4000;
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:3000';
@@ -89,6 +126,7 @@ connectDB()
     await seedJobsIfNeeded();
     await seedDetailedJob();
     await ensureMinimumJobs(12);
+    scheduleAutoCleanup();
   })
   .catch((err) => {
     // eslint-disable-next-line no-console
