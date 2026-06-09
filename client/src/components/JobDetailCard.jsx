@@ -180,6 +180,11 @@ function JobDetailCard({ job, adLink: propAdLink }) {
                         🎓 {job.education}
                       </span>
                     )}
+                    {job.salary && (
+                      <span className="jc-chip jc-chip-gray" style={{ padding: '0.15rem 0.5rem', fontSize: '0.8rem' }}>
+                        💰 {job.salary}
+                      </span>
+                    )}
                   </>
                 )}
               </div>
@@ -310,6 +315,11 @@ function JobDetailCard({ job, adLink: propAdLink }) {
                   {job.education && (
                     <span className="jc-chip jc-chip-gray" style={{ padding: '0.15rem 0.5rem', fontSize: '0.8rem' }}>
                       🎓 {job.education}
+                    </span>
+                  )}
+                  {job.salary && (
+                    <span className="jc-chip jc-chip-gray" style={{ padding: '0.15rem 0.5rem', fontSize: '0.8rem' }}>
+                      💰 {job.salary}
                     </span>
                   )}
                 </>
