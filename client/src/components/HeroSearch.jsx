@@ -12,6 +12,16 @@ const POPULAR_SEARCHES = [
   'Software Developer',
   'Project Manager',
   'Sales',
+  'Fresher Jobs',
+  'Internship',
+  'Bank Jobs',
+  'Railway Jobs',
+  'SSC',
+  'UPSC',
+  'Teaching',
+  'Defence',
+  'Nursing',
+  'Accountant',
 ];
 
 export default function HeroSearch() {
