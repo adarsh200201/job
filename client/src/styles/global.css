@@ -568,29 +568,47 @@ main {
 /* Responsive hero */
 @media (max-width: 640px) {
   .hero-search-section {
-    padding: 1.5rem 1rem 1.5rem;
+    padding: 1.25rem 0.75rem 1.25rem;
   }
 
-  /* Keep the outer bar as a column: [inputs row] + [button] */
+  /* Single row layout on mobile for all 3 elements */
   .hero-search-bar {
-    flex-direction: column;
-    border-radius: 10px;
+    flex-direction: row;
+    align-items: stretch;
+    border-radius: 8px;
+    background: #fff;
+    height: 48px; /* Compact height to fit all 3 on one line */
   }
 
-  /* Both inputs side-by-side in ONE row */
+  /* Both inputs side-by-side */
   .hero-input-group {
     flex-direction: row;
-    width: 100%;
+    flex: 1;
     align-items: stretch;
+    min-width: 0;
   }
 
-  /* Each input takes exactly half the space */
+  /* Each input takes half the space */
   .hero-input-wrapper {
     flex: 1;
     min-width: 0;
     border-bottom: none;
-    padding: 0 0.4rem;
-    min-height: 40px;
+    padding: 0 0.3rem;
+    display: flex;
+    align-items: center;
+  }
+
+  /* Smaller icons on mobile to save space */
+  .hero-input-icon {
+    margin-right: 0.25rem;
+    width: 15px;
+    height: 15px;
+  }
+
+  /* Increased font size for readability/prevent auto-zoom */
+  .hero-input {
+    font-size: 1.05rem;
+    padding: 0;
   }
 
   /* Show a thin vertical divider between the two inputs */
@@ -602,15 +620,21 @@ main {
     flex-shrink: 0;
   }
 
-  /* Search button — compact fixed height */
+  /* Search button — on the right of the same row */
   .hero-search-btn {
-    width: 100%;
-    height: 32px;
+    width: 46px; /* Square search button */
+    height: 100%;
     padding: 0;
-    border-radius: 0 0 10px 10px;
+    border-radius: 0 8px 8px 0;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .hero-search-btn svg {
+    width: 18px;
+    height: 18px;
   }
 
   .btn-nav-outline {

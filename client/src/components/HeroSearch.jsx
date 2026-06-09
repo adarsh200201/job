@@ -55,13 +55,13 @@ export default function HeroSearch() {
           <div className="hero-input-group">
             <div className="hero-input-wrapper">
               <svg className="hero-input-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
               <input
                 id="hero-job-search"
                 type="text"
                 className="hero-input"
-                placeholder="Search jobs, keywords, companies"
+                placeholder="Search jobs"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 aria-label="Search jobs"
@@ -70,13 +70,13 @@ export default function HeroSearch() {
             <div className="hero-input-divider" />
             <div className="hero-input-wrapper">
               <svg className="hero-input-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
               </svg>
               <input
                 id="hero-location-search"
                 type="text"
                 className="hero-input"
-                placeholder='Enter location or "remote"'
+                placeholder='Enter location '
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 aria-label="Location"
@@ -85,7 +85,7 @@ export default function HeroSearch() {
           </div>
           <button className="hero-search-btn" type="submit" aria-label="Search">
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
           </button>
         </form>
@@ -101,7 +101,7 @@ export default function HeroSearch() {
                 type="button"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                  <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
                 </svg>
                 {term}
               </button>
