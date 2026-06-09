@@ -1,5 +1,5 @@
 import React, { Suspense, useEffect } from 'react';
-import { Routes, Route, Link, NavLink, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Link, NavLink, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import Footer from './components/Footer.jsx';
 import PreFooterSections from './components/PreFooterSections.jsx';
 import HeroSearch from './components/HeroSearch.jsx';
@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { startKeepAlive, stopKeepAlive } from './utils/keepAlive.js';
 import { trackPageView, useScrollDepth } from './utils/analytics.js';
 import ScrollToTop from './components/ScrollToTop.jsx';
+import { MEGA_CATEGORIES } from './utils/categoryConfig.js';
 
 // Lazy load page components for code splitting
 const Home = React.lazy(() => import('./pages/Home.jsx'));
@@ -27,6 +28,8 @@ const SalarySearch = React.lazy(() => import('./pages/SalarySearch.jsx'));
 const UserDashboard = React.lazy(() => import('./pages/UserDashboard.jsx'));
 const Onboarding = React.lazy(() => import('./pages/Onboarding.jsx'));
 const PrivacyPolicy = React.lazy(() => import('./pages/PrivacyPolicy.jsx'));
+const GovtJobsCategory = React.lazy(() => import('./pages/GovtJobsCategory.jsx'));
+const RootSlugHandler = React.lazy(() => import('./pages/RootSlugHandler.jsx'));
 
 // Loading fallback
 function LoadingFallback() {
@@ -152,9 +155,10 @@ function NavActions() {
 /* ══════════════════════════════════════════════════════════
    MEGA NAV DROPDOWN (govtjobsalert.in style)
 ══════════════════════════════════════════════════════════ */
-function NavDropdown({ label, items }) {
+function NavDropdown({ label, items, to, showArrow = true, mega = false }) {
   const [open, setOpen] = React.useState(false);
   const ref = React.useRef(null);
+  const location = useLocation();
 
   React.useEffect(() => {
     const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
@@ -162,49 +166,102 @@ function NavDropdown({ label, items }) {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
+  const isChildActive = Array.isArray(items) && items.some(item => location.pathname === item.to);
+
+  const col1 = mega ? items.slice(0, 13) : [];
+  const col2 = mega ? items.slice(13, 26) : [];
+  const col3 = mega ? items.slice(26, 39) : [];
+  const col4 = mega ? items.slice(39, 52) : [];
+
   return (
     <li ref={ref} style={{ position: 'relative', listStyle: 'none' }}
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
     >
-      <button
+      <NavLink
+        to={to}
+        className={({ isActive }) => `nav-link ${(isActive || isChildActive) ? 'active' : ''}`}
         onClick={() => setOpen(o => !o)}
         style={{
-          display: 'flex', alignItems: 'center', gap: '4px',
-          background: 'none', border: 'none', cursor: 'pointer',
-          padding: '0.45rem 1rem', borderRadius: '9999px',
-          fontWeight: 600, fontSize: '0.92rem', color: '#475569',
-          transition: 'all 200ms', whiteSpace: 'nowrap',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '4px',
+          cursor: 'pointer'
         }}
-        onMouseEnter={e => { e.currentTarget.style.color = '#1A3A6B'; e.currentTarget.style.background = 'rgba(26,58,107,0.08)'; }}
-        onMouseLeave={e => { e.currentTarget.style.color = '#475569'; e.currentTarget.style.background = 'none'; }}
       >
         {label}
-        <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', opacity: 0.6 }}>
-          <path d="M1 3l4 4 4-4" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-        </svg>
-      </button>
+        {showArrow && (
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', opacity: 0.6 }}>
+            <path d="M1 3l4 4 4-4" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+          </svg>
+        )}
+      </NavLink>
 
       {open && (
-        <div style={{
+        <div style={mega ? {
+          position: 'absolute', top: '100%', right: 0,
+          background: '#ffffff',
+          border: '1px solid #e2e8f0',
+          borderRadius: '12px', boxShadow: '0 10px 40px rgba(0,0,0,0.08)',
+          width: '760px', zIndex: 9999, padding: '16px',
+          display: 'flex', gap: '12px',
+          animation: 'dropdownFade 0.15s ease',
+        } : {
           position: 'absolute', top: '100%', left: 0,
           background: '#fff', border: '1px solid #e2e8f0',
           borderRadius: '8px', boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
           minWidth: '210px', zIndex: 9999, padding: '6px 0',
           animation: 'dropdownFade 0.15s ease',
         }}>
-          {items.map((item, i) => (
-            <NavLink
-              key={i}
-              to={item.to}
-              onClick={() => setOpen(false)}
-              style={{ display: 'block', padding: '9px 18px', textDecoration: 'none', color: '#1e293b', fontSize: '0.88rem', fontWeight: 500, transition: 'all 0.15s', borderBottom: i < items.length - 1 ? '1px solid #f8fafc' : 'none' }}
-              onMouseEnter={e => { e.currentTarget.style.background = '#eff6ff'; e.currentTarget.style.color = '#1A3A6B'; e.currentTarget.style.paddingLeft = '22px'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#1e293b'; e.currentTarget.style.paddingLeft = '18px'; }}
-            >
-              {item.label}
-            </NavLink>
-          ))}
+          {mega ? (
+            <>
+              {[col1, col2, col3, col4].map((col, cIdx) => (
+                <div key={cIdx} style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                  {col.map((item, i) => (
+                    <NavLink
+                      key={i}
+                      to={item.to}
+                      onClick={() => setOpen(false)}
+                      style={{
+                        display: 'block',
+                        padding: '4px 8px',
+                        textDecoration: 'none',
+                        color: '#475569',
+                        fontSize: '0.78rem',
+                        fontWeight: 600,
+                        transition: 'all 0.15s',
+                        borderRadius: '4px',
+                        whiteSpace: 'nowrap'
+                      }}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.background = 'rgba(109, 40, 217, 0.08)';
+                        e.currentTarget.style.color = '#6d28d9';
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.background = 'transparent';
+                        e.currentTarget.style.color = '#475569';
+                      }}
+                    >
+                      {item.label}
+                    </NavLink>
+                  ))}
+                </div>
+              ))}
+            </>
+          ) : (
+            items.map((item, i) => (
+              <NavLink
+                key={i}
+                to={item.to}
+                onClick={() => setOpen(false)}
+                style={{ display: 'block', padding: '9px 18px', textDecoration: 'none', color: '#1e293b', fontSize: '0.88rem', fontWeight: 500, transition: 'all 0.15s', borderBottom: i < items.length - 1 ? '1px solid #f8fafc' : 'none' }}
+                onMouseEnter={e => { e.currentTarget.style.background = '#eff6ff'; e.currentTarget.style.color = '#1A3A6B'; e.currentTarget.style.paddingLeft = '22px'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#1e293b'; e.currentTarget.style.paddingLeft = '18px'; }}
+              >
+                {item.label}
+              </NavLink>
+            ))
+          )}
         </div>
       )}
     </li>
@@ -240,7 +297,11 @@ export default function App() {
 
 function AppLayout() {
   const location = useLocation();
+  const navigate = useNavigate();
   const isHome = location.pathname === '/';
+
+  const [showSearch, setShowSearch] = React.useState(false);
+  const [searchQuery, setSearchQuery] = React.useState('');
 
   // Track scroll depth globally on all pages
   useScrollDepth(location.pathname);
@@ -249,7 +310,10 @@ function AppLayout() {
     const staticPaths = [
       '/', '/student-career-center', '/salaries', '/about', '/contact',
       '/faq', '/blog', '/terms', '/disclaimer', '/login', '/signup',
-      '/auth/callback', '/admin/login', '/admin', '/dashboard', '/onboarding', '/privacy'
+      '/auth/callback', '/admin/login', '/admin', '/dashboard', '/onboarding', '/privacy',
+      '/govt-jobs', '/upsc-jobs', '/ssc-jobs', '/railway-jobs', '/banking-jobs', '/defence-jobs', '/other-govt-jobs', '/teaching-jobs', '/psu-jobs',
+      '/results', '/admit-cards', '/answer-keys',
+      ...Object.keys(MEGA_CATEGORIES).map(k => `/${k}`)
     ];
     const isJobDetail = !staticPaths.includes(location.pathname);
     
@@ -273,45 +337,22 @@ function AppLayout() {
 
   /* ── Nav dropdown link configs ── */
   const govtJobItems = [
-    { label: '🏛️ All Govt Jobs',     to: '/?type=Full-Time' },
-    { label: '📋 SSC Jobs',           to: '/?q=SSC' },
-    { label: '🚂 Railway Jobs',       to: '/?q=Railway' },
-    { label: '🏦 Banking Jobs',       to: '/?q=Banking' },
-    { label: '⚔️ Defence Jobs',       to: '/?q=Defence' },
-    { label: '👮 Police Jobs',        to: '/?q=Police' },
-    { label: '📚 Teaching Jobs',      to: '/?q=Teacher' },
-    { label: '🏥 Medical Jobs',       to: '/?q=Medical' },
-    { label: '🔬 PSU Jobs',           to: '/?q=PSU' },
-    { label: '⚙️ Engineering Jobs',   to: '/?q=Engineer' },
+    { label: 'Latest Govt Jobs',     to: '/govt-jobs' },
+    { label: 'UPSC Jobs',           to: '/upsc-jobs' },
+    { label: 'SSC Jobs',           to: '/ssc-jobs' },
+    { label: 'Railway Jobs',       to: '/railway-jobs' },
+    { label: 'Banking Jobs',       to: '/banking-jobs' },
+    { label: 'Defence Jobs',       to: '/defence-jobs' },
+    { label: 'Other Govt Jobs',     to: '/other-govt-jobs' },
+    { label: 'Teaching Jobs',      to: '/teaching-jobs' },
+    { label: 'PSU Jobs',           to: '/psu-jobs' },
   ];
 
-  const resultItems = [
-    { label: '📢 Latest Results',   to: '/?q=Result' },
-    { label: '🎓 Board Results',    to: '/?q=Board+Result' },
-    { label: '📊 Exam Results',     to: '/?q=Exam+Result' },
-    { label: '✅ Final Merit List', to: '/?q=Merit+List' },
-  ];
 
-  const admitCardItems = [
-    { label: '🪪 All Admit Cards', to: '/?q=Admit+Card' },
-    { label: '📄 Hall Ticket',     to: '/?q=Hall+Ticket' },
-    { label: '🔑 Call Letter',     to: '/?q=Call+Letter' },
-  ];
-
-  const answerKeyItems = [
-    { label: '🗝️ All Answer Keys',     to: '/?q=Answer+Key' },
-    { label: '📝 Provisional Key',     to: '/?q=Provisional+Answer+Key' },
-    { label: '✅ Final Answer Key',    to: '/?q=Final+Answer+Key' },
-  ];
-
-  const moreItems = [
-    { label: '📅 Exam Calendar',   to: '/blog' },
-    { label: '💰 Salary Search',   to: '/salaries' },
-    { label: '📚 Career Advice',   to: '/blog' },
-    { label: '🎓 Student Center',  to: '/student-career-center' },
-    { label: '❓ FAQ',             to: '/faq' },
-    { label: '📞 Contact Us',      to: '/contact' },
-  ];
+  const moreItems = Object.entries(MEGA_CATEGORIES).map(([key, config]) => ({
+    label: config.label,
+    to: `/${key}`
+  }));
 
   return (
     <>
@@ -324,9 +365,9 @@ function AppLayout() {
 
       <ScrollToTop />
       <header className="site-header">
-        {/* ── Row 1: Logo + Auth ── */}
+        {/* ── Row 1: Logo, Nav Links, and Auth ── */}
         <div className="nav-top-bar">
-          <div className="nav-top-inner">
+          <div className="nav-top-inner" style={{ gap: '1.5rem' }}>
             <Link to="/" className="nav-logo-link">
               <img src="/logo.png" alt="NextJobPost Logo" className="logo-img-nav" />
               <span className="nav-brand">
@@ -335,30 +376,103 @@ function AppLayout() {
                 <span className="nav-brand-post">Post</span>
               </span>
             </Link>
+
+            <ul className="nav-links" style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', flexWrap: 'nowrap', gap: '4px', overflow: 'visible' }}>
+              <NavDropdown label="Govt Jobs" items={govtJobItems} to="/govt-jobs" />
+              
+              <li style={{ listStyle: 'none' }}>
+                <NavLink className="nav-link" to="/results">Result</NavLink>
+              </li>
+              <li style={{ listStyle: 'none' }}>
+                <NavLink className="nav-link" to="/admit-cards">Admit Card</NavLink>
+              </li>
+              <li style={{ listStyle: 'none' }}>
+                <NavLink className="nav-link" to="/answer-keys">Answer Key</NavLink>
+              </li>
+
+              <NavDropdown label="More" items={moreItems} to="#" mega={true} />
+
+              <li style={{ listStyle: 'none', display: 'flex', alignItems: 'center', position: 'relative', marginLeft: '6px' }}>
+                {showSearch && (
+                  <form 
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      if (searchQuery.trim()) {
+                        navigate(`/?q=${encodeURIComponent(searchQuery.trim())}`);
+                        setShowSearch(false);
+                        setSearchQuery('');
+                      }
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      animation: 'dropdownFade 0.2s ease',
+                      marginRight: '8px'
+                    }}
+                  >
+                    <input
+                      type="text"
+                      placeholder="Search jobs..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      autoFocus
+                      style={{
+                        padding: '0.4rem 1rem',
+                        fontSize: '0.9rem',
+                        borderRadius: '9999px',
+                        border: '1.5px solid #d1d5db',
+                        outline: 'none',
+                        width: '150px',
+                        transition: 'all 0.2s',
+                      }}
+                      onBlur={() => {
+                        setTimeout(() => {
+                          if (!searchQuery) setShowSearch(false);
+                        }, 200);
+                      }}
+                    />
+                  </form>
+                )}
+                <button
+                  onClick={() => setShowSearch(prev => !prev)}
+                  aria-label="Search jobs"
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: '0.45rem',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: showSearch ? '#6d28d9' : '#475569',
+                    backgroundColor: showSearch ? 'rgba(109, 40, 217, 0.08)' : 'transparent',
+                    transition: 'all 200ms',
+                  }}
+                  onMouseEnter={e => {
+                    if (!showSearch) {
+                      e.currentTarget.style.color = '#1A3A6B';
+                      e.currentTarget.style.background = 'rgba(26,58,107,0.08)';
+                    }
+                  }}
+                  onMouseLeave={e => {
+                    if (!showSearch) {
+                      e.currentTarget.style.color = '#475569';
+                      e.currentTarget.style.background = 'none';
+                    }
+                  }}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  </svg>
+                </button>
+              </li>
+            </ul>
+
             <NavActions />
           </div>
         </div>
-
-        {/* ── Row 2: Category Nav (govtjobsalert.in style) ── */}
-        <nav className="nav-secondary-bar">
-          <div className="nav-secondary-inner">
-            <ul className="nav-links" style={{ flexWrap: 'nowrap', overflowX: 'auto', gap: '0', paddingBottom: '0' }}>
-              <NavDropdown label="Govt Jobs" items={govtJobItems} />
-              <NavDropdown label="Result"    items={resultItems} />
-              <NavDropdown label="Admit Card" items={admitCardItems} />
-              <NavDropdown label="Answer Key" items={answerKeyItems} />
-
-              <li style={{ listStyle: 'none' }}>
-                <NavLink className="nav-link" to="/?type=Internship">Internships</NavLink>
-              </li>
-              <li style={{ listStyle: 'none' }}>
-                <NavLink className="nav-link" to="/?type=Remote">Work From Home</NavLink>
-              </li>
-
-              <NavDropdown label="More" items={moreItems} />
-            </ul>
-          </div>
-        </nav>
 
         {isHome && <HeroSearch />}
       </header>
@@ -368,6 +482,9 @@ function AppLayout() {
           <Routes>
             {/* Public */}
             <Route path="/" element={<Home />} />
+            
+
+
             <Route path="/student-career-center" element={<StudentCareerCenter />} />
             <Route path="/salaries" element={<SalarySearch />} />
             <Route path="/about" element={<About />} />
@@ -389,8 +506,8 @@ function AppLayout() {
             <Route path="/dashboard" element={<UserRoute><UserDashboard /></UserRoute>} />
             <Route path="/onboarding" element={<UserRoute><Onboarding /></UserRoute>} />
 
-            {/* Job detail catch-all */}
-            <Route path="/:slug" element={<JobDetails />} />
+            {/* Job detail or category page catch-all */}
+            <Route path="/:slug" element={<RootSlugHandler />} />
           </Routes>
         </Suspense>
       </main>

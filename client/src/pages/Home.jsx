@@ -5,10 +5,11 @@ import api from '../api/index.js';
 import { useCache } from '../hooks/useCache.js';
 import JobDetailCard from '../components/JobDetailCard.jsx';
 import RecentJobs from '../components/RecentJobs.jsx';
-import SidebarSearch from '../components/SidebarSearch.jsx';
+import JoinUpdates from '../components/JoinUpdates.jsx';
 import { JobCardSkeleton } from '../components/SkeletonLoader.jsx';
 import { trackJobSearch, trackCategoryViewed } from '../utils/analytics.js';
 import SidebarAd from '../components/SidebarAd.jsx';
+import SidebarCategories from '../components/SidebarCategories.jsx';
 
 export default function Home() {
   const [jobs, setJobs] = useState([]);
@@ -23,7 +24,11 @@ export default function Home() {
     const fetchJobs = async () => {
       setLoading(true);
       try {
-        const query = location.search ? location.search : '';
+        const searchParams = new URLSearchParams(location.search);
+        if (!searchParams.has('limit')) {
+          searchParams.set('limit', '20');
+        }
+        const query = `?${searchParams.toString()}`;
         const response = await cache.get(
           (url) => api.get(url),
           `/jobs${query}`
@@ -163,9 +168,9 @@ export default function Home() {
         </div>
 
         <div className="col-12 col-lg-4 col-right">
-          <SidebarSearch />
+          <JoinUpdates />
           <div className="sidebar-sticky" style={{ display: 'flex', flexDirection: 'column', gap: '2rem', width: '100%' }}>
-            <RecentJobs jobs={sortedJobs} />
+            <SidebarCategories jobs={sortedJobs} />
             <SidebarAd />
           </div>
         </div>

@@ -1,88 +1,302 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 export default function Footer() {
+  const [muted, setMuted] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [showScrollBtn, setShowScrollBtn] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
+        setShowScrollBtn(true);
+      } else {
+        setShowScrollBtn(false);
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+
+    // Initial check of permission state on mount
+    if ('Notification' in window) {
+      setMuted(Notification.permission !== 'granted');
+    }
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+  const handleScrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleToggleMute = async () => {
+    if (!('Notification' in window)) {
+      setToastMessage("Notifications not supported by this browser.");
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 2500);
+      return;
+    }
+
+    if (Notification.permission === 'granted') {
+      const nextMuted = !muted;
+      setMuted(nextMuted);
+      setToastMessage(nextMuted ? "Notifications muted locally." : "Notifications enabled!");
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 2500);
+
+      if (!nextMuted) {
+        new Notification("NextJobPost", {
+          body: "🔔 You will now receive instant job alert notifications!",
+          icon: "/logo.png"
+        });
+      }
+    } else if (Notification.permission !== 'denied') {
+      const permission = await Notification.requestPermission();
+      if (permission === 'granted') {
+        setMuted(false);
+        setToastMessage("Notifications enabled!");
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 2500);
+
+        new Notification("NextJobPost", {
+          body: "🎉 Thank you for subscribing to NextJobPost alerts!",
+          icon: "/logo.png"
+        });
+      } else {
+        setMuted(true);
+        setToastMessage("Notification permission denied.");
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 2500);
+      }
+    } else {
+      setToastMessage("Notifications blocked. Please enable permission in site settings.");
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+    }
+  };
+
+  // State jobs divided exactly as shown in the mockup:
+  const stateCol1 = [
+    { label: 'A&N Islands', to: '/andaman-nicobar-jobs' },
+    { label: 'Assam', to: '/assam-jobs' },
+    { label: 'Chhattisgarh', to: '/chhattisgarh-jobs' },
+    { label: 'Goa', to: '/goa-jobs' },
+    { label: 'HP', to: '/himachal-pradesh-jobs' },
+    { label: 'Karnataka', to: '/karnataka-jobs' },
+    { label: 'Lakshadweep', to: '/lakshadweep-jobs' },
+    { label: 'Manipur', to: '/manipur-jobs' },
+    { label: 'Nagaland', to: '/nagaland-jobs' },
+    { label: 'Punjab', to: '/punjab-jobs' },
+    { label: 'Tamil Nadu', to: '/tamil-nadu-jobs' },
+    { label: 'UP', to: '/uttar-pradesh-jobs' }
+  ];
+
+  const stateCol2 = [
+    { label: 'Andhra Pradesh', to: '/andhra-pradesh-jobs' },
+    { label: 'Bihar', to: '/bihar-jobs' },
+    { label: 'Delhi', to: '/delhi-jobs' },
+    { label: 'Gujarat', to: '/gujarat-jobs' },
+    { label: 'J&K', to: '/jammu-kashmir-jobs' },
+    { label: 'Kerala', to: '/kerala-jobs' },
+    { label: 'MP', to: '/madhya-pradesh-jobs' },
+    { label: 'Meghalaya', to: '/meghalaya-jobs' },
+    { label: 'Odisha', to: '/odisha-jobs' },
+    { label: 'Rajasthan', to: '/rajasthan-jobs' },
+    { label: 'Telangana', to: '/telangana-jobs' },
+    { label: 'Uttarakhand', to: '/uttarakhand-jobs' }
+  ];
+
+  const stateCol3 = [
+    { label: 'Arunachal', to: '/arunachal-pradesh-jobs' },
+    { label: 'Chandigarh', to: '/chandigarh-jobs' },
+    { label: 'DNHDD', to: '/dnh-dd-jobs' },
+    { label: 'Haryana', to: '/haryana-jobs' },
+    { label: 'Jharkhand', to: '/jharkhand-jobs' },
+    { label: 'Ladakh', to: '/ladakh-jobs' },
+    { label: 'Maharashtra', to: '/maharashtra-jobs' },
+    { label: 'Mizoram', to: '/mizoram-jobs' },
+    { label: 'Puducherry', to: '/puducherry-jobs' },
+    { label: 'Sikkim', to: '/sikkim-jobs' },
+    { label: 'Tripura', to: '/tripura-jobs' },
+    { label: 'West Bengal', to: '/west-bengal-jobs' }
+  ];
+
   return (
     <footer className="site-footer">
+      {/* Toast Alert */}
+      {showToast && (
+        <div className="footer-toast animate-fade-in">
+          <span>{muted ? '🔕' : '🔔'}</span>
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
+      {/* Floating Buttons */}
+      <button 
+        onClick={handleToggleMute} 
+        className={`floating-btn floating-left ${muted ? 'muted' : ''}`}
+        aria-label="Toggle notifications"
+      >
+        {muted ? (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            <path d="M18.63 13A17.89 17.89 0 0 1 18 8" />
+            <path d="M6.26 6.26A5.86 5.86 0 0 0 6 8v7a4 4 0 0 0-4 4h18a4 4 0 0 0-1.84-3.37" />
+            <line x1="1" y1="1" x2="23" y2="23" />
+          </svg>
+        ) : (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+          </svg>
+        )}
+      </button>
+
+      {showScrollBtn && (
+        <button 
+          onClick={handleScrollToTop} 
+          className="floating-btn floating-right animate-fade-in"
+          aria-label="Scroll to top"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="18 15 12 9 6 15" />
+          </svg>
+        </button>
+      )}
+
       <div className="footer-top">
         <div className="container footer-grid">
           
-          {/* Column 1: Language Dropdown */}
-          <div className="footer-col footer-lang-col">
-            <div className="lang-selector">
-              <span className="lang-flag">🇮🇳</span>
-              <select className="lang-select">
-                <option value="en">India (English)</option>
-              </select>
+          {/* Column 1: About NextJobPost */}
+          <div className="footer-col footer-col-about">
+            <h4 className="footer-heading">About NextJobPost</h4>
+            <p className="footer-about-text">
+              NextJobPost is India's trusted government job notification platform. Latest recruitment alerts, results, admit cards, and answer keys for UPSC, SSC, Railway, Banking, Defence, PSU and all 36 States & UTs.
+            </p>
+            <p className="footer-contact">
+              <strong>Contact:</strong> <a href="mailto:admin@nextjobpost.com">admin@nextjobpost.com</a>
+            </p>
+            <div className="footer-social-buttons mt-3">
+              <a href="https://chat.whatsapp.com/LVpuUJluTpUEdIc4daAemQ" target="_blank" rel="noopener noreferrer" className="footer-social-btn whatsapp">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" fill="currentColor" width="16" height="16">
+                  <path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/>
+                </svg>
+                WhatsApp
+              </a>
+              <a href="https://t.me/nextjobpost" target="_blank" rel="noopener noreferrer" className="footer-social-btn telegram">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                  <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0m5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.328-.373-.115l-6.869 4.326-2.96-.924c-.643-.204-.658-.643.136-.953l11.566-4.458c.538-.196 1.006.128.832 1.136z" />
+                </svg>
+                Telegram
+              </a>
             </div>
-            <div className="footer-extracted-note mt-3">
-              <small className="text-muted">* We extracted this information from the job description.</small>
+          </div>
+
+          {/* Column 2: Central Govt Jobs */}
+          <div className="footer-col footer-col-central">
+            <h4 className="footer-heading">Central Govt Jobs</h4>
+            <div className="footer-subcols-2">
+              <ul className="footer-links">
+                <li><Link to="/upsc-jobs">UPSC Jobs</Link></li>
+                <li><Link to="/railway-jobs">Railway Jobs</Link></li>
+                <li><Link to="/defence-jobs">Defence Jobs</Link></li>
+                <li><Link to="/teaching-jobs">Teaching Jobs</Link></li>
+              </ul>
+              <ul className="footer-links">
+                <li><Link to="/ssc-jobs">SSC Jobs</Link></li>
+                <li><Link to="/banking-jobs">Banking Jobs</Link></li>
+                <li><Link to="/?q=Police">Police Jobs</Link></li>
+                <li><Link to="/psu-jobs">PSU Jobs</Link></li>
+              </ul>
             </div>
           </div>
 
-          {/* Column 2: Job Seekers */}
-          <div className="footer-col">
-            <h4 className="footer-heading">For Job Seekers</h4>
-            <ul className="footer-links">
-              <li><Link to="/">Browse Jobs</Link></li>
-              <li><Link to="/salaries">Salary Tools</Link></li>
-              <li><Link to="/blog">Career Advice</Link></li>
-              <li><Link to="/about">Free Resume Templates</Link></li>
-              <li><Link to="/about">Free Resume Builder</Link></li>
-              <li><Link to="/about">Company Profile</Link></li>
-              <li><Link to="/student-career-center">Student Career Center</Link></li>
-              <li><Link to="/faq">Help</Link></li>
-            </ul>
+          {/* Column 3: State & UT Jobs */}
+          <div className="footer-col footer-col-states">
+            <h4 className="footer-heading">State & UT Jobs</h4>
+            <div className="footer-subcols-3">
+              <ul className="footer-links">
+                {stateCol1.map((item, idx) => (
+                  <li key={`st1-${idx}`}><Link to={item.to}>{item.label}</Link></li>
+                ))}
+              </ul>
+              <ul className="footer-links">
+                {stateCol2.map((item, idx) => (
+                  <li key={`st2-${idx}`}><Link to={item.to}>{item.label}</Link></li>
+                ))}
+              </ul>
+              <ul className="footer-links">
+                {stateCol3.map((item, idx) => (
+                  <li key={`st3-${idx}`}><Link to={item.to}>{item.label}</Link></li>
+                ))}
+              </ul>
+            </div>
           </div>
 
-          {/* Column 3: Employers */}
-          <div className="footer-col">
-            <h4 className="footer-heading">For Employers</h4>
-            <ul className="footer-links">
-              <li><Link to="/admin">Products</Link></li>
-              <li><Link to="/admin">Solutions</Link></li>
-              <li><Link to="/admin">Pricing</Link></li>
-              <li><Link to="/admin">Resources</Link></li>
-              <li><Link to="/faq">Help</Link></li>
-            </ul>
+          {/* Column 4: By Qualification */}
+          <div className="footer-col footer-col-qual">
+            <h4 className="footer-heading">By Qualification</h4>
+            <div className="footer-subcols-2">
+              <ul className="footer-links">
+                <li><Link to="/10th-pass-jobs">10th Pass</Link></li>
+                <li><Link to="/graduate-jobs">Graduate</Link></li>
+                <li><Link to="/engineering-jobs">Engineering</Link></li>
+                <li><Link to="/diploma-jobs">Diploma</Link></li>
+                <li><Link to="/teaching-jobs">Teaching</Link></li>
+                <li><Link to="/commerce-jobs">Commerce</Link></li>
+              </ul>
+              <ul className="footer-links">
+                <li><Link to="/12th-pass-jobs">12th Pass</Link></li>
+                <li><Link to="/post-graduate-jobs">Post Graduate</Link></li>
+                <li><Link to="/iti-jobs">ITI Jobs</Link></li>
+                <li><Link to="/medical-jobs">Medical</Link></li>
+                <li><Link to="/computer-it-jobs">Computer/IT</Link></li>
+                <li><Link to="/law-jobs">Law Jobs</Link></li>
+              </ul>
+            </div>
           </div>
 
-          {/* Column 4: Helpful Resources */}
-          <div className="footer-col">
-            <h4 className="footer-heading">Helpful Resources</h4>
-            <ul className="footer-links">
-              <li><Link to="/terms">Terms of Use</Link></li>
-              <li><Link to="/disclaimer">Privacy Center - UPDATED!</Link></li>
-              <li><Link to="/about">Security Center</Link></li>
-              <li><Link to="/contact">Accessibility Center</Link></li>
-              <li><Link to="/disclaimer">Do Not Sell My Personal Information</Link></li>
-              <li><Link to="/disclaimer">AdChoices</Link></li>
-              <li><Link to="/disclaimer">Your Privacy Choices <span className="privacy-icon">✔❌</span></Link></li>
-            </ul>
+          {/* Column 5: Useful Links */}
+          <div className="footer-col footer-col-links">
+            <h4 className="footer-heading">Useful Links</h4>
+            <div className="footer-subcols-2">
+              <ul className="footer-links">
+                <li><Link to="/govt-jobs">All Govt Jobs</Link></li>
+                <li><Link to="/admit-cards">Admit Cards</Link></li>
+                <li><Link to="/exam-calendar">Exam Calendar</Link></li>
+                <li><Link to="/previous-papers">Previous Papers</Link></li>
+                <li><a href="https://www.rrcb.gov.in/" target="_blank" rel="noopener noreferrer">RRB Sites</a></li>
+              </ul>
+              <ul className="footer-links">
+                <li><Link to="/results">Exam Results</Link></li>
+                <li><Link to="/answer-keys">Answer Keys</Link></li>
+                <li><Link to="/syllabus-jobs">Syllabus</Link></li>
+                <li><Link to="/prep-strategy">Preparation</Link></li>
+              </ul>
+            </div>
           </div>
 
         </div>
       </div>
 
       <div className="footer-bottom">
-        <div className="container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
-          
-          {/* Social Icons & Copyright */}
-          <div className="footer-social-wrap" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
-            <h5 className="footer-subheading" style={{ margin: 0 }}>Find us on social media:</h5>
-            <div className="footer-social-icons" style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-              <a href="#" className="social-icon fb"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg></a>
-              <a href="#" className="social-icon x"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"></path></svg></a>
-              <a href="#" className="social-icon ig"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg></a>
-              <a href="#" className="social-icon yt"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" fill="#2d0057"></polygon></svg></a>
-              <a href="#" className="social-icon pt"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.951-7.252 4.168 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.367 18.633 0 12.017 0z"></path></svg></a>
-              <a href="#" className="social-icon tk"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"></path></svg></a>
-            </div>
-            <p className="copyright-text" style={{ marginTop: '0.5rem' }}>
-              © {new Date().getFullYear()} NextJobPost Ltd
-            </p>
+        <div className="container footer-bottom-flex">
+          <p className="copyright-text">
+            © {new Date().getFullYear()} NextJobPost.com
+          </p>
+          <div className="footer-bottom-links">
+            <Link to="/about">About us</Link>
+            <span className="footer-link-divider">|</span>
+            <Link to="/privacy">Privacy Policy</Link>
+            <span className="footer-link-divider">|</span>
+            <Link to="/contact">Contact Us</Link>
+            <span className="footer-link-divider">|</span>
+            <Link to="/disclaimer">Disclaimer</Link>
+            <span className="footer-link-divider">|</span>
+            <Link to="/terms">Terms & Conditions</Link>
           </div>
-
         </div>
       </div>
     </footer>

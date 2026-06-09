@@ -1,8 +1,134 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import api from '../api/index.js';
 
 export default function PreFooterSections() {
   const [isExpanded, setIsExpanded] = useState(false);
+
+  // Default state fallbacks based on seeded data so we have real links immediately
+  const [categories, setCategories] = useState([
+    { label: 'Full-Time Jobs', to: '/?type=Full-Time' },
+    { label: 'Internship Jobs', to: '/?type=Internship' },
+    { label: 'Remote Jobs', to: '/?type=Remote' },
+    { label: 'Part-Time Jobs', to: '/?type=Part-Time' },
+    { label: 'Software Developer Jobs', to: '/?q=Software' },
+    { label: 'Web Developer Jobs', to: '/?q=Developer' },
+    { label: 'Quality Assurance Jobs', to: '/?q=QA' },
+    { label: 'Content Writing Jobs', to: '/?q=Writer' },
+    { label: 'Data Analyst Jobs', to: '/?q=Data' },
+    { label: 'Customer Support Jobs', to: '/?q=Support' }
+  ]);
+
+  const [titles, setTitles] = useState([
+    { label: 'Software Engineer - Fresher', to: '/?q=Software' },
+    { label: 'Frontend Developer Internship', to: '/?q=Frontend' },
+    { label: 'Junior QA Engineer', to: '/?q=QA' },
+    { label: 'Part-time Content Writer', to: '/?q=Writer' },
+    { label: 'Work From Home - Data Entry', to: '/?q=Data' },
+    { label: 'Full Stack Developer', to: '/?q=Developer' },
+    { label: 'Backend Developer', to: '/?q=Backend' },
+    { label: 'DevOps Intern', to: '/?q=DevOps' },
+    { label: 'Graphic Designer', to: '/?q=Designer' },
+    { label: 'Data Analyst - Fresher', to: '/?q=Data' }
+  ]);
+
+  const [locations, setLocations] = useState([
+    { label: 'Bangalore Jobs', to: '/?q=Bangalore' },
+    { label: 'Hyderabad Jobs', to: '/?q=Hyderabad' },
+    { label: 'Pune Jobs', to: '/?q=Pune' },
+    { label: 'Mumbai Jobs', to: '/?q=Mumbai' },
+    { label: 'Delhi Jobs', to: '/?q=Delhi' },
+    { label: 'Chennai Jobs', to: '/?q=Chennai' },
+    { label: 'Remote Jobs', to: '/?q=Remote' }
+  ]);
+
+  useEffect(() => {
+    let isMounted = true;
+    
+    api.get('/jobs?limit=100')
+      .then(res => {
+        if (!isMounted) return;
+        const jobsArray = res.data?.data || res.data || [];
+        if (!Array.isArray(jobsArray) || jobsArray.length === 0) return;
+
+        // 1. Process Categories dynamically
+        const activeTypes = Array.from(new Set(jobsArray.map(j => j.type).filter(Boolean)));
+        const catList = activeTypes.map(type => ({
+          label: `${type} Jobs`,
+          to: `/?type=${encodeURIComponent(type)}`
+        }));
+        
+        const popularTerms = [
+          { term: 'Software', label: 'Software Developer Jobs' },
+          { term: 'Developer', label: 'Web Developer Jobs' },
+          { term: 'QA', label: 'Quality Assurance Jobs' },
+          { term: 'Writer', label: 'Content Writing Jobs' },
+          { term: 'Data', label: 'Data Analyst Jobs' },
+          { term: 'Support', label: 'Customer Support Jobs' },
+          { term: 'Design', label: 'Graphic Design Jobs' },
+          { term: 'Marketing', label: 'Marketing Jobs' }
+        ];
+
+        popularTerms.forEach(item => {
+          const hasMatch = jobsArray.some(j => 
+            (j.title && j.title.toLowerCase().includes(item.term.toLowerCase())) ||
+            (j.jobDescription && j.jobDescription.toLowerCase().includes(item.term.toLowerCase()))
+          );
+          if (hasMatch) {
+            if (!catList.some(c => c.label === item.label)) {
+              catList.push({
+                label: item.label,
+                to: `/?q=${encodeURIComponent(item.term)}`
+              });
+            }
+          }
+        });
+        if (catList.length > 0) {
+          setCategories(catList.slice(0, 10));
+        }
+
+        // 2. Process Titles dynamically - point directly to actual job detail routes
+        const titleList = jobsArray.slice(0, 10).map(job => ({
+          label: job.title,
+          to: `/${job.slug}`
+        }));
+        if (titleList.length > 0) {
+          setTitles(titleList);
+        }
+
+        // 3. Process Locations dynamically
+        const rawLocations = jobsArray.map(j => j.location).filter(Boolean);
+        const locSet = new Set();
+        rawLocations.forEach(loc => {
+          const cities = ['Bangalore', 'Bengaluru', 'Hyderabad', 'Pune', 'Mumbai', 'Delhi', 'Chennai', 'Noida', 'Gurgaon', 'Kolkata', 'Remote'];
+          cities.forEach(city => {
+            if (loc.toLowerCase().includes(city.toLowerCase())) {
+              locSet.add(city === 'Bengaluru' ? 'Bangalore' : city);
+            }
+          });
+        });
+        
+        if (locSet.size < 5) {
+          rawLocations.forEach(loc => {
+            const clean = loc.split('(')[0].split(',')[0].trim();
+            if (clean) locSet.add(clean);
+          });
+        }
+
+        const locList = Array.from(locSet).map(loc => ({
+          label: `${loc} Jobs`,
+          to: `/?q=${encodeURIComponent(loc)}`
+        }));
+        if (locList.length > 0) {
+          setLocations(locList.slice(0, 10));
+        }
+      })
+      .catch(err => {
+        console.error("Failed to fetch popular jobs:", err);
+      });
+      
+    return () => { isMounted = false; };
+  }, []);
 
   return (
     <div className="pre-footer-sections">
@@ -49,16 +175,9 @@ export default function PreFooterSections() {
             <div className="pf-pop-col">
               <h3>Jobs by Categories</h3>
               <ul>
-                <li><Link to="/?q=Accounting">Accounting Jobs</Link></li>
-                <li><Link to="/?q=Childcare">Childcare Jobs</Link></li>
-                <li><Link to="/?q=Clerical">Clerical Jobs</Link></li>
-                <li><Link to="/?q=Communication">Communication Jobs</Link></li>
-                <li><Link to="/?q=Construction">Construction Jobs</Link></li>
-                <li><Link to="/?q=Customer+Service">Customer Service Jobs</Link></li>
-                <li><Link to="/?q=Education">Education Jobs</Link></li>
-                <li><Link to="/?q=Engineering">Engineering Jobs</Link></li>
-                <li><Link to="/?q=Healthcare">Healthcare Jobs</Link></li>
-                <li><Link to="/?q=Human+Resources">Human Resources Jobs</Link></li>
+                {categories.map((item, idx) => (
+                  <li key={`cat-${idx}`}><Link to={item.to}>{item.label}</Link></li>
+                ))}
               </ul>
             </div>
 
@@ -66,16 +185,9 @@ export default function PreFooterSections() {
             <div className="pf-pop-col">
               <h3>Jobs by Titles</h3>
               <ul>
-                <li><Link to="/?q=Administrative+Assistant">Administrative Assistant Jobs</Link></li>
-                <li><Link to="/?q=Delivery+Driver">Delivery Driver Jobs</Link></li>
-                <li><Link to="/?q=Electrician">Electrician Jobs</Link></li>
-                <li><Link to="/?q=LPN">LPN Jobs</Link></li>
-                <li><Link to="/?q=Medical+Assistant">Medical Assistant Jobs</Link></li>
-                <li><Link to="/?q=Nurse+Practitioner">Nurse Practitioner Jobs</Link></li>
-                <li><Link to="/?q=Online+Teaching">Online Teaching Jobs</Link></li>
-                <li><Link to="/?q=Project+Manager">Project Manager Jobs</Link></li>
-                <li><Link to="/?q=Security+Guard">Security Guard Jobs</Link></li>
-                <li><Link to="/?q=Software+Developer">Software Developer Jobs</Link></li>
+                {titles.map((item, idx) => (
+                  <li key={`title-${idx}`}><Link to={item.to}>{item.label}</Link></li>
+                ))}
               </ul>
             </div>
 
@@ -83,16 +195,9 @@ export default function PreFooterSections() {
             <div className="pf-pop-col">
               <h3>Jobs by Locations</h3>
               <ul>
-                <li><Link to="/?q=Atlanta">Atlanta, GA Jobs</Link></li>
-                <li><Link to="/?q=Austin">Austin, TX Jobs</Link></li>
-                <li><Link to="/?q=Chicago">Chicago, IL Jobs</Link></li>
-                <li><Link to="/?q=Dallas">Dallas, TX Jobs</Link></li>
-                <li><Link to="/?q=Denver">Denver, CO Jobs</Link></li>
-                <li><Link to="/?q=Houston">Houston, TX Jobs</Link></li>
-                <li><Link to="/?q=Los+Angeles">Los Angeles, CA Jobs</Link></li>
-                <li><Link to="/?q=New+York">NYC, NY Jobs</Link></li>
-                <li><Link to="/?q=San+Diego">San Diego, CA Jobs</Link></li>
-                <li><Link to="/?q=Seattle">Seattle, WA Jobs</Link></li>
+                {locations.map((item, idx) => (
+                  <li key={`loc-${idx}`}><Link to={item.to}>{item.label}</Link></li>
+                ))}
               </ul>
             </div>
           </div>

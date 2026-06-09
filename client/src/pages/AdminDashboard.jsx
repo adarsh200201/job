@@ -4,7 +4,7 @@ import api from '../api/index.js';
 import RichTextEditor from '../components/RichTextEditor.jsx';
 import { getImageUrl } from '../utils/imageUtils.js';
 
-const initialForm = { title: '', company: '', location: '', type: 'Full-Time', experience: '', education: '', batch: '', jobDescription: '', description: '', responsibilities: '', requirements: '', skills: '', salary: '', applyLink: '', lastDate: '', image: '', whatsapp: 'https://chat.whatsapp.com/LVpuUJluTpUEdIc4daAemQ', telegram: 'https://t.me/nextjobpost', contact: '', metaTitle: '', metaDescription: '', aboutCompany: '', whyJoin: '', howToApply: '', finalThoughts: '', highlightText: '' };
+const initialForm = { title: '', company: '', location: '', type: 'Full-Time', experience: '', education: '', batch: '', jobDescription: '', description: '', responsibilities: '', requirements: '', skills: '', salary: '', applyLink: '', lastDate: '', image: '', whatsapp: 'https://chat.whatsapp.com/LVpuUJluTpUEdIc4daAemQ', telegram: 'https://t.me/nextjobpost', contact: '', metaTitle: '', metaDescription: '', aboutCompany: '', whyJoin: '', howToApply: '', finalThoughts: '', highlightText: '', isActive: true, isGovernment: false, postType: 'Job', pdfLink: '', sourceUrl: '', sourceWebsite: '', importantDates: '', isFeatured: false, eligibility: '', vacancies: '' };
 
 const DEFAULT_AD_LINK = 'https://www.effectivegatecpm.com/s738fegejz?key=12ac1ed2eeb4ac73b7d41add24630c1e1e';
 
@@ -20,6 +20,7 @@ export default function AdminDashboard() {
   const [imageLoading, setImageLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [filterBy, setFilterBy] = useState('all');
+  const [categoryFilter, setCategoryFilter] = useState('all');
   const [showSettings, setShowSettings] = useState(false);
   const [adLink, setAdLink] = useState(DEFAULT_AD_LINK);
   const [settingsSaving, setSettingsSaving] = useState(false);
@@ -170,11 +171,13 @@ export default function AdminDashboard() {
     setForm({
       title: job.title,
       company: job.company,
-      location: job.location,
-      type: job.type,
-      experience: job.experience,
+      location: job.location || '',
+      type: job.type || 'Full-Time',
+      experience: job.experience || '',
       education: job.education || '',
       batch: job.batch || '',
+      eligibility: job.eligibility || '',
+      vacancies: job.vacancies || '',
       jobDescription: job.jobDescription || '',
       description: job.description || '',
       aboutCompany: job.aboutCompany || '',
@@ -193,7 +196,15 @@ export default function AdminDashboard() {
       telegram: job.telegram || 'https://t.me/nextjobpost',
       contact: job.contact || '',
       metaTitle: job.metaTitle || '',
-      metaDescription: job.metaDescription || ''
+      metaDescription: job.metaDescription || '',
+      isActive: job.isActive !== undefined ? job.isActive : true,
+      isGovernment: job.isGovernment !== undefined ? job.isGovernment : false,
+      postType: job.postType || 'Job',
+      pdfLink: job.pdfLink || '',
+      sourceUrl: job.sourceUrl || '',
+      sourceWebsite: job.sourceWebsite || '',
+      importantDates: job.importantDates || '',
+      isFeatured: job.isFeatured !== undefined ? job.isFeatured : false
     });
     setError('');
   };
@@ -204,6 +215,28 @@ export default function AdminDashboard() {
     setActiveTab('basic');
     setImageError('');
     setImageLoading(false);
+  };
+
+  const toggleJobStatus = async (jobId, currentStatus) => {
+    try {
+      // Optimistically update status in local UI state
+      setJobs(prevJobs => 
+        prevJobs.map(j => j._id === jobId ? { ...j, isActive: !currentStatus } : j)
+      );
+      
+      // Call API to update status
+      await api.put(`/jobs/${jobId}`, { isActive: !currentStatus });
+      
+      setSettingsMessage('✅ Job status updated successfully!');
+      setTimeout(() => setSettingsMessage(''), 3000);
+    } catch (err) {
+      // Rollback on error
+      setJobs(prevJobs => 
+        prevJobs.map(j => j._id === jobId ? { ...j, isActive: currentStatus } : j)
+      );
+      setError('❌ Failed to update job status.');
+      setTimeout(() => setError(''), 5000);
+    }
   };
 
   const save = async (e) => {
@@ -299,22 +332,28 @@ export default function AdminDashboard() {
 
       {/* Stats Section */}
       <div className="row mb-4 g-3">
-        <div className="col-12 col-md-6 col-lg-4">
+        <div className="col-12 col-md-6 col-lg-3">
           <div style={{ background: 'linear-gradient(135deg, #1677b6 0%, #2a9df4 100%)', color: '#fff', padding: '1.5rem', borderRadius: '12px', boxShadow: filterBy === 'all' ? '0 8px 20px rgba(22,107,138,0.4)' : '0 8px 20px rgba(22,107,138,0.2)', cursor: 'pointer', transition: 'all 200ms ease', border: filterBy === 'all' ? '2px solid rgba(255,255,255,0.5)' : '2px solid transparent' }} onClick={() => setFilterBy('all')} onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-4px)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
             <div style={{ fontSize: '0.9rem', fontWeight: 700, opacity: 0.9, marginBottom: '0.5rem' }}>Total Jobs</div>
             <div style={{ fontSize: '2rem', fontWeight: 900 }}>{jobs.length}</div>
           </div>
         </div>
-        <div className="col-12 col-md-6 col-lg-4">
+        <div className="col-12 col-md-6 col-lg-3">
           <div style={{ background: 'linear-gradient(135deg, #19a974 0%, #36d37b 100%)', color: '#fff', padding: '1.5rem', borderRadius: '12px', boxShadow: filterBy === 'active' ? '0 8px 20px rgba(25,169,116,0.4)' : '0 8px 20px rgba(25,169,116,0.2)', cursor: 'pointer', transition: 'all 200ms ease', border: filterBy === 'active' ? '2px solid rgba(255,255,255,0.5)' : '2px solid transparent' }} onClick={() => setFilterBy('active')} onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-4px)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
             <div style={{ fontSize: '0.9rem', fontWeight: 700, opacity: 0.9, marginBottom: '0.5rem' }}>Active Listings</div>
             <div style={{ fontSize: '2rem', fontWeight: 900 }}>{jobs.filter(j => j.isActive).length}</div>
           </div>
         </div>
-        <div className="col-12 col-md-6 col-lg-4">
+        <div className="col-12 col-md-6 col-lg-3">
           <div style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)', color: '#fff', padding: '1.5rem', borderRadius: '12px', boxShadow: filterBy === 'featured' ? '0 8px 20px rgba(245,158,11,0.4)' : '0 8px 20px rgba(245,158,11,0.2)', cursor: 'pointer', transition: 'all 200ms ease', border: filterBy === 'featured' ? '2px solid rgba(255,255,255,0.5)' : '2px solid transparent' }} onClick={() => setFilterBy('featured')} onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-4px)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
             <div style={{ fontSize: '0.9rem', fontWeight: 700, opacity: 0.9, marginBottom: '0.5rem' }}>Featured Jobs</div>
             <div style={{ fontSize: '2rem', fontWeight: 900 }}>{jobs.filter(j => j.isFeatured).length}</div>
+          </div>
+        </div>
+        <div className="col-12 col-md-6 col-lg-3">
+          <div style={{ background: 'linear-gradient(135deg, #4b5563 0%, #6b7280 100%)', color: '#fff', padding: '1.5rem', borderRadius: '12px', boxShadow: filterBy === 'draft' ? '0 8px 20px rgba(75,85,99,0.4)' : '0 8px 20px rgba(75,85,99,0.2)', cursor: 'pointer', transition: 'all 200ms ease', border: filterBy === 'draft' ? '2px solid rgba(255,255,255,0.5)' : '2px solid transparent' }} onClick={() => setFilterBy('draft')} onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-4px)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
+            <div style={{ fontSize: '0.9rem', fontWeight: 700, opacity: 0.9, marginBottom: '0.5rem' }}>Draft / Inactive</div>
+            <div style={{ fontSize: '2rem', fontWeight: 900 }}>{jobs.filter(j => !j.isActive).length}</div>
           </div>
         </div>
       </div>
@@ -447,32 +486,36 @@ export default function AdminDashboard() {
                       <label className="form-label">Company Name</label>
                       <input className="form-control" value={form.company} onChange={(e) => setForm({ ...form, company: e.target.value })} placeholder="e.g., Tech Corp" required />
                     </div>
-                    <div className="col-12 col-md-6">
-                      <label className="form-label">Location</label>
-                      <input className="form-control" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder="e.g., Bangalore, India" required />
-                    </div>
-                    <div className="col-12 col-md-6">
-                      <label className="form-label">Job Type</label>
-                      <select className="form-select" value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} required>
-                        <option>Full-Time</option>
-                        <option>Part-Time</option>
-                        <option>Internship</option>
-                        <option>Contract</option>
-                        <option>Remote</option>
-                      </select>
-                    </div>
-                    <div className="col-12 col-md-6">
-                      <label className="form-label">Experience Required</label>
-                      <input className="form-control" value={form.experience} onChange={(e) => setForm({ ...form, experience: e.target.value })} placeholder="e.g., 0-2 years" required />
-                    </div>
-                    <div className="col-12 col-md-6">
-                      <label className="form-label">Education Requirement</label>
-                      <input className="form-control" value={form.education} onChange={(e) => setForm({ ...form, education: e.target.value })} placeholder="e.g., B.Tech (CSE/IT), MCA" required />
-                    </div>
-                    <div className="col-12 col-md-6">
-                      <label className="form-label">Batch/Year</label>
-                      <input className="form-control" value={form.batch} onChange={(e) => setForm({ ...form, batch: e.target.value })} placeholder="e.g., 2025 Batch" />
-                    </div>
+                    {!form.isGovernment && (
+                      <>
+                        <div className="col-12 col-md-6">
+                          <label className="form-label">Location</label>
+                          <input className="form-control" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder="e.g., Bangalore, India" required={!form.isGovernment} />
+                        </div>
+                        <div className="col-12 col-md-6">
+                          <label className="form-label">Job Type</label>
+                          <select className="form-select" value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} required={!form.isGovernment}>
+                            <option>Full-Time</option>
+                            <option>Part-Time</option>
+                            <option>Internship</option>
+                            <option>Contract</option>
+                            <option>Remote</option>
+                          </select>
+                        </div>
+                        <div className="col-12 col-md-6">
+                          <label className="form-label">Experience Required</label>
+                          <input className="form-control" value={form.experience} onChange={(e) => setForm({ ...form, experience: e.target.value })} placeholder="e.g., 0-2 years" required={!form.isGovernment} />
+                        </div>
+                        <div className="col-12 col-md-6">
+                          <label className="form-label">Education Requirement</label>
+                          <input className="form-control" value={form.education} onChange={(e) => setForm({ ...form, education: e.target.value })} placeholder="e.g., B.Tech (CSE/IT), MCA" required={!form.isGovernment} />
+                        </div>
+                        <div className="col-12 col-md-6">
+                          <label className="form-label">Batch/Year</label>
+                          <input className="form-control" value={form.batch} onChange={(e) => setForm({ ...form, batch: e.target.value })} placeholder="e.g., 2025 Batch" />
+                        </div>
+                      </>
+                    )}
                     <div className="col-12 col-md-6">
                       <label className="form-label">Salary (Optional)</label>
                       <input className="form-control" value={form.salary} onChange={(e) => setForm({ ...form, salary: e.target.value })} placeholder="e.g., 6-12 LPA" />
@@ -485,6 +528,75 @@ export default function AdminDashboard() {
                       <label className="form-label">Apply Link</label>
                       <input className="form-control" type="url" value={form.applyLink} onChange={(e) => setForm({ ...form, applyLink: e.target.value })} placeholder="https://apply.example.com" required />
                     </div>
+                    <div className="col-12 col-md-6">
+                      <label className="form-label">Listing Status</label>
+                      <select className="form-select" value={String(form.isActive)} onChange={(e) => setForm({ ...form, isActive: e.target.value === 'true' })} required>
+                        <option value="true">Active (Published)</option>
+                        <option value="false">Inactive (Draft)</option>
+                      </select>
+                    </div>
+                    <div className="col-12 col-md-6">
+                      <label className="form-label">Featured Listing?</label>
+                      <select className="form-select" value={String(form.isFeatured)} onChange={(e) => setForm({ ...form, isFeatured: e.target.value === 'true' })} required>
+                        <option value="false">Standard Job</option>
+                        <option value="true">Featured Job (Home Highlights)</option>
+                      </select>
+                    </div>
+
+                    {/* Government Job Settings */}
+                    <div className="col-12" style={{ borderTop: '2px solid #e0e7f1', paddingTop: '1.5rem', marginTop: '1.5rem' }}>
+                      <div className="form-check form-switch d-flex align-items-center gap-2">
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          id="isGovernment"
+                          checked={form.isGovernment}
+                          onChange={(e) => setForm({ ...form, isGovernment: e.target.checked })}
+                          style={{ width: '2.5rem', height: '1.25rem', cursor: 'pointer' }}
+                        />
+                        <label className="form-check-label" htmlFor="isGovernment" style={{ fontWeight: 700, color: '#162c4a', cursor: 'pointer', userSelect: 'none' }}>
+                          🏛️ Is this a Government Job Post?
+                        </label>
+                      </div>
+                    </div>
+
+                    {form.isGovernment && (
+                      <>
+                        <div className="col-12 col-md-6 animate-slide-down">
+                          <label className="form-label">Post Type</label>
+                          <select className="form-select" value={form.postType} onChange={(e) => setForm({ ...form, postType: e.target.value })} required>
+                            <option value="Job">Job</option>
+                            <option value="Admit Card">Admit Card</option>
+                            <option value="Result">Result</option>
+                            <option value="Answer Key">Answer Key</option>
+                          </select>
+                        </div>
+                        <div className="col-12 col-md-6 animate-slide-down">
+                          <label className="form-label">Eligibility Criteria</label>
+                          <input className="form-control" value={form.eligibility} onChange={(e) => setForm({ ...form, eligibility: e.target.value })} placeholder="e.g., Graduate, B.Tech, 12th Pass" required={form.isGovernment} />
+                        </div>
+                        <div className="col-12 col-md-6 animate-slide-down">
+                          <label className="form-label">Vacancies</label>
+                          <input className="form-control" value={form.vacancies} onChange={(e) => setForm({ ...form, vacancies: e.target.value })} placeholder="e.g., 500 Posts" required={form.isGovernment} />
+                        </div>
+                        <div className="col-12 col-md-6 animate-slide-down">
+                          <label className="form-label">Official PDF Link</label>
+                          <input className="form-control" type="url" value={form.pdfLink} onChange={(e) => setForm({ ...form, pdfLink: e.target.value })} placeholder="https://example.com/notification.pdf" />
+                        </div>
+                        <div className="col-12 col-md-6 animate-slide-down">
+                          <label className="form-label">Source Website Name</label>
+                          <input className="form-control" value={form.sourceWebsite} onChange={(e) => setForm({ ...form, sourceWebsite: e.target.value })} placeholder="e.g., UPSC, SSC, Railway" />
+                        </div>
+                        <div className="col-12 col-md-6 animate-slide-down">
+                          <label className="form-label">Source/Apply URL (Source URL)</label>
+                          <input className="form-control" type="url" value={form.sourceUrl} onChange={(e) => setForm({ ...form, sourceUrl: e.target.value })} placeholder="https://ssc.nic.in/apply" />
+                        </div>
+                        <div className="col-12 animate-slide-down">
+                          <label className="form-label">Important Dates (Instructions/Details)</label>
+                          <textarea className="form-control" rows="3" value={form.importantDates} onChange={(e) => setForm({ ...form, importantDates: e.target.value })} placeholder="e.g., Application Start: 01/06/2026&#10;Last Date: 30/06/2026&#10;Exam Date: July 2026" />
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
               )}
@@ -682,22 +794,76 @@ export default function AdminDashboard() {
       <div style={{ background: '#fff', borderRadius: '12px', boxShadow: '0 6px 20px rgba(22,44,74,0.04)', overflow: 'hidden' }}>
         <div style={{ padding: '1.5rem', borderBottom: '1px solid #f0f4f8', background: '#fafbfc', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2 className="h5 mb-0" style={{ fontWeight: 800, color: '#162c4a' }}>
-            📋 {filterBy === 'all' && 'All Job Listings'} {filterBy === 'active' && 'Active Listings'} {filterBy === 'featured' && 'Featured Jobs'} ({(() => {
+            📋 {filterBy === 'all' && 'All Job Listings'} {filterBy === 'active' && 'Active Listings'} {filterBy === 'featured' && 'Featured Jobs'} {filterBy === 'draft' && 'Draft / Inactive Jobs'} ({(() => {
               if (filterBy === 'all') return jobs.length;
               if (filterBy === 'active') return jobs.filter(j => j.isActive).length;
               if (filterBy === 'featured') return jobs.filter(j => j.isFeatured).length;
+              if (filterBy === 'draft') return jobs.filter(j => !j.isActive).length;
               return 0;
             })()})
           </h2>
-          {filterBy !== 'all' && (
-            <button style={{ background: '#f0f4f8', border: '1px solid #e0e7f1', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, color: '#1677b6' }} onClick={() => setFilterBy('all')}>
-              ✕ Clear Filter
+          {(filterBy !== 'all' || categoryFilter !== 'all') && (
+            <button 
+              style={{ background: '#f0f4f8', border: '1px solid #e0e7f1', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, color: '#1677b6' }} 
+              onClick={() => {
+                setFilterBy('all');
+                setCategoryFilter('all');
+              }}
+            >
+              ✕ Clear Filters
             </button>
           )}
         </div>
 
+        {/* Category Filters Bar */}
+        <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid #f0f4f8', background: '#f8fafc', display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+          <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#465a6b', marginRight: '0.5rem' }}>🏷️ Category Filter:</span>
+          {[
+            { id: 'all', label: 'All Categories' },
+            { id: 'govt', label: '🏛️ Govt Jobs' },
+            { id: 'admit', label: '🪪 Admit Cards' },
+            { id: 'result', label: '📢 Results' },
+            { id: 'answer', label: '🗝️ Answer Keys' },
+            { id: 'corporate', label: '💼 Corporate' }
+          ].map(category => (
+            <button
+              key={category.id}
+              onClick={() => setCategoryFilter(category.id)}
+              type="button"
+              style={{
+                padding: '0.4rem 0.8rem',
+                borderRadius: '6px',
+                fontSize: '0.85rem',
+                fontWeight: 600,
+                border: '1px solid',
+                borderColor: categoryFilter === category.id ? '#1677b6' : '#e0e7f1',
+                background: categoryFilter === category.id ? '#1677b6' : '#fff',
+                color: categoryFilter === category.id ? '#fff' : '#465a6b',
+                cursor: 'pointer',
+                transition: 'all 150ms ease'
+              }}
+            >
+              {category.label}
+            </button>
+          ))}
+        </div>
+
         {(() => {
-          const filteredJobs = filterBy === 'all' ? jobs : filterBy === 'active' ? jobs.filter(j => j.isActive) : jobs.filter(j => j.isFeatured);
+          const filteredJobs = jobs.filter(j => {
+            // Primary status filter
+            if (filterBy === 'active' && !j.isActive) return false;
+            if (filterBy === 'featured' && !j.isFeatured) return false;
+            if (filterBy === 'draft' && j.isActive) return false;
+
+            // Secondary category filter
+            if (categoryFilter === 'govt' && !j.isGovernment) return false;
+            if (categoryFilter === 'admit' && (!j.isGovernment || !String(j.postType || '').toLowerCase().includes('admit'))) return false;
+            if (categoryFilter === 'result' && (!j.isGovernment || !String(j.postType || '').toLowerCase().includes('result'))) return false;
+            if (categoryFilter === 'answer' && (!j.isGovernment || !String(j.postType || '').toLowerCase().includes('answer'))) return false;
+            if (categoryFilter === 'corporate' && j.isGovernment) return false;
+
+            return true;
+          });
           return filteredJobs.length === 0 ? (
             <div style={{ padding: '3rem', textAlign: 'center', color: '#465a6b' }}>
               <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📭</div>
@@ -724,7 +890,24 @@ export default function AdminDashboard() {
                   {filteredJobs.map((j) => (
                     <tr key={j._id} style={{ borderBottom: '1px solid #f0f4f8', transition: 'all 200ms ease' }}>
                       <td style={{ padding: '1rem', fontWeight: 600, color: '#162c4a' }}>
-                        {j.title.length > 30 ? j.title.substring(0, 30) + '...' : j.title}
+                        <div>{j.title.length > 40 ? j.title.substring(0, 40) + '...' : j.title}</div>
+                        <div style={{ display: 'flex', gap: '0.25rem', marginTop: '0.25rem', flexWrap: 'wrap' }}>
+                          {j.isGovernment && (
+                            <span style={{ fontSize: '0.72rem', background: '#ffe4e6', color: '#e11d48', padding: '0.1rem 0.4rem', borderRadius: '4px', fontWeight: 700 }}>
+                              🏛️ Govt ({j.postType || 'Job'})
+                            </span>
+                          )}
+                          {j.isFeatured && (
+                            <span style={{ fontSize: '0.72rem', background: '#fef3c7', color: '#d97706', padding: '0.1rem 0.4rem', borderRadius: '4px', fontWeight: 700 }}>
+                              ⭐ Featured
+                            </span>
+                          )}
+                          {!j.isActive && (
+                            <span style={{ fontSize: '0.72rem', background: '#f3f4f6', color: '#4b5563', padding: '0.1rem 0.4rem', borderRadius: '4px', fontWeight: 700 }}>
+                              📝 Draft
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td style={{ padding: '1rem', color: '#465a6b' }}>{j.company}</td>
                       <td style={{ padding: '1rem', color: '#465a6b' }}>{j.location}</td>
@@ -742,17 +925,37 @@ export default function AdminDashboard() {
                         </span>
                       </td>
                       <td style={{ padding: '1rem' }}>
-                        <span style={{
-                          display: 'inline-block',
-                          padding: '0.35rem 0.75rem',
-                          borderRadius: '6px',
-                          fontSize: '0.85rem',
-                          fontWeight: 700,
-                          background: j.isActive ? 'rgba(25,169,116,0.1)' : 'rgba(239,68,68,0.1)',
-                          color: j.isActive ? '#19a974' : '#ef4444'
-                        }}>
-                          {j.isActive ? '✓ Active' : '◯ Inactive'}
-                        </span>
+                        <button 
+                          onClick={() => toggleJobStatus(j._id, j.isActive)}
+                          type="button"
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.4rem',
+                            padding: '0.35rem 0.75rem',
+                            borderRadius: '6px',
+                            fontSize: '0.85rem',
+                            fontWeight: 700,
+                            background: j.isActive ? 'rgba(25,169,116,0.1)' : 'rgba(239,68,68,0.1)',
+                            color: j.isActive ? '#19a974' : '#ef4444',
+                            border: '1px solid',
+                            borderColor: j.isActive ? 'rgba(25,169,116,0.2)' : 'rgba(239,68,68,0.2)',
+                            cursor: 'pointer',
+                            transition: 'all 200ms ease'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'scale(1.05)';
+                            e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'none';
+                            e.currentTarget.style.boxShadow = 'none';
+                          }}
+                          title="Click to toggle listing status (Active/Inactive)"
+                        >
+                          <span>{j.isActive ? '🟢 Active' : '🔴 Inactive'}</span>
+                          <span style={{ fontSize: '0.75rem', opacity: 0.7 }}>🔁</span>
+                        </button>
                       </td>
                       <td style={{ padding: '1rem', textAlign: 'right' }}>
                         <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
@@ -796,6 +999,9 @@ export default function AdminDashboard() {
         }
         .admin-header {
           animation: slideDown 400ms ease;
+        }
+        .animate-slide-down {
+          animation: slideDown 300ms ease forwards;
         }
       `}</style>
     </div>

@@ -47,6 +47,18 @@ function buildFilters(query) {
     filters.isFeatured = true;
   }
   
+  // Filter by government jobs
+  if (query.isGovernment) {
+    filters.isGovernment = query.isGovernment === 'true';
+  }
+
+  // Filter by post type
+  if (query.postType) {
+    filters.postType = query.postType;
+  } else if (query.status !== 'all') {
+    filters.postType = { $nin: ['Admit Card', 'Result', 'Answer Key'] };
+  }
+  
   return filters;
 }
 
@@ -167,12 +179,26 @@ exports.createJob = async (req, res) => {
       title, company, location, type, experience, jobDescription,
       responsibilities, requirements, skills, education, batch,
       salary, applyLink, lastDate, image, whatsapp, telegram, contact,
-      metaTitle, metaDescription, isFeatured,
-      aboutCompany, whyJoin, description, howToApply, finalThoughts, highlightText
+      metaTitle, metaDescription, isFeatured, isActive,
+      aboutCompany, whyJoin, description, howToApply, finalThoughts, highlightText,
+      postType, sourceWebsite, sourceUrl, importantDates, pdfLink, isGovernment,
+      eligibility, vacancies
     } = req.body;
     
     // Required fields validation
-    if (!title || !company || !location || !type || !experience || !jobDescription || !education || !applyLink) {
+    const isGov = isGovernment === true || isGovernment === 'true';
+    let hasMissing = !title || !company || !jobDescription || !applyLink;
+    if (!isGov) {
+      if (!location || !type || !experience || !education) {
+        hasMissing = true;
+      }
+    } else {
+      if (!eligibility || !vacancies) {
+        hasMissing = true;
+      }
+    }
+
+    if (hasMissing) {
       return res.status(400).json({ 
         success: false, 
         message: 'Missing required fields' 
@@ -190,15 +216,17 @@ exports.createJob = async (req, res) => {
       title,
       slug,
       company,
-      location,
-      type,
-      experience,
+      location: isGov ? '' : location,
+      type: isGov ? 'Full-Time' : type, // Keep a valid default for database enum if needed
+      experience: isGov ? '' : experience,
       jobDescription,
       responsibilities: Array.isArray(responsibilities) ? responsibilities : [responsibilities].filter(Boolean),
       requirements: Array.isArray(requirements) ? requirements : [requirements].filter(Boolean),
       skills: Array.isArray(skills) ? skills : [skills].filter(Boolean),
-      education,
-      batch,
+      education: isGov ? '' : education,
+      batch: isGov ? '' : batch,
+      eligibility: isGov ? eligibility : '',
+      vacancies: isGov ? vacancies : '',
       salary,
       applyLink,
       lastDate: lastDate || null,
@@ -213,8 +241,17 @@ exports.createJob = async (req, res) => {
       finalThoughts: finalThoughts || '',
       highlightText: highlightText || '',
       metaTitle: metaTitle || `${title} - ${company} - Job Openings`,
-      metaDescription: metaDescription || `${title} at ${company} in ${location}. ${jobDescription.substring(0, 150)}...`,
+      metaDescription: metaDescription || (isGov 
+        ? `${title} at ${company}. Eligibility: ${eligibility || ''}. Vacancies: ${vacancies || ''}.`
+        : `${title} at ${company} in ${location}. ${jobDescription.substring(0, 150)}...`),
       isFeatured: isFeatured || false,
+      isActive: isActive !== undefined ? isActive : true,
+      postType: postType || 'Job',
+      sourceWebsite: sourceWebsite || '',
+      sourceUrl: sourceUrl || '',
+      importantDates: importantDates || '',
+      pdfLink: pdfLink || '',
+      isGovernment: isGov,
       postedBy: req.user?.id
     });
     
@@ -250,13 +287,44 @@ exports.updateJob = async (req, res) => {
     const { id } = req.params;
     const updates = req.body;
     
-    // If title is being updated, update the slug as well
+    // If title is being updated, update the slug as well and validate/sanitize government fields
     if (updates.title) {
       updates.slug = slugify(updates.title, {
         lower: true,
         strict: true,
         trim: true
       });
+
+      const isGov = updates.isGovernment === true || updates.isGovernment === 'true';
+      let hasMissing = !updates.title || !updates.company || !updates.jobDescription || !updates.applyLink;
+      if (!isGov) {
+        if (!updates.location || !updates.type || !updates.experience || !updates.education) {
+          hasMissing = true;
+        }
+      } else {
+        if (!updates.eligibility || !updates.vacancies) {
+          hasMissing = true;
+        }
+      }
+
+      if (hasMissing) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Missing required fields' 
+        });
+      }
+
+      // Sanitize fields based on government status
+      if (isGov) {
+        updates.location = '';
+        updates.type = 'Full-Time';
+        updates.experience = '';
+        updates.education = '';
+        updates.batch = '';
+      } else {
+        updates.eligibility = '';
+        updates.vacancies = '';
+      }
     }
     
     const job = await Job.findByIdAndUpdate(

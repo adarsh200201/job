@@ -19,7 +19,7 @@ const PostCard = memo(({ job }) => {
   return (
     <Link to={`/${job.slug}`} className="rj-card">
       <div className="rj-img-wrap">
-        {job.image && (
+        {job.image ? (
           <img
             src={getImageUrl(job.image)}
             alt={job.title}
@@ -27,6 +27,10 @@ const PostCard = memo(({ job }) => {
             loading="lazy"
             onError={(e) => { e.target.style.display = 'none'; }}
           />
+        ) : (
+          <div className="rj-placeholder" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%', background: '#eff6ff', fontSize: '1.2rem' }}>
+            {job.isGovernment ? '🏛️' : '💼'}
+          </div>
         )}
       </div>
       <div className="rj-info">

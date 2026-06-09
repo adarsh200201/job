@@ -1,9 +1,11 @@
 const dotenv = require('dotenv');
-dotenv.config();
+const path = require('path');
+// Load .env from root (works whether run from /server or root)
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
+dotenv.config(); // fallback: also check current dir .env
 
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
 const session = require('express-session');
 const passport = require('./config/passport');
 const { connectDB } = require('./utils/db');

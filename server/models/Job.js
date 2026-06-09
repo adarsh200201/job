@@ -7,15 +7,15 @@ const JobSchema = new mongoose.Schema(
     title: { type: String, required: true, trim: true },
     slug: { type: String, unique: true, trim: true },
     company: { type: String, required: true, trim: true },
-    location: { type: String, required: true, trim: true },
+    location: { type: String, required: function() { return !this.isGovernment; }, trim: true },
     type: { 
       type: String, 
       enum: ['Full-Time', 'Part-Time', 'Internship', 'Contract', 'Remote', 'Hybrid'], 
-      required: true 
+      required: function() { return !this.isGovernment; }
     },
     
     // Job Details
-    experience: { type: String, required: true, trim: true },
+    experience: { type: String, required: function() { return !this.isGovernment; }, trim: true },
     salary: { type: String, trim: true },
     jobDescription: { type: String, required: true },
     responsibilities: { type: [String], default: [] },
@@ -23,8 +23,10 @@ const JobSchema = new mongoose.Schema(
     skills: { type: [String], default: [] },
     
     // Eligibility Criteria
-    education: { type: String, required: true, trim: true },
+    education: { type: String, required: function() { return !this.isGovernment; }, trim: true },
     batch: { type: String, trim: true }, // e.g., "2025 Batch"
+    eligibility: { type: String, trim: true },
+    vacancies: { type: String, trim: true },
     
     // Application Details
     applyLink: { type: String, required: true, trim: true },
@@ -50,6 +52,16 @@ const JobSchema = new mongoose.Schema(
     // SEO Fields
     metaTitle: { type: String, trim: true },
     metaDescription: { type: String, trim: true },
+    
+    // Scraper Metadata
+    postType: { type: String, default: 'Job', trim: true },
+    sourceWebsite: { type: String, trim: true },
+    sourceUrl: { type: String, trim: true },
+    importantDates: { type: String, trim: true },
+    pdfLink: { type: String, trim: true },
+    isGovernment: { type: Boolean, default: false },
+    eligibility: { type: String, trim: true },
+    vacancies: { type: String, trim: true },
     
     // Status
     isActive: { type: Boolean, default: true },
