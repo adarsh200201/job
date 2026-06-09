@@ -107,36 +107,36 @@ function JobDetailCard({ job, adLink: propAdLink }) {
               {/* Header Badge Row */}
               <div className="jc-govt-header" style={{ marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
                 <div className="jc-govt-badge-group" style={{ gap: '0.4rem', display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
-                  <span className={`jc-govt-badge ${badgeClass}`} style={{ padding: '3px 8px', fontSize: '0.65rem', fontWeight: '800' }}>
+                  <span className={`jc-govt-badge ${badgeClass}`} style={{ padding: '3px 8px', fontSize: '0.78rem', fontWeight: '800' }}>
                     {badgeText}
                   </span>
                   {formattedLastDate && (
-                    <span className="jc-govt-last-date" style={{ padding: '2px 6px', fontSize: '0.65rem' }}>
+                    <span className="jc-govt-last-date" style={{ padding: '2px 6px', fontSize: '0.78rem' }}>
                       📅 Last Date: {formattedLastDate}
                     </span>
                   )}
-                  <span className="jc-posted" style={{ fontSize: '0.72rem', color: '#9ca3af', fontWeight: '500', marginLeft: '0.25rem' }}>
+                  <span className="jc-posted" style={{ fontSize: '0.8rem', color: '#9ca3af', fontWeight: '500', marginLeft: '0.25rem' }}>
                     {timeAgo(job.createdAt)}
                   </span>
                 </div>
               </div>
 
               {/* Title */}
-              <h2 className="jc-title" style={{ fontSize: '1.05rem', margin: '0.1rem 0', fontWeight: '700', lineHeight: '1.3' }}>
+              <h2 className="jc-title" style={{ fontSize: '1.25rem', margin: '0.1rem 0', fontWeight: '700', lineHeight: '1.3' }}>
                 <Link to={`/${job.slug}`} target="_blank" rel="noopener noreferrer" className="jc-title-link">
                   {job.title}
                 </Link>
               </h2>
 
               {/* Company / Org + Location Row */}
-              <div className="jc-company-row" style={{ gap: '0.5rem', fontSize: '0.74rem', display: 'flex', alignItems: 'center' }}>
+              <div className="jc-company-row" style={{ gap: '0.5rem', fontSize: '0.88rem', display: 'flex', alignItems: 'center' }}>
                 <span className="jc-company" style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
                   {job.company || (job.isGovernment ? 'Govt Org' : 'Company')}
                 </span>
                 {!job.isGovernment && job.location && (
                   <span className="jc-location" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                     {job.location}
                   </span>
                 )}
@@ -147,17 +147,17 @@ function JobDetailCard({ job, adLink: propAdLink }) {
                 {job.isGovernment ? (
                   <>
                     {job.eligibility && (
-                      <span className="jc-chip jc-chip-gray" style={{ padding: '0.15rem 0.5rem', fontSize: '0.68rem' }}>
+                      <span className="jc-chip jc-chip-gray" style={{ padding: '0.15rem 0.5rem', fontSize: '0.8rem' }}>
                         🎓 {job.eligibility}
                       </span>
                     )}
                     {job.vacancies && (
-                      <span className="jc-chip jc-chip-gray" style={{ padding: '0.15rem 0.5rem', fontSize: '0.68rem' }}>
+                      <span className="jc-chip jc-chip-gray" style={{ padding: '0.15rem 0.5rem', fontSize: '0.8rem' }}>
                         👥 {job.vacancies}
                       </span>
                     )}
                     {job.salary && (
-                      <span className="jc-chip jc-chip-gray" style={{ padding: '0.15rem 0.5rem', fontSize: '0.68rem' }}>
+                      <span className="jc-chip jc-chip-gray" style={{ padding: '0.15rem 0.5rem', fontSize: '0.8rem' }}>
                         💰 {job.salary}
                       </span>
                     )}
@@ -165,18 +165,18 @@ function JobDetailCard({ job, adLink: propAdLink }) {
                 ) : (
                   <>
                     {job.type && (
-                      <span className="jc-chip" style={{ background: typeColor.bg, color: typeColor.color, padding: '0.15rem 0.5rem', fontSize: '0.68rem' }}>
+                      <span className="jc-chip" style={{ background: typeColor.bg, color: typeColor.color, padding: '0.15rem 0.5rem', fontSize: '0.8rem' }}>
                         <span className="jc-chip-dot" style={{ background: typeColor.dot }} />
                         {job.type}
                       </span>
                     )}
                     {job.experience && (
-                      <span className="jc-chip jc-chip-gray" style={{ padding: '0.15rem 0.5rem', fontSize: '0.68rem' }}>
+                      <span className="jc-chip jc-chip-gray" style={{ padding: '0.15rem 0.5rem', fontSize: '0.8rem' }}>
                         💼 {job.experience}
                       </span>
                     )}
                     {job.education && (
-                      <span className="jc-chip jc-chip-gray" style={{ padding: '0.15rem 0.5rem', fontSize: '0.68rem' }}>
+                      <span className="jc-chip jc-chip-gray" style={{ padding: '0.15rem 0.5rem', fontSize: '0.8rem' }}>
                         🎓 {job.education}
                       </span>
                     )}
@@ -186,7 +186,7 @@ function JobDetailCard({ job, adLink: propAdLink }) {
 
               {/* Excerpt */}
               {(job.description || job.jobDescription) && (
-                <p className="jc-excerpt" style={{ margin: '0.1rem 0 0 0', fontSize: '0.74rem', lineClamp: 1, WebkitLineClamp: 1 }}>
+                <p className="jc-excerpt" style={{ margin: '0.1rem 0 0 0', fontSize: '0.88rem', lineClamp: 1, WebkitLineClamp: 1 }}>
                   {excerpt(job.description || job.jobDescription, 120)}
                 </p>
               )}
@@ -239,36 +239,36 @@ function JobDetailCard({ job, adLink: propAdLink }) {
             {/* Header Badge Row */}
             <div className="jc-govt-header" style={{ marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
               <div className="jc-govt-badge-group" style={{ gap: '0.4rem', display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
-                <span className={`jc-govt-badge ${badgeClass}`} style={{ padding: '3px 8px', fontSize: '0.65rem', fontWeight: '800' }}>
+                <span className={`jc-govt-badge ${badgeClass}`} style={{ padding: '3px 8px', fontSize: '0.78rem', fontWeight: '800' }}>
                   {badgeText}
                 </span>
                 {formattedLastDate && (
-                  <span className="jc-govt-last-date" style={{ padding: '2px 6px', fontSize: '0.65rem' }}>
+                  <span className="jc-govt-last-date" style={{ padding: '2px 6px', fontSize: '0.78rem' }}>
                     📅 Last Date: {formattedLastDate}
                   </span>
                 )}
-                <span className="jc-posted" style={{ fontSize: '0.72rem', color: '#9ca3af', fontWeight: '500', marginLeft: '0.25rem' }}>
+                <span className="jc-posted" style={{ fontSize: '0.8rem', color: '#9ca3af', fontWeight: '500', marginLeft: '0.25rem' }}>
                   {timeAgo(job.createdAt)}
                 </span>
               </div>
             </div>
 
             {/* Title */}
-            <h2 className="jc-title" style={{ fontSize: '1.05rem', margin: '0.1rem 0', fontWeight: '700', lineHeight: '1.3' }}>
+            <h2 className="jc-title" style={{ fontSize: '1.25rem', margin: '0.1rem 0', fontWeight: '700', lineHeight: '1.3' }}>
               <Link to={`/${job.slug}`} target="_blank" rel="noopener noreferrer" className="jc-title-link">
                 {job.title}
               </Link>
             </h2>
 
             {/* Company / Org + Location Row */}
-            <div className="jc-company-row" style={{ gap: '0.5rem', fontSize: '0.74rem', display: 'flex', alignItems: 'center' }}>
+            <div className="jc-company-row" style={{ gap: '0.5rem', fontSize: '0.88rem', display: 'flex', alignItems: 'center' }}>
               <span className="jc-company" style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
                 {job.company || (job.isGovernment ? 'Govt Org' : 'Company')}
               </span>
               {!job.isGovernment && job.location && (
                 <span className="jc-location" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                   {job.location}
                 </span>
               )}
@@ -279,17 +279,17 @@ function JobDetailCard({ job, adLink: propAdLink }) {
               {job.isGovernment ? (
                 <>
                   {job.eligibility && (
-                    <span className="jc-chip jc-chip-gray" style={{ padding: '0.15rem 0.5rem', fontSize: '0.68rem' }}>
+                    <span className="jc-chip jc-chip-gray" style={{ padding: '0.15rem 0.5rem', fontSize: '0.8rem' }}>
                       🎓 {job.eligibility}
                     </span>
                   )}
                   {job.vacancies && (
-                    <span className="jc-chip jc-chip-gray" style={{ padding: '0.15rem 0.5rem', fontSize: '0.68rem' }}>
+                    <span className="jc-chip jc-chip-gray" style={{ padding: '0.15rem 0.5rem', fontSize: '0.8rem' }}>
                       👥 {job.vacancies}
                     </span>
                   )}
                   {job.salary && (
-                    <span className="jc-chip jc-chip-gray" style={{ padding: '0.15rem 0.5rem', fontSize: '0.68rem' }}>
+                    <span className="jc-chip jc-chip-gray" style={{ padding: '0.15rem 0.5rem', fontSize: '0.8rem' }}>
                       💰 {job.salary}
                     </span>
                   )}
@@ -297,18 +297,18 @@ function JobDetailCard({ job, adLink: propAdLink }) {
               ) : (
                 <>
                   {job.type && (
-                    <span className="jc-chip" style={{ background: typeColor.bg, color: typeColor.color, padding: '0.15rem 0.5rem', fontSize: '0.68rem' }}>
+                    <span className="jc-chip" style={{ background: typeColor.bg, color: typeColor.color, padding: '0.15rem 0.5rem', fontSize: '0.8rem' }}>
                       <span className="jc-chip-dot" style={{ background: typeColor.dot }} />
                       {job.type}
                     </span>
                   )}
                   {job.experience && (
-                    <span className="jc-chip jc-chip-gray" style={{ padding: '0.15rem 0.5rem', fontSize: '0.68rem' }}>
+                    <span className="jc-chip jc-chip-gray" style={{ padding: '0.15rem 0.5rem', fontSize: '0.8rem' }}>
                       💼 {job.experience}
                     </span>
                   )}
                   {job.education && (
-                    <span className="jc-chip jc-chip-gray" style={{ padding: '0.15rem 0.5rem', fontSize: '0.68rem' }}>
+                    <span className="jc-chip jc-chip-gray" style={{ padding: '0.15rem 0.5rem', fontSize: '0.8rem' }}>
                       🎓 {job.education}
                     </span>
                   )}
@@ -318,7 +318,7 @@ function JobDetailCard({ job, adLink: propAdLink }) {
 
             {/* Excerpt */}
             {(job.description || job.jobDescription) && (
-              <p className="jc-excerpt" style={{ margin: '0.1rem 0 0 0', fontSize: '0.74rem', lineClamp: 1, WebkitLineClamp: 1 }}>
+              <p className="jc-excerpt" style={{ margin: '0.1rem 0 0 0', fontSize: '0.88rem', lineClamp: 1, WebkitLineClamp: 1 }}>
                 {excerpt(job.description || job.jobDescription, 120)}
               </p>
             )}

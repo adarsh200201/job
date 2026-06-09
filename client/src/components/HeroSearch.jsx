@@ -61,7 +61,7 @@ export default function HeroSearch() {
                 id="hero-job-search"
                 type="text"
                 className="hero-input"
-                placeholder="Search jobs"
+                placeholder="Search jobs, keywords, companies"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 aria-label="Search jobs"
@@ -76,7 +76,7 @@ export default function HeroSearch() {
                 id="hero-location-search"
                 type="text"
                 className="hero-input"
-                placeholder='Enter location '
+                placeholder='Enter location or "remote"'
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 aria-label="Location"
