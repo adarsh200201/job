@@ -11,20 +11,20 @@
 # Redirect sitemap and robots.txt to backend
 [[redirects]]
   from = "/sitemap.xml"
-  to = "https://next-job-cfbh.onrender.com/sitemap.xml"
+  to = "https://nextjobpost-backend.onrender.com/sitemap.xml"
   status = 200
   force = true
 
 [[redirects]]
   from = "/robots.txt"
-  to = "https://next-job-cfbh.onrender.com/robots.txt"
+  to = "https://nextjobpost-backend.onrender.com/robots.txt"
   status = 200
   force = true
 
 # API Proxy to backend
 [[redirects]]
   from = "/api/*"
-  to = "https://next-job-cfbh.onrender.com/api/:splat"
+  to = "https://nextjobpost-backend.onrender.com/api/:splat"
   status = 200
   force = true
 
