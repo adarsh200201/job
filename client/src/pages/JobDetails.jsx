@@ -1123,7 +1123,7 @@ export default function JobDetails() {
                 Job Description
               </h2>
               {/* Intro text (title line) above the grid */}
-              {job.jobDescription && (
+              {job.telegramFields && job.jobDescription && (
                 <div style={{ padding: '8px 4px 12px', fontSize: '0.97rem', color: '#334155', fontWeight: '500' }}>
                   {stripUnicodeBold(job.jobDescription)}
                 </div>
