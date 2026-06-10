@@ -32,6 +32,38 @@ function extractVacancy(title) {
   return match ? match[1] : 'As per notification';
 }
 
+// Generic salary patterns that should be replaced by real parsed values
+const GENERIC_SALARY_RE = /best in industry|as per company|competitive|not disclosed|negotiable|market standard/i;
+
+/**
+ * Returns the best salary string to display.
+ * Strategy: if DB salary is generic/missing, scan the raw description for
+ * any currency/salary value pattern (₹X LPA, X LPA, etc.) — this works
+ * even when Telegram uses Unicode math-bold for key labels like 𝗦𝗮𝗹𝗮𝗿𝘆.
+ */
+function getDisplaySalary(job) {
+  const dbSalary = job.salary || '';
+  // If DB value looks real (not generic), use it directly
+  if (dbSalary && !GENERIC_SALARY_RE.test(dbSalary)) return dbSalary;
+
+  // Scan raw description for a salary VALUE pattern (e.g. ₹4.5 LPA – ₹8 LPA (Expected))
+  const rawText = job.jobDescription || job.description || '';
+
+  // Match patterns like: ₹4.5 LPA – ₹8 LPA (Expected) | ₹50,000/month | 6 LPA | 60K/month
+  const VALUE_RE = /₹[\d,.]+\s*(?:LPA|L|Lakh|lakhs?|K|\/month)?(?:\s*[-–—]\s*₹?[\d,.]+\s*(?:LPA|L|Lakh|lakhs?|K|\/month)?)?(?:\s*\([^)\n]{1,30}\))?/i;
+  const mVal = rawText.match(VALUE_RE);
+  if (mVal) return mVal[0].trim();
+
+  // Fallback: try matching "X LPA" or "X Lakh" without ₹ symbol
+  const LPA_RE = /\b(\d+(?:\.\d+)?)\s*(?:LPA|Lakh|lacs?)\b/i;
+  const mLpa = rawText.match(LPA_RE);
+  if (mLpa) return mLpa[0].trim();
+
+  // Final fallback: return DB value (even if generic)
+  return dbSalary;
+}
+
+
 function formatDate(dateStr) {
   if (!dateStr) return '';
   const d = new Date(dateStr);
@@ -156,11 +188,11 @@ function JobDetailCard({ job, adLink: propAdLink }) {
                         👥 {job.vacancies}
                       </span>
                     )}
-                    {job.salary && (
+                    {(() => { const s = getDisplaySalary(job); return s ? (
                       <span className="jc-chip jc-chip-gray" style={{ padding: '0.15rem 0.5rem', fontSize: '0.8rem' }}>
-                        💰 {job.salary}
+                        💰 {s}
                       </span>
-                    )}
+                    ) : null; })()}
                   </>
                 ) : (
                   <>
@@ -180,11 +212,11 @@ function JobDetailCard({ job, adLink: propAdLink }) {
                         🎓 {job.education}
                       </span>
                     )}
-                    {job.salary && (
+                    {(() => { const s = getDisplaySalary(job); return s ? (
                       <span className="jc-chip jc-chip-gray" style={{ padding: '0.15rem 0.5rem', fontSize: '0.8rem' }}>
-                        💰 {job.salary}
+                        💰 {s}
                       </span>
-                    )}
+                    ) : null; })()}
                   </>
                 )}
               </div>
@@ -293,11 +325,11 @@ function JobDetailCard({ job, adLink: propAdLink }) {
                       👥 {job.vacancies}
                     </span>
                   )}
-                  {job.salary && (
+                  {(() => { const s = getDisplaySalary(job); return s ? (
                     <span className="jc-chip jc-chip-gray" style={{ padding: '0.15rem 0.5rem', fontSize: '0.8rem' }}>
-                      💰 {job.salary}
+                      💰 {s}
                     </span>
-                  )}
+                  ) : null; })()}
                 </>
               ) : (
                 <>
@@ -317,12 +349,11 @@ function JobDetailCard({ job, adLink: propAdLink }) {
                       🎓 {job.education}
                     </span>
                   )}
-                  {job.salary && (
+                  {(() => { const s = getDisplaySalary(job); return s ? (
                     <span className="jc-chip jc-chip-gray" style={{ padding: '0.15rem 0.5rem', fontSize: '0.8rem' }}>
-                      💰 {job.salary}
+                      💰 {s}
                     </span>
-                  )}
-                </>
+                  ) : null; })()}</>
               )}
             </div>
 

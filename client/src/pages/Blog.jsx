@@ -55,7 +55,7 @@ export default function Blog() {
 
   return (
     <section className="blog-page" style={{ paddingTop: '2rem', paddingBottom: '3rem' }}>
-      <div className="container">
+      <div>
         
         {/* Header */}
         <div className="mb-5 text-center">

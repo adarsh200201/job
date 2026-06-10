@@ -72,41 +72,314 @@ const AlsoReadCard = ({ relatedJob, themeColor = '#dc3545' }) => {
   );
 };
 
+// Strip Unicode Math Bold / Italic chars that Telegram uses for bold text
+const stripUnicodeBold = (str) => {
+  if (!str) return str;
+  const ranges = [
+    [0x1D400, 0x1D419, 0x41], [0x1D41A, 0x1D433, 0x61],
+    [0x1D434, 0x1D44D, 0x41], [0x1D44E, 0x1D467, 0x61],
+    [0x1D468, 0x1D481, 0x41], [0x1D482, 0x1D49B, 0x61],
+    [0x1D49C, 0x1D4B5, 0x41], [0x1D4B6, 0x1D4CF, 0x61],
+    [0x1D4D0, 0x1D4E9, 0x41], [0x1D4EA, 0x1D503, 0x61],
+    [0x1D504, 0x1D51D, 0x41], [0x1D51E, 0x1D537, 0x61],
+    [0x1D538, 0x1D551, 0x41], [0x1D552, 0x1D56B, 0x61],
+    [0x1D56C, 0x1D585, 0x41], [0x1D586, 0x1D59F, 0x61],
+    [0x1D5A0, 0x1D5B9, 0x41], [0x1D5BA, 0x1D5D3, 0x61],
+    [0x1D5D4, 0x1D5ED, 0x41], [0x1D5EE, 0x1D607, 0x61],
+    [0x1D608, 0x1D621, 0x41], [0x1D622, 0x1D63B, 0x61],
+    [0x1D63C, 0x1D655, 0x41], [0x1D656, 0x1D66F, 0x61],
+    [0x1D670, 0x1D689, 0x41], [0x1D68A, 0x1D6A3, 0x61],
+    [0x1D7CE, 0x1D7D7, 0x30], [0x1D7D8, 0x1D7E1, 0x30],
+    [0x1D7E2, 0x1D7EB, 0x30], [0x1D7EC, 0x1D7F5, 0x30],
+    [0x1D7F6, 0x1D7FF, 0x30],
+  ];
+  return [...str].map(ch => {
+    const cp = ch.codePointAt(0);
+    for (const [start, end, base] of ranges) {
+      if (cp >= start && cp <= end) return String.fromCharCode(base + (cp - start));
+    }
+    return ch;
+  }).join('');
+};
+
+// Strip leading emoji characters from a string
+const stripLeadingEmoji = (str) => str.replace(/^[\p{Emoji_Presentation}\p{Extended_Pictographic}\s•\-*]+/u, '').trim();
+
+// Field icon map for TelegramJobInfoGrid
+const FIELD_ICONS = {
+  'job role': '💼', 'role': '💼', 'position': '💼', 'designation': '💼', 'job type': '💼',
+  'qualification': '🎓', 'education': '🎓', 'degree': '🎓',
+  'batch': '📅', 'year': '📅', 'pass out': '📅',
+  'location': '📍', 'job location': '📍', 'city': '📍', 'place': '📍',
+  'salary': '💰', 'ctc': '💰', 'package': '💰', 'stipend': '💰', 'salary package': '💰',
+  'experience': '⏳', 'exp': '⏳',
+  'last date': '🗓️', 'deadline': '🗓️', 'apply by': '🗓️',
+  'skills': '⚙️', 'tech stack': '⚙️', 'technologies': '⚙️',
+  'vacancies': '📊', 'openings': '📊', 'posts': '📊',
+  'department': '🏢', 'company': '🏢',
+  'gender': '🚻', 'age': '🔢',
+};
+
+// Premium row-based Job Info Table for Telegram-sourced jobs
+const TelegramJobInfoGrid = ({ fields, themeColor = '#7c3aed' }) => {
+  if (!fields || fields.length === 0) return null;
+  return (
+    <div style={{
+      borderRadius: '10px',
+      overflow: 'hidden',
+      border: `1.5px solid ${themeColor}25`,
+      boxShadow: '0 4px 24px rgba(0,0,0,0.07)',
+      background: '#fff',
+    }}>
+      {fields.map((f, i) => {
+        const keyLower = f.key.toLowerCase();
+        const iconKey = Object.keys(FIELD_ICONS).find(k => keyLower.includes(k));
+        const icon = iconKey ? FIELD_ICONS[iconKey] : '▸';
+        return (
+          <div
+            key={i}
+            className="telegram-info-table-row"
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = `${themeColor}06`}
+            onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+          >
+            {/* Label cell */}
+            <div 
+              className="telegram-label-cell"
+              style={{
+                background: `${themeColor}08`,
+              }}
+            >
+              <span style={{
+                width: '30px',
+                height: '30px',
+                borderRadius: '8px',
+                background: `${themeColor}18`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '0.95rem',
+                flexShrink: 0,
+              }}>{icon}</span>
+              <span style={{
+                fontSize: '0.76rem',
+                fontWeight: '700',
+                color: themeColor,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                lineHeight: '1.2',
+              }}>{f.key}</span>
+            </div>
+            {/* Value cell */}
+            <div className="telegram-value-cell">
+              <span style={{
+                fontSize: '0.93rem',
+                color: '#1e293b',
+                fontWeight: '500',
+                lineHeight: '1.5',
+                wordBreak: 'break-word',
+              }}>{f.value}</span>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+// Parse inline Telegram key:value pattern: "emoji Key: Value emoji Key: Value"
+// Used for lines where multiple fields are packed on a single line
+const parseInlineFields = (line, knownKeys) => {
+  const results = [];
+  // Build alternation pattern from known keys
+  const keyAlt = knownKeys.join('|');
+  // Split on boundaries: emoji + optional spaces + knownKey + ":"
+  const splitRe = new RegExp(
+    `(?=[\\p{Emoji_Presentation}\\p{Extended_Pictographic}]?\\s*(?:${keyAlt})\\s*:)`,
+    'iu'
+  );
+  const segments = line.split(splitRe).map(s => s.trim()).filter(Boolean);
+  const pairRe = new RegExp(`^[\\p{Emoji_Presentation}\\p{Extended_Pictographic}\\s]*(${keyAlt})\\s*:\\s*(.+)`, 'iu');
+  segments.forEach(seg => {
+    const m = seg.match(pairRe);
+    if (m) results.push({ key: m[1].trim(), value: stripUnicodeBold(m[2].trim()) });
+  });
+  return results;
+};
+
+
 // Dynamic section enrichment for sparse off-campus/program postings
 const getEnrichedJob = (originalJob) => {
   if (!originalJob) return null;
   const enriched = { ...originalJob };
   if (!enriched.isGovernment) {
-    const desc = enriched.jobDescription || enriched.description || '';
-    const descLines = desc.split('\n').map(l => l.trim()).filter(Boolean);
+    const rawDesc = enriched.jobDescription || enriched.description || '';
     
+    // Extract all HTTP links from the raw description
+    const urlRegex = /https?:\/\/[^\s]+/g;
+    const extractedUrls = [...rawDesc.matchAll(urlRegex)].map(m => m[0].replace(/[).,]+$/, ''));
+    
+    // Build labeled link entries from extracted URLs
+    if (extractedUrls.length > 0 && !enriched.extractedLinks) {
+      const labelMap = [
+        { key: 'whatsapp.com', label: 'Join Our WhatsApp Channel' },
+        { key: 'wa.me', label: 'Join Our WhatsApp Channel' },
+        { key: 't.me', label: 'Join Our Telegram Channel' },
+        { key: 'telegram.me', label: 'Join Our Telegram Channel' },
+        { key: 'youtube.com', label: 'Watch: How to Apply' },
+        { key: 'youtu.be', label: 'Watch: How to Apply' },
+        { key: 'linkedin.com', label: 'Apply on LinkedIn' },
+      ];
+      enriched.extractedLinks = extractedUrls.map(url => {
+        const match = labelMap.find(l => url.includes(l.key));
+        // Redirect WhatsApp/Telegram to official channels
+        let finalUrl = url;
+        if (url.includes('whatsapp.com') || url.includes('wa.me')) finalUrl = 'https://chat.whatsapp.com/LVpuUJluTpUEdIc4daAemQ';
+        if (url.includes('t.me') || url.includes('telegram.me')) finalUrl = 'https://t.me/nextjobpost';
+        return { url: finalUrl, label: match ? match.label : 'Apply / Visit Link' };
+      });
+      // Deduplicate by URL
+      enriched.extractedLinks = enriched.extractedLinks.filter(
+        (link, idx, self) => self.findIndex(l => l.url === link.url) === idx
+      );
+    }
+
+    // Strip all URLs from the displayed job description
+    let cleanDesc = rawDesc.replace(urlRegex, '');
+
+    // Remove lines that are now empty after URL stripping, or are well-known label-only lines
+    const linesToStrip = [
+      /^[•\-\*]?\s*[\p{Emoji_Presentation}\p{Extended_Pictographic}]?\s*Apply\s*Link\s*:?\s*$/u,
+      /^[•\-\*]?\s*[\p{Emoji_Presentation}\p{Extended_Pictographic}]?\s*How\s*to\s*[Aa]pply\s*:?\s*$/u,
+      /^[•\-\*]?\s*[\p{Emoji_Presentation}\p{Extended_Pictographic}]?\s*Join\s*(Our\s*)?WhatsApp\s*:?\s*$/ui,
+      /^[•\-\*]?\s*[\p{Emoji_Presentation}\p{Extended_Pictographic}]?\s*Join\s*(Our\s*)?Telegram\s*:?\s*$/ui,
+      /^[•\-\*]?\s*[\p{Emoji_Presentation}\p{Extended_Pictographic}]?\s*Last\s*Date\s*:?\s*(Apply\s*ASAP)?\s*$/ui,
+      /^[⸻\-—_=]{2,}\s*$/u,   // divider lines like ⸻, ---, ===
+    ];
+
+    cleanDesc = cleanDesc
+      .split('\n')
+      .filter(line => {
+        const t = line.trim();
+        if (!t) return false; // remove blank lines right here
+        return !linesToStrip.some(re => re.test(t));
+      })
+      .join('\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+
+    enriched.jobDescription = cleanDesc || rawDesc;
+
+    const descLines = cleanDesc.split('\n').map(l => stripUnicodeBold(l).trim()).filter(Boolean);
+
+    // Parse structured key:value bullet lines into telegramFields
+    const KNOWN_KEYS = [
+      'Job Role', 'Role', 'Position', 'Designation', 'Job Type',
+      'Qualification', 'Education', 'Degree',
+      'Batch', 'Year of Passing', 'Pass out', 'Passout',
+      'Location', 'Job Location', 'City',
+      'Salary', 'CTC', 'Package', 'Stipend', 'Salary Package',
+      'Experience', 'Exp',
+      'Last Date', 'Deadline', 'Apply By',
+      'Skills', 'Tech Stack', 'Technologies',
+      'Vacancies', 'Openings', 'Posts',
+      'Department', 'Company',
+      'Gender', 'Age',
+    ];
+    const keyPattern = new RegExp(`^[•\\-\\*]?\\s*[\\p{Emoji_Presentation}\\p{Extended_Pictographic}\\s]*(${KNOWN_KEYS.join('|')})\\s*:(.*)$`, 'iu');
+    // Patterns for lines we should NEVER show in the intro text
+    const NOISY_LINE_PATTERNS = [
+      /share with your friends/i,
+      /apply link\s*:?\s*$/i,
+      /how to apply\s*:?\s*$/i,
+      /join.*whatsapp\s*:?\s*$/i,
+      /join.*telegram\s*:?\s*$/i,
+      /freshly posted/i,
+      /^[🚨🔔📢📣⚡🎯✅🔗]+\s*$/u,  // emoji-only lines
+    ];
+    const telegramFields = [];
+    const bodyLines = [];
+    descLines.forEach(line => {
+      const m = line.match(keyPattern);
+      if (m) {
+        const key = m[1].trim();
+        const val = stripUnicodeBold(m[2].trim());
+        if (val) telegramFields.push({ key, value: val });
+      } else if (!line.match(/^[•\-\*]/)) {
+        // Non-bullet line — check if it's an inline "emoji Key: Value emoji Key: Value" pattern
+        const inlineParsed = parseInlineFields(line, KNOWN_KEYS);
+        if (inlineParsed.length >= 2) {
+          // Multiple fields on one line — take them as structured fields, not body text
+          inlineParsed.forEach(f => {
+            if (!telegramFields.find(e => e.key.toLowerCase() === f.key.toLowerCase())) {
+              telegramFields.push(f);
+            }
+          });
+        } else {
+          // Keep as intro/title body text if it's not noisy
+          const cleaned = stripUnicodeBold(line).trim();
+          const isNoisy = NOISY_LINE_PATTERNS.some(re => re.test(cleaned));
+          const isEmojiOnly = /^[\p{Emoji_Presentation}\p{Extended_Pictographic}\s]+$/u.test(cleaned);
+          if (!isNoisy && !isEmojiOnly && cleaned.length > 3) {
+            bodyLines.push(cleaned);
+          }
+        }
+      }
+    });
+    if (telegramFields.length > 0) enriched.telegramFields = telegramFields;
+    // Keep only the intro/title text as the displayed jobDescription
+    if (telegramFields.length > 0 && bodyLines.length > 0) {
+      enriched.jobDescription = bodyLines.join('\n');
+    } else if (telegramFields.length > 0) {
+      enriched.jobDescription = null; // nothing left to show as raw text
+    }
+
+    // Override generic DB field values with actual values parsed from Telegram text
+    const GENERIC_SALARY = /best in industry|as per company|competitive|not disclosed|negotiable|market standard/i;
+    if (telegramFields.length > 0) {
+      const findField = (...keys) => {
+        for (const k of keys) {
+          const f = telegramFields.find(tf => tf.key.toLowerCase().includes(k.toLowerCase()));
+          if (f) return f.value;
+        }
+        return null;
+      };
+      const parsedSalary = findField('salary', 'ctc', 'package', 'stipend');
+      if (parsedSalary && (!enriched.salary || GENERIC_SALARY.test(enriched.salary))) {
+        enriched.salary = parsedSalary;
+      }
+      const parsedLocation = findField('location', 'city');
+      if (parsedLocation && !enriched.location) enriched.location = parsedLocation;
+      const parsedBatch = findField('batch', 'pass out', 'year');
+      if (parsedBatch && !enriched.batch) enriched.batch = parsedBatch;
+      const parsedType = findField('job role', 'role', 'position', 'designation', 'job type');
+      if (parsedType && !enriched.type) enriched.type = parsedType;
+    }
+
     // Parse key items (e.g. checkmarks, emojis, bullets) for highlights/requirements
-    const parsedHighlights = descLines.filter(line => 
-      line.startsWith('✅') || 
-      line.startsWith('🤖') || 
-      line.startsWith('📁') || 
-      line.startsWith('🎓') || 
-      line.startsWith('💼') || 
-      line.startsWith('👉') || 
-      line.startsWith('•') ||
-      line.startsWith('-') ||
-      line.startsWith('*')
-    ).map(line => line.replace(/^[✅🤖📁🎓💼👉•\-\s*]+/, '').trim());
-    
-    if (parsedHighlights.length > 0 && (!enriched.requirements || enriched.requirements.length === 0)) {
-      enriched.requirements = parsedHighlights;
+    // Only do this if we didn't already parse structured telegramFields (to avoid duplication)
+    if (telegramFields.length === 0) {
+      const parsedHighlights = descLines.filter(line =>
+        line.startsWith('✅') ||
+        line.startsWith('•') ||
+        line.startsWith('-') ||
+        line.startsWith('*')
+      ).map(line => stripLeadingEmoji(line));
+
+      if (parsedHighlights.length > 0 && (!enriched.requirements || enriched.requirements.length === 0)) {
+        enriched.requirements = parsedHighlights;
+      }
     }
     
     // Auto-create "Why Join" if missing
     if (!enriched.whyJoin) {
-      const placementHighlight = desc.includes('Placement') || desc.includes('Job Assistance') || desc.includes('Hiring Partners') || desc.includes('Hiring');
-      const salaryHighlight = desc.match(/\d+\s*(?:LPA|Lakh|L)/i);
+      const placementHighlight = rawDesc.includes('Placement') || rawDesc.includes('Job Assistance') || rawDesc.includes('Hiring Partners') || rawDesc.includes('Hiring');
+      const salaryHighlight = rawDesc.match(/\d+\s*(?:LPA|Lakh|L)/i);
       
       enriched.whyJoin = [
-        "🚀 Industry-Relevant Learning: Master high-demand skills like SQL, Python, AI, and Data Visualization.",
-        placementHighlight ? "💼 Job Assistance & Direct Support: Get mock interviews, 1:1 mentorship prep, and direct referral opportunities through hiring partners." : null,
-        salaryHighlight ? `💰 Compensation Opportunities: Position yourself for premium salary packages (up to ${salaryHighlight[0]} packages).` : null,
-        "📁 Practical Experience: Build real-world projects and case studies to showcase in your portfolio."
+        "Industry-Relevant Learning: Master high-demand skills like SQL, Python, AI, and Data Visualization.",
+        placementHighlight ? "Job Assistance & Direct Support: Get mock interviews, 1:1 mentorship prep, and direct referral opportunities through hiring partners." : null,
+        salaryHighlight ? `Compensation Opportunities: Position yourself for premium salary packages (up to ${salaryHighlight[0]} packages).` : null,
+        "Practical Experience: Build real-world projects and case studies to showcase in your portfolio."
       ].filter(Boolean);
     }
     
@@ -116,7 +389,7 @@ const getEnrichedJob = (originalJob) => {
         <ol style="line-height: 1.8; padding-left: 1.25rem; margin: 0;">
           <li style="margin-bottom: 8px;">Click on the <strong>Apply Now</strong> button below to open the official registration page.</li>
           <li style="margin-bottom: 8px;">Fill in your details (Name, Contact, Education, Batch) in the application form.</li>
-          <li style="margin-bottom: 8px;">Complete the initial screening profile to highlight your interest in Data Science & Analytics.</li>
+          <li style="margin-bottom: 8px;">Complete the initial screening profile to highlight your interest in Data Science &amp; Analytics.</li>
           <li style="margin-bottom: 8px;">Submit the application and await further instructions regarding onboarding or interviews.</li>
         </ol>
       `;
@@ -278,7 +551,7 @@ export default function JobDetails() {
     if (pt.includes('admit')) return '#1d4ed8'; // blue
     if (pt.includes('result')) return '#b45309'; // amber/gold
     if (pt.includes('answer')) return '#6d28d9'; // purple
-    return '#15803d'; // green for standard government job
+    return '#1d4ed8'; // blue for standard government job
   };
 
   const themeColor = getThemeColor();
@@ -361,7 +634,7 @@ export default function JobDetails() {
   };
 
   return (
-    <div className="job-details container mt-0 mb-4 animate-fade-in-up">
+    <div className="job-details mt-0 mb-4 animate-fade-in-up">
       <Helmet>
         <title>{job.metaTitle || `${job.title} at ${job.company} | NextJobPost`}</title>
         <meta name="description" content={job.metaDescription || job.shortSummary || `Apply for the ${job.title} job opening at ${job.company} in ${job.location}. Find eligibility criteria, responsibilities, and apply now.`} />
@@ -386,37 +659,54 @@ export default function JobDetails() {
         </script>
       </Helmet>
       <div className="row g-4">
-        <div className="col-12 col-lg-8">
+        <div className="col-12 col-lg-8 col-left">
           <div className="job-header-section mb-4 mt-2">
             <div className="d-flex flex-wrap align-items-center gap-2.5 mb-3">
               {/* Category Badge */}
               {job.isGovernment && (
-                <div className="d-inline-flex align-items-center gap-1.5 px-2.5 py-1 rounded-pill shadow-sm" style={{
+                <div className="d-inline-flex align-items-center gap-2 px-3 py-1.5 rounded-pill shadow-sm" style={{
                   background: 
                     String(job.postType || '').toLowerCase().includes('admit') ? 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)' :
                     String(job.postType || '').toLowerCase().includes('result') ? 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)' :
                     String(job.postType || '').toLowerCase().includes('answer') ? 'linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%)' :
-                    'linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%)',
+                    'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)',
                   border: 
                     String(job.postType || '').toLowerCase().includes('admit') ? '1px solid #3b82f6' :
                     String(job.postType || '').toLowerCase().includes('result') ? '1px solid #f59e0b' :
                     String(job.postType || '').toLowerCase().includes('answer') ? '1px solid #a855f7' :
-                    '1px solid #22c55e',
+                    '1px solid #3b82f6',
                   color: 
                     String(job.postType || '').toLowerCase().includes('admit') ? '#1d4ed8' :
                     String(job.postType || '').toLowerCase().includes('result') ? '#b45309' :
                     String(job.postType || '').toLowerCase().includes('answer') ? '#6d28d9' :
-                    '#15803d',
+                    '#1d4ed8',
                   fontSize: '0.82rem',
                   fontWeight: '700',
                   textTransform: 'uppercase',
                   letterSpacing: '0.5px'
                 }}>
-                  <span>
-                    {String(job.postType || '').toLowerCase().includes('admit') ? '🪪 Exam Admit Card' :
-                     String(job.postType || '').toLowerCase().includes('result') ? '📢 Exam Result Out' :
-                     String(job.postType || '').toLowerCase().includes('answer') ? '🗝️ Answer Key Out' :
-                     '🏛️ Govt Recruitment'}
+                  <span className="d-inline-flex align-items-center gap-1.5">
+                    {String(job.postType || '').toLowerCase().includes('admit') ? (
+                      <>
+                        <span style={{ fontSize: '1rem', lineHeight: '1' }}>🪪</span>
+                        <span>Exam Admit Card</span>
+                      </>
+                    ) : String(job.postType || '').toLowerCase().includes('result') ? (
+                      <>
+                        <span style={{ fontSize: '1rem', lineHeight: '1' }}>📢</span>
+                        <span>Exam Result Out</span>
+                      </>
+                    ) : String(job.postType || '').toLowerCase().includes('answer') ? (
+                      <>
+                        <span style={{ fontSize: '1rem', lineHeight: '1' }}>🗝️</span>
+                        <span>Answer Key Out</span>
+                      </>
+                    ) : (
+                      <>
+                        <span style={{ fontSize: '1rem', lineHeight: '1' }}>🏛️</span>
+                        <span>Govt Recruitment</span>
+                      </>
+                    )}
                   </span>
                 </div>
               )}
@@ -447,7 +737,7 @@ export default function JobDetails() {
               maxWidth: '100%'
             }}>
               {/* SHARE GROUP */}
-              <span style={{ fontSize: '0.9rem', fontWeight: '800', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.5px', marginRight: '4px', flexShrink: 0 }}>Share</span>
+              <span className="share-follow-label" style={{ fontSize: '0.9rem', fontWeight: '800', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.5px', marginRight: '4px', flexShrink: 0 }}>Share</span>
               
               {/* WhatsApp Share */}
               <a 
@@ -460,7 +750,7 @@ export default function JobDetails() {
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" fill="currentColor" width="16" height="16">
                   <path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/>
                 </svg>
-                WhatsApp
+                <span className="share-btn-text">WhatsApp</span>
               </a>
 
               {/* Telegram Share */}
@@ -474,7 +764,7 @@ export default function JobDetails() {
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
                   <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0m5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.328-.373-.115l-6.869 4.326-2.96-.924c-.643-.204-.658-.643.136-.953l11.566-4.458c.538-.196 1.006.128.832 1.136z" />
                 </svg>
-                Telegram
+                <span className="share-btn-text">Telegram</span>
               </a>
 
               {/* Copy Link Share */}
@@ -486,14 +776,14 @@ export default function JobDetails() {
                   <rect x="9" y="9" width="13" height="13" rx="2" ry="2" strokeLinecap="round" strokeLinejoin="round"/>
                   <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                {copied ? 'Copied' : 'Copy Link'}
+                <span className="share-btn-text">{copied ? 'Copied' : 'Copy Link'}</span>
               </button>
 
               {/* Divider */}
-              <div style={{ width: '1px', height: '24px', backgroundColor: '#cbd5e1', margin: '0 8px', flexShrink: 0 }}></div>
+              <div className="share-follow-bar-divider" style={{ width: '1px', height: '24px', backgroundColor: '#cbd5e1', margin: '0 8px', flexShrink: 0 }}></div>
 
               {/* FOLLOW GROUP */}
-              <span style={{ fontSize: '0.9rem', fontWeight: '800', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.5px', marginRight: '4px', flexShrink: 0 }}>Follow</span>
+              <span className="share-follow-label" style={{ fontSize: '0.9rem', fontWeight: '800', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.5px', marginRight: '4px', flexShrink: 0 }}>Follow</span>
 
               {/* WhatsApp Channel */}
               <a 
@@ -506,7 +796,7 @@ export default function JobDetails() {
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" fill="currentColor" width="16" height="16">
                   <path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/>
                 </svg>
-                Join WhatsApp
+                <span className="follow-btn-text">Join WhatsApp</span>
               </a>
 
               {/* Telegram Channel */}
@@ -520,7 +810,7 @@ export default function JobDetails() {
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
                   <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0m5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.328-.373-.115l-6.869 4.326-2.96-.924c-.643-.204-.658-.643.136-.953l11.566-4.458c.538-.196 1.006.128.832 1.136z" />
                 </svg>
-                Join Telegram
+                <span className="follow-btn-text">Join Telegram</span>
               </a>
             </div>
           </div>
@@ -569,141 +859,247 @@ export default function JobDetails() {
 
           {/* OVERVIEW SECTION */}
           <div className="mb-4">
-            {job.isGovernment ? (
-              <div className="govt-overview-card p-4 rounded-4 shadow-sm border" style={{
-                background: '#ffffff',
-                borderTop: '5px solid #ff9933', // saffron top line
-                borderColor: '#e2e8f0',
-                position: 'relative'
-              }}>
-                {/* Saffron, White, Green Tricolor Line */}
-                <div style={{ display: 'flex', height: '4px', position: 'absolute', top: 0, left: 0, right: 0 }}>
+            <div className="overview-card p-4 rounded-4 shadow-sm border" style={{
+              background: '#ffffff',
+              borderColor: '#e2e8f0',
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
+              {/* Saffron, White, Green Tricolor Line for Gov Jobs, or Theme Color for Private Jobs */}
+              {job.isGovernment ? (
+                <div style={{ display: 'flex', height: '5px', position: 'absolute', top: 0, left: 0, right: 0 }}>
                   <div style={{ flex: 1, backgroundColor: '#ff9933' }}></div>
                   <div style={{ flex: 1, backgroundColor: '#ffffff' }}></div>
                   <div style={{ flex: 1, backgroundColor: '#138808' }}></div>
                 </div>
+              ) : (
+                <div style={{ height: '5px', position: 'absolute', top: 0, left: 0, right: 0, backgroundColor: themeColor }}></div>
+              )}
 
-                <h2 className="fw-bold mb-3 mt-2 text-dark d-flex align-items-center gap-2" style={{ fontSize: '1.35rem' }}>
-                  <span>🏛️</span> {job.company} {job.postType || 'Recruitment'} – Overview
-                </h2>
+              <h2 className="fw-bold mb-3 mt-2 text-dark d-flex align-items-center gap-2.5" style={{ fontSize: '1.4rem', letterSpacing: '-0.02em' }}>
+                <span style={{ fontSize: '1.5rem' }}>{job.isGovernment ? '🏛️' : '🏢'}</span>
+                {job.isGovernment 
+                  ? `${job.company} ${job.postType || 'Recruitment'} – Overview`
+                  : `${capitalize(job.company)} Off Campus Recruitment – Overview`}
+              </h2>
 
-                <div className="row g-3">
-                  <div className="col-12 col-md-6">
-                    <div className="p-3 rounded-3 bg-light border border-light-subtle h-100 d-flex align-items-start gap-2.5">
-                      <span style={{ fontSize: '1.25rem' }}>🏛️</span>
-                      <div>
-                        <div className="text-muted small fw-bold text-uppercase" style={{ fontSize: '0.75rem', letterSpacing: '0.5px' }}>Organization</div>
-                        <div className="fw-bold text-dark mt-1" style={{ fontSize: '0.95rem' }}>{job.company}</div>
-                      </div>
-                    </div>
+              <div className="overview-table-wrap mt-3">
+                <table className="overview-table">
+                  <tbody>
+                    {job.isGovernment ? (
+                      <>
+                        {job.company && (
+                          <tr>
+                            <td className="overview-key">
+                              <span style={{ marginRight: '8px' }}>🏛️</span> Organization
+                            </td>
+                            <td className="overview-value">
+                              {job.company}
+                            </td>
+                          </tr>
+                        )}
+                        {(job.postType || job.isGovernment) && (
+                          <tr>
+                            <td className="overview-key">
+                              <span style={{ marginRight: '8px' }}>📢</span> Notification Type
+                            </td>
+                            <td className="overview-value">
+                              <span className="badge rounded-pill px-3 py-1.5" style={{
+                                fontSize: '0.8rem',
+                                backgroundColor: `${themeColor}12`,
+                                color: themeColor,
+                                border: `1px solid ${themeColor}30`,
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.5px'
+                              }}>
+                                {job.postType || 'Government Job'}
+                              </span>
+                            </td>
+                          </tr>
+                        )}
+                        {(job.eligibility || job.education) && (
+                          <tr>
+                            <td className="overview-key">
+                              <span style={{ marginRight: '8px' }}>🎓</span> Eligibility Criteria
+                            </td>
+                            <td className="overview-value">
+                              {job.eligibility || job.education}
+                            </td>
+                          </tr>
+                        )}
+                        {job.salary && (
+                          <tr>
+                            <td className="overview-key">
+                              <span style={{ marginRight: '8px' }}>💰</span> Salary / Pay Scale
+                            </td>
+                            <td className="overview-value" style={{ color: '#16a34a' }}>
+                              {job.salary}
+                            </td>
+                          </tr>
+                        )}
+                        {(job.vacancies || extractVacancy(job.title)) && (
+                          <tr>
+                            <td className="overview-key">
+                              <span style={{ marginRight: '8px' }}>👥</span> Vacancies
+                            </td>
+                            <td className="overview-value">
+                              <span className="badge bg-secondary-subtle text-secondary-emphasis px-2.5 py-1" style={{ fontSize: '0.88rem' }}>
+                                {job.vacancies || extractVacancy(job.title)}
+                              </span>
+                            </td>
+                          </tr>
+                        )}
+                        {job.lastDate && (
+                          <tr>
+                            <td className="overview-key">
+                              <span style={{ marginRight: '8px' }}>📅</span> Last Date to Apply
+                            </td>
+                            <td className="overview-value" style={{ color: '#ef4444' }}>
+                              {new Date(job.lastDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                              {new Date(job.lastDate) > new Date() && (
+                                <span className="ms-2 badge bg-danger-subtle text-danger px-2 py-1" style={{ fontSize: '0.75rem', fontWeight: '600' }}>
+                                  Active
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        {job.company && (
+                          <tr>
+                            <td className="overview-key">
+                              <span style={{ marginRight: '8px' }}>🏢</span> Company Name
+                            </td>
+                            <td className="overview-value">
+                              {capitalize(job.company)}
+                            </td>
+                          </tr>
+                        )}
+                        {job.type && (
+                          <tr>
+                            <td className="overview-key">
+                              <span style={{ marginRight: '8px' }}>💼</span> Role / Designation
+                            </td>
+                            <td className="overview-value">
+                              {job.type}
+                            </td>
+                          </tr>
+                        )}
+                        {(job.education || job.eligibility) && (
+                          <tr>
+                            <td className="overview-key">
+                              <span style={{ marginRight: '8px' }}>🎓</span> Qualification
+                            </td>
+                            <td className="overview-value">
+                              {job.education || job.eligibility}
+                            </td>
+                          </tr>
+                        )}
+                        {job.experience && (
+                          <tr>
+                            <td className="overview-key">
+                              <span style={{ marginRight: '8px' }}>⏳</span> Experience
+                            </td>
+                            <td className="overview-value">
+                              {job.experience}
+                            </td>
+                          </tr>
+                        )}
+                        {job.batch && (
+                          <tr>
+                            <td className="overview-key">
+                              <span style={{ marginRight: '8px' }}>📆</span> Batch
+                            </td>
+                            <td className="overview-value">
+                              {job.batch}
+                            </td>
+                          </tr>
+                        )}
+                        {job.location && (
+                          <tr>
+                            <td className="overview-key">
+                              <span style={{ marginRight: '8px' }}>📍</span> Location
+                            </td>
+                            <td className="overview-value">
+                              {job.location}
+                            </td>
+                          </tr>
+                        )}
+                        {job.salary && (
+                          <tr>
+                            <td className="overview-key">
+                              <span style={{ marginRight: '8px' }}>💰</span> Salary
+                            </td>
+                            <td className="overview-value" style={{ color: '#16a34a' }}>
+                              {job.salary}
+                            </td>
+                          </tr>
+                        )}
+                        {job.lastDate && (
+                          <tr>
+                            <td className="overview-key">
+                              <span style={{ marginRight: '8px' }}>📅</span> Application Deadline
+                            </td>
+                            <td className="overview-value" style={{ color: '#ef4444' }}>
+                              {new Date(job.lastDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                              {new Date(job.lastDate) > new Date() && (
+                                <span className="ms-2 badge bg-danger-subtle text-danger px-2 py-1" style={{ fontSize: '0.75rem', fontWeight: '600' }}>
+                                  Active
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        )}
+                      </>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              <AlsoReadCard relatedJob={intersperseJobs[0]} themeColor={themeColor} />
+
+              {/* Essential Links Block */}
+              {(job.pdfLink || job.applyLink) && (
+                <div className="mt-4 p-3 rounded-3 shadow-sm" style={{ background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                  <div className="fw-bold mb-3 text-dark d-flex align-items-center gap-1.5" style={{ fontSize: '0.95rem' }}>
+                    <span>🔗</span> Essential Links:
                   </div>
-                  <div className="col-12 col-md-6">
-                    <div className="p-3 rounded-3 bg-light border border-light-subtle h-100 d-flex align-items-start gap-2.5">
-                      <span style={{ fontSize: '1.25rem' }}>📢</span>
-                      <div>
-                        <div className="text-muted small fw-bold text-uppercase" style={{ fontSize: '0.75rem', letterSpacing: '0.5px' }}>Notification Type</div>
-                        <div className="fw-bold text-dark mt-1">
-                          <span className="badge rounded-pill px-2.5 py-1" style={{
-                            fontSize: '0.8rem',
-                            backgroundColor: `${themeColor}12`,
-                            color: themeColor,
-                            border: `1px solid ${themeColor}30`
-                          }}>
-                            {job.postType || 'Notification'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
+                  <div className="d-flex flex-wrap gap-2.5">
+                    {job.pdfLink && (
+                      (!job.pdfLink.includes('govtjobsalert.in') && !job.pdfLink.includes('sarkariresult.com')) ||
+                      job.pdfLink.toLowerCase().endsWith('.pdf')
+                    ) && (
+                      <a href={job.pdfLink} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline-danger fw-bold d-inline-flex align-items-center gap-1.5 px-3 py-2" style={{ borderRadius: '6px' }}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Download Official PDF
+                      </a>
+                    )}
+                    {job.applyLink && (
+                      <a 
+                        href={job.applyLink} 
+                        onClick={(e) => {
+                          handleApply(e, job.applyLink);
+                          handleApplyAction();
+                        }}
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="btn btn-sm text-white fw-bold d-inline-flex align-items-center gap-1.5 px-4 py-2" 
+                        style={{ backgroundColor: themeColor, borderRadius: '6px', border: 'none' }}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                        Apply Now / Source URL
+                      </a>
+                    )}
                   </div>
-                  {job.eligibility && (
-                    <div className="col-12 col-md-6">
-                      <div className="p-3 rounded-3 bg-light border border-light-subtle h-100 d-flex align-items-start gap-2.5">
-                        <span style={{ fontSize: '1.25rem' }}>🎓</span>
-                        <div>
-                          <div className="text-muted small fw-bold text-uppercase" style={{ fontSize: '0.75rem', letterSpacing: '0.5px' }}>Eligibility Criteria</div>
-                          <div className="fw-bold text-dark mt-1" style={{ fontSize: '0.95rem' }}>{job.eligibility}</div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  {job.salary && (
-                    <div className="col-12 col-md-6">
-                      <div className="p-3 rounded-3 bg-light border border-light-subtle h-100 d-flex align-items-start gap-2.5">
-                        <span style={{ fontSize: '1.25rem' }}>💰</span>
-                        <div>
-                          <div className="text-muted small fw-bold text-uppercase" style={{ fontSize: '0.75rem', letterSpacing: '0.5px' }}>Salary / Pay Scale</div>
-                          <div className="fw-bold text-dark mt-1" style={{ fontSize: '0.95rem' }}>{job.salary}</div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  {(job.vacancies || extractVacancy(job.title)) && (
-                    <div className="col-12 col-md-6">
-                      <div className="p-3 rounded-3 bg-light border border-light-subtle h-100 d-flex align-items-start gap-2.5">
-                        <span style={{ fontSize: '1.25rem' }}>👥</span>
-                        <div>
-                          <div className="text-muted small fw-bold text-uppercase" style={{ fontSize: '0.75rem', letterSpacing: '0.5px' }}>Vacancies</div>
-                          <div className="fw-bold text-dark mt-1" style={{ fontSize: '0.95rem' }}>{job.vacancies || extractVacancy(job.title)}</div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  {job.lastDate && (
-                    <div className="col-12 col-md-6">
-                      <div className="p-3 rounded-3 bg-light border border-light-subtle h-100 d-flex align-items-start gap-2.5">
-                        <span style={{ fontSize: '1.25rem' }}>📅</span>
-                        <div>
-                          <div className="text-muted small fw-bold text-uppercase" style={{ fontSize: '0.75rem', letterSpacing: '0.5px' }}>Last Date to Apply</div>
-                          <div className="fw-bold text-dark mt-1" style={{ fontSize: '0.95rem' }}>
-                            {new Date(job.lastDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </div>
-
-                <AlsoReadCard relatedJob={intersperseJobs[0]} />
-
-                {/* Important Downloads Block */}
-                {(job.pdfLink || job.applyLink) && (
-                  <div className="mt-4 p-3 rounded-3" style={{ background: '#f8fafc', border: '1px solid #cbd5e1' }}>
-                    <div className="fw-bold mb-2 text-dark">🔗 Essential Links:</div>
-                    <div className="d-flex flex-wrap gap-2">
-                      {job.pdfLink && !job.pdfLink.includes('govtjobsalert.in') && !job.pdfLink.includes('sarkariresult.com') && (
-                        <a href={job.pdfLink} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline-danger fw-bold d-inline-flex align-items-center gap-1">
-                          📄 Download Official PDF
-                        </a>
-                      )}
-                      {job.applyLink && (
-                        <a href={job.applyLink} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-primary fw-bold d-inline-flex align-items-center gap-1">
-                          🌐 Apply Now / Source URL
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div>
-                <h2 className="capsule-header p-3 rounded" style={getHeaderStyle()}>
-                  <span>🏛️</span> {capitalize(job.company)} Off Campus Recruitment {job.batch ? job.batch.replace(/Batch|batch/, '').trim() : ''} – Overview
-                </h2>
-                <ul className="job-overview-list list-unstyled ps-4" style={{ lineHeight: '2' }}>
-                  {job.company && <li style={{listStyleType: 'disc'}}><strong>Company Name:</strong> {job.company}</li>}
-                  {job.type && <li style={{listStyleType: 'disc'}}><strong>Role:</strong> {job.type}</li>}
-                  {job.education && <li style={{listStyleType: 'disc'}}><strong>Qualification:</strong> {job.education}</li>}
-                  {job.experience && <li style={{listStyleType: 'disc'}}><strong>Experience:</strong> {job.experience}</li>}
-                  
-                  <AlsoReadCard relatedJob={intersperseJobs[0]} themeColor={themeColor} />
-
-                  {job.batch && <li style={{listStyleType: 'disc'}}><strong>Batch:</strong> {job.batch}</li>}
-                  {job.location && <li style={{listStyleType: 'disc'}}><strong>Location:</strong> {job.location}</li>}
-                  {job.salary && <li style={{listStyleType: 'disc'}}><strong>Salary:</strong> {job.salary}</li>}
-                  {job.lastDate && <li style={{listStyleType: 'disc'}}><strong>Application Deadline:</strong> {new Date(job.lastDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</li>}
-                </ul>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           {/* ABOUT COMPANY */}
@@ -721,14 +1117,30 @@ export default function JobDetails() {
           )}
 
           {/* JOB DESCRIPTION */}
-          {job.jobDescription && (
+          {(job.telegramFields || job.jobDescription) && (
             <div className="mb-4 text-dark" style={{ lineHeight: '1.7' }}>
               <h2 className="capsule-header p-3 rounded" style={getHeaderStyle()}>
-                <span>📝</span> Job Description
+                Job Description
               </h2>
-              <div className="rich-text-section ps-2">
-                <RichTextDisplay content={job.jobDescription} />
-              </div>
+              {/* Intro text (title line) above the grid */}
+              {job.jobDescription && (
+                <div style={{ padding: '8px 4px 12px', fontSize: '0.97rem', color: '#334155', fontWeight: '500' }}>
+                  {stripUnicodeBold(job.jobDescription)}
+                </div>
+              )}
+              {/* Structured info grid for Telegram-sourced jobs */}
+              {job.telegramFields && (
+                <TelegramJobInfoGrid
+                  fields={job.telegramFields}
+                  themeColor={themeColor}
+                />
+              )}
+              {/* Fallback plain text for non-Telegram jobs */}
+              {!job.telegramFields && job.jobDescription && (
+                <div className="rich-text-section ps-2">
+                  <RichTextDisplay content={job.jobDescription} />
+                </div>
+              )}
             </div>
           )}
 
@@ -794,6 +1206,56 @@ export default function JobDetails() {
               </div>
             </div>
           )}
+
+          {/* ESSENTIAL LINKS — for private/off-campus jobs with extracted URLs */}
+          {!job.isGovernment && job.extractedLinks && job.extractedLinks.length > 0 && (
+            <div className="essential-links-section mb-4">
+              <h2>Essential Links — {job.company}</h2>
+              <ul>
+                {job.applyLink && (
+                  <li>
+                    <a
+                      href={job.applyLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => { handleApply(e, job.applyLink); handleApplyAction(); }}
+                    >
+                      Apply Now for {job.company} — Official Application
+                    </a>
+                  </li>
+                )}
+                {job.extractedLinks.map((link, idx) => (
+                  <li key={idx}>
+                    <a href={link.url} target="_blank" rel="noopener noreferrer">
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+                <li>
+                  <a
+                    href="https://chat.whatsapp.com/LVpuUJluTpUEdIc4daAemQ"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => handleSocialJoinClick('WhatsApp')}
+                  >
+                    Join WhatsApp Channel for Government Jobs
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://t.me/nextjobpost"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => handleSocialJoinClick('Telegram')}
+                  >
+                    Join Telegram Channel for Government Jobs
+                  </a>
+                </li>
+              </ul>
+            </div>
+          )}
+
+
 
           <div className="my-5 p-4 rounded-4 shadow-sm" style={{
             background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
@@ -878,7 +1340,7 @@ export default function JobDetails() {
               maxWidth: '100%'
             }}>
               {/* SHARE GROUP */}
-              <span style={{ fontSize: '0.9rem', fontWeight: '800', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.5px', marginRight: '4px', flexShrink: 0 }}>Share</span>
+              <span className="share-follow-label" style={{ fontSize: '0.9rem', fontWeight: '800', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.5px', marginRight: '4px', flexShrink: 0 }}>Share</span>
               
               {/* WhatsApp Share */}
               <a 
@@ -891,7 +1353,7 @@ export default function JobDetails() {
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" fill="currentColor" width="16" height="16">
                   <path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/>
                 </svg>
-                WhatsApp
+                <span className="share-btn-text">WhatsApp</span>
               </a>
 
               {/* Telegram Share */}
@@ -905,7 +1367,7 @@ export default function JobDetails() {
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
                   <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0m5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.328-.373-.115l-6.869 4.326-2.96-.924c-.643-.204-.658-.643.136-.953l11.566-4.458c.538-.196 1.006.128.832 1.136z" />
                 </svg>
-                Telegram
+                <span className="share-btn-text">Telegram</span>
               </a>
 
               {/* Copy Link Share */}
@@ -917,14 +1379,14 @@ export default function JobDetails() {
                   <rect x="9" y="9" width="13" height="13" rx="2" ry="2" strokeLinecap="round" strokeLinejoin="round"/>
                   <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                {copied ? 'Copied' : 'Copy Link'}
+                <span className="share-btn-text">{copied ? 'Copied' : 'Copy Link'}</span>
               </button>
 
               {/* Divider */}
-              <div style={{ width: '1px', height: '24px', backgroundColor: '#cbd5e1', margin: '0 8px', flexShrink: 0 }}></div>
+              <div className="share-follow-bar-divider" style={{ width: '1px', height: '24px', backgroundColor: '#cbd5e1', margin: '0 8px', flexShrink: 0 }}></div>
 
               {/* FOLLOW GROUP */}
-              <span style={{ fontSize: '0.9rem', fontWeight: '800', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.5px', marginRight: '4px', flexShrink: 0 }}>Follow</span>
+              <span className="share-follow-label" style={{ fontSize: '0.9rem', fontWeight: '800', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.5px', marginRight: '4px', flexShrink: 0 }}>Follow</span>
 
               {/* WhatsApp Channel */}
               <a 
@@ -937,7 +1399,7 @@ export default function JobDetails() {
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" fill="currentColor" width="16" height="16">
                   <path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/>
                 </svg>
-                Join WhatsApp
+                <span className="follow-btn-text">Join WhatsApp</span>
               </a>
 
               {/* Telegram Channel */}
@@ -951,7 +1413,7 @@ export default function JobDetails() {
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
                   <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0m5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.328-.373-.115l-6.869 4.326-2.96-.924c-.643-.204-.658-.643.136-.953l11.566-4.458c.538-.196 1.006.128.832 1.136z" />
                 </svg>
-                Join Telegram
+                <span className="follow-btn-text">Join Telegram</span>
               </a>
             </div>
           </div>

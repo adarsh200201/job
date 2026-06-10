@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const POPULAR_SEARCHES = [
@@ -27,8 +27,15 @@ const POPULAR_SEARCHES = [
 export default function HeroSearch() {
   const [query, setQuery] = useState('');
   const [location, setLocation] = useState('');
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 640);
   const navigate = useNavigate();
   const loc = useLocation();
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 640);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleSearch = (e) => {
     e && e.preventDefault();
@@ -61,7 +68,7 @@ export default function HeroSearch() {
                 id="hero-job-search"
                 type="text"
                 className="hero-input"
-                placeholder="Search jobs, keywords, companies"
+                placeholder={isMobile ? "Search jobs" : "Search jobs, keywords, companies"}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 aria-label="Search jobs"
@@ -76,7 +83,7 @@ export default function HeroSearch() {
                 id="hero-location-search"
                 type="text"
                 className="hero-input"
-                placeholder='Enter location or "remote"'
+                placeholder={isMobile ? "Enter location" : 'Enter location or "remote"'}
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 aria-label="Location"

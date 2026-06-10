@@ -74,12 +74,19 @@ export default function RichTextDisplay({ content }) {
     const anchors = Array.from(div.querySelectorAll('a'));
     anchors.forEach(a => {
       const href = a.getAttribute('href') || '';
-      if (href.includes('govtjobsalert.in') || href.includes('sarkariresult.com')) {
+      
+      // Redirect WhatsApp and Telegram links to official channels
+      if (href.includes('whatsapp.com')) {
+        a.setAttribute('href', 'https://chat.whatsapp.com/LVpuUJluTpUEdIc4daAemQ');
+      } else if (href.includes('t.me') || href.includes('telegram.me') || href.includes('telegram.dog')) {
+        a.setAttribute('href', 'https://t.me/nextjobpost');
+      } else if ((href.includes('govtjobsalert.in') || href.includes('sarkariresult.com')) && !href.toLowerCase().endsWith('.pdf')) {
         a.removeAttribute('href');
         a.style.cursor = 'default';
         a.style.textDecoration = 'none';
         a.style.color = 'inherit';
       }
+      
       if (a.textContent.trim().toLowerCase() === 'apply online') {
         a.textContent = 'Apply Now';
       }
@@ -94,7 +101,17 @@ export default function RichTextDisplay({ content }) {
     return div.innerHTML;
   };
 
-  const sanitizedHTML = sanitizeHTML(content);
+  // If content is plain text (no HTML tags), convert newlines to <br />
+  const formatPlainText = (text) => {
+    if (!text) return '';
+    if (!/<\/?[a-z][\s\S]*>/i.test(text)) {
+      return text.replace(/\r?\n/g, '<br />');
+    }
+    return text;
+  };
+
+  const formattedContent = formatPlainText(content);
+  const sanitizedHTML = sanitizeHTML(formattedContent);
 
   return (
     <div
