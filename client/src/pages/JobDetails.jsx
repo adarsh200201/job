@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import api from '../api/index.js';
 import { useCache } from '../hooks/useCache.js';
-import JoinUpdates from '../components/JoinUpdates.jsx';
-import SidebarCategories from '../components/SidebarCategories.jsx';
+import { cleanJobBranding } from '../utils/textUtils.js';
+
+import SidebarFilter from '../components/SidebarFilter.jsx';
 import RichTextDisplay from '../components/RichTextDisplay.jsx';
 import { JobDetailsSkeleton } from '../components/SkeletonLoader.jsx';
 import { getImageUrl } from '../utils/imageUtils.js';
@@ -104,6 +105,18 @@ const stripUnicodeBold = (str) => {
 
 // Strip leading emoji characters from a string
 const stripLeadingEmoji = (str) => str.replace(/^[\p{Emoji_Presentation}\p{Extended_Pictographic}\s•\-*]+/u, '').trim();
+
+// Relative time formatting helper
+const timeAgo = (dateStr) => {
+  if (!dateStr) return 'Recently Posted';
+  const date = new Date(dateStr);
+  const diff = Date.now() - date.getTime();
+  const days = Math.floor(diff / 86400000);
+  if (days === 0) return 'Posted today';
+  if (days === 1) return 'Posted 1 day ago';
+  if (days < 7) return `Posted ${days} days ago`;
+  return `Posted on ${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+};
 
 // Field icon map for TelegramJobInfoGrid
 const FIELD_ICONS = {
@@ -210,7 +223,8 @@ const parseInlineFields = (line, knownKeys) => {
 // Dynamic section enrichment for sparse off-campus/program postings
 const getEnrichedJob = (originalJob) => {
   if (!originalJob) return null;
-  const enriched = { ...originalJob };
+  const cleaned = cleanJobBranding(originalJob);
+  const enriched = { ...cleaned };
   if (!enriched.isGovernment) {
     const rawDesc = enriched.jobDescription || enriched.description || '';
     
@@ -400,7 +414,25 @@ const getEnrichedJob = (originalJob) => {
 
 export default function JobDetails() {
   const { slug } = useParams();
+  const navigate = useNavigate();
   const [job, setJob] = useState(null);
+
+  const getJobDetailsLabel = () => {
+    const titleLower = String(job?.title || '').toLowerCase();
+    if (titleLower.includes('syllabus') || titleLower.includes('pattern')) return 'Exam details';
+    if (titleLower.includes('admit') || titleLower.includes('result') || titleLower.includes('answer key')) return 'Exam info';
+    return 'Job details';
+  };
+
+  const getJobDescriptionLabel = () => {
+    const titleLower = String(job?.title || '').toLowerCase();
+    if (titleLower.includes('syllabus')) return 'Syllabus';
+    if (titleLower.includes('pattern')) return 'Exam pattern';
+    if (titleLower.includes('admit')) return 'Admit card';
+    if (titleLower.includes('result')) return 'Result';
+    if (titleLower.includes('answer key')) return 'Answer key';
+    return 'Job description';
+  };
   const [loading, setLoading] = useState(true);
   const [recent, setRecent] = useState([]);
   const [adLink, setAdLink] = useState(DEFAULT_AD_LINK);
@@ -408,6 +440,79 @@ export default function JobDetails() {
   const [hasApplied, setHasApplied] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [activeTab, setActiveTab] = useState('job-details');
+  const isScrollingRef = React.useRef(false);
+  const scrollTimeoutRef = React.useRef(null);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    };
+  }, []);
+
+  // Scroll active tab into view in the horizontal tab bar
+  useEffect(() => {
+    if (!isMobile || !activeTab) return;
+    const activeEl = document.querySelector(`.mobile-tabs span[data-tab-id="${activeTab}"]`);
+    if (activeEl) {
+      activeEl.scrollIntoView({
+        behavior: 'smooth',
+        inline: 'center',
+        block: 'nearest'
+      });
+    }
+  }, [activeTab, isMobile]);
+
+  useEffect(() => {
+    if (!isMobile || !job) return;
+    const handleScroll = () => {
+      if (isScrollingRef.current) {
+        // If we are currently scrolling via a tab click, debounce the unlock of scroll-spy
+        if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+        scrollTimeoutRef.current = setTimeout(() => {
+          isScrollingRef.current = false;
+        }, 150); // scroll has finished if no scroll events for 150ms
+        return;
+      }
+      const sections = [
+        { id: 'job-details', target: 'job-details-top' },
+        (job.telegramFields || job.jobDescription) && { id: 'job-description', target: 'job-description-section' },
+        job.aboutCompany && { id: 'about-company', target: 'about-company-section' },
+        job.responsibilities && job.responsibilities.length > 0 && { id: 'responsibilities', target: 'responsibilities-section' },
+        job.requirements && job.requirements.length > 0 && { id: 'requirements', target: 'requirements-section' },
+        job.whyJoin && { id: 'why-join', target: 'why-join-section' },
+        job.howToApply && { id: 'how-to-apply', target: 'how-to-apply-section' },
+        (job.pdfLink || job.applyLink || (job.extractedLinks && job.extractedLinks.length > 0)) && { id: 'essential-links', target: 'essential-links-section' },
+        recent.length > 0 && { id: 'similar-jobs', target: 'similar-jobs-section' }
+      ].filter(Boolean);
+
+      // Check if we are at the bottom of the page
+      const isAtBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 50;
+      if (isAtBottom && sections.length > 0) {
+        setActiveTab(sections[sections.length - 1].id);
+        return;
+      }
+
+      let active = 'job-details';
+      for (const section of sections) {
+        const el = document.getElementById(section.target);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= 130) {
+            active = section.id;
+          }
+        }
+      }
+      setActiveTab(active);
+    };
+    window.addEventListener('scroll', handleScroll);
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isMobile, job, recent]);
 
   useEffect(() => {
     if (job?._id) {
@@ -418,7 +523,11 @@ export default function JobDetails() {
 
   const handleApplyAction = () => {
     if (job?._id) {
-      localStorage.setItem(`applied_${job._id}`, 'true');
+      try {
+        localStorage.setItem(`applied_${job._id}`, 'true');
+      } catch (e) {
+        console.error("Local storage error during apply:", e);
+      }
       setHasApplied(true);
       trackApplyJobClicked(job);
     }
@@ -426,15 +535,19 @@ export default function JobDetails() {
 
   const handleSaveAction = () => {
     if (job?._id) {
-      const nextSaved = !isSaved;
-      localStorage.setItem(`saved_${job._id}`, String(nextSaved));
-      setIsSaved(nextSaved);
-      // Keep simple interaction logs
-      trackEvent(nextSaved ? 'Job Saved' : 'Job Unsaved', {
-        jobId: job._id,
-        title: job.title,
-        company: job.company
-      });
+      try {
+        const nextSaved = !isSaved;
+        localStorage.setItem(`saved_${job._id}`, String(nextSaved));
+        setIsSaved(nextSaved);
+        // Keep simple interaction logs
+        trackEvent(nextSaved ? 'Job Saved' : 'Job Unsaved', {
+          jobId: job._id,
+          title: job.title,
+          company: job.company
+        });
+      } catch (e) {
+        console.error("Local storage error during save:", e);
+      }
     }
   };
 
@@ -633,6 +746,658 @@ export default function JobDetails() {
     "jobLocationType": (job.location && job.location.toLowerCase().includes("remote")) ? "TELECOMMUTE" : undefined
   };
 
+  if (isMobile) {
+    const tabs = [
+      { id: 'job-details', label: getJobDetailsLabel(), target: 'job-details-top' },
+      (job.telegramFields || job.jobDescription) && { id: 'job-description', label: getJobDescriptionLabel(), target: 'job-description-section' },
+      job.aboutCompany && { id: 'about-company', label: 'About company', target: 'about-company-section' },
+      job.responsibilities && job.responsibilities.length > 0 && { id: 'responsibilities', label: 'Responsibilities', target: 'responsibilities-section' },
+      job.requirements && job.requirements.length > 0 && { id: 'requirements', label: 'Requirements', target: 'requirements-section' },
+      job.whyJoin && { id: 'why-join', label: 'Why join', target: 'why-join-section' },
+      job.howToApply && { id: 'how-to-apply', label: 'How to apply', target: 'how-to-apply-section' },
+      (job.pdfLink || job.applyLink || (job.extractedLinks && job.extractedLinks.length > 0)) && { id: 'essential-links', label: 'Links', target: 'essential-links-section' },
+      recent.length > 0 && { id: 'similar-jobs', label: 'Similar jobs', target: 'similar-jobs-section' }
+    ].filter(Boolean);
+
+    const handleTabClick = (tabId, targetId) => {
+      setActiveTab(tabId);
+      isScrollingRef.current = true;
+      const element = document.getElementById(targetId);
+      if (element) {
+        const elementPosition = element.getBoundingClientRect().top + window.scrollY;
+        window.scrollTo({
+          top: elementPosition - 110,
+          behavior: 'smooth'
+        });
+        if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+        // Fallback timer in case the scroll event doesn't fire (e.g. already at target)
+        scrollTimeoutRef.current = setTimeout(() => {
+          isScrollingRef.current = false;
+        }, 1200);
+      }
+    };
+
+    const scrollToRelatedJobs = () => {
+      const element = document.getElementById('similar-jobs-section');
+      if (element) {
+        const elementPosition = element.getBoundingClientRect().top + window.scrollY;
+        window.scrollTo({
+          top: elementPosition - 110,
+          behavior: 'smooth'
+        });
+      }
+    };
+
+    return (
+      <div className="job-details-mobile mt-0 mb-5" style={{ backgroundColor: '#ffffff', minHeight: '100vh', paddingBottom: '80px', fontFamily: "'Inter', sans-serif" }}>
+        <Helmet>
+          <title>{job.metaTitle || `${job.title} at ${job.company} | NextJobPost`}</title>
+          <meta name="description" content={job.metaDescription || job.shortSummary || `Apply for the ${job.title} job opening at ${job.company} in ${job.location}. Find eligibility criteria, responsibilities, and apply now.`} />
+          <link rel="canonical" href={window.location.href} />
+          
+          {/* Open Graph / Facebook */}
+          <meta property="og:type" content="article" />
+          <meta property="og:title" content={job.metaTitle || `${job.title} at ${job.company} | NextJobPost`} />
+          <meta property="og:description" content={job.metaDescription || job.shortSummary || `Apply for the ${job.title} job opening at ${job.company} in ${job.location}.`} />
+          <meta property="og:image" content={getImageUrl(job.image) || `${window.location.origin}/logo.png`} />
+          <meta property="og:url" content={window.location.href} />
+          
+          {/* Twitter */}
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:title" content={job.metaTitle || `${job.title} at ${job.company} | NextJobPost`} />
+          <meta name="twitter:description" content={job.metaDescription || job.shortSummary || `Apply for the ${job.title} job opening at ${job.company} in ${job.location}.`} />
+          <meta name="twitter:image" content={getImageUrl(job.image) || `${window.location.origin}/logo.png`} />
+
+          {/* Structured Data (Google Jobs Schema) */}
+          <script type="application/ld+json">
+            {JSON.stringify(jsonLd)}
+          </script>
+        </Helmet>
+
+        {/* Sticky Mobile Header */}
+        <div style={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 1020,
+          backgroundColor: '#ffffff',
+          borderBottom: '1px solid #e2e8f0',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '10px 16px',
+          height: '54px'
+        }}>
+          {/* Back button */}
+          <button 
+            onClick={() => {
+              if (window.history.state && window.history.state.idx > 0) {
+                navigate(-1);
+              } else {
+                navigate('/');
+              }
+            }} 
+            style={{ background: 'none', border: 'none', padding: '6px', color: '#1e293b', display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+          </button>
+          
+          {/* Right actions */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            {/* Bookmark button */}
+            <button onClick={handleSaveAction} style={{ background: 'none', border: 'none', padding: '6px', color: '#64748b', display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+              {isSaved ? (
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="#d97706" viewBox="0 0 24 24">
+                  <path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/>
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                </svg>
+              )}
+            </button>
+
+            {/* Share button */}
+            <button onClick={() => {
+              if (navigator.share) {
+                navigator.share({
+                  title: job.title,
+                  text: `Check out this job: ${job.title}`,
+                  url: window.location.href,
+                }).catch(() => {});
+              } else {
+                handleCopyLink();
+              }
+            }} style={{ background: 'none', border: 'none', padding: '6px', color: '#64748b', display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 10.742l4.606-2.303m0 0a3 3 0 10-3.612-4.14a3 3 0 003.612 4.14zm-4.606 2.303a3 3 0 110 5.258l4.606-2.303m-4.606-2.955a3 3 0 010-2.303" />
+              </svg>
+            </button>
+
+            {/* Join Us button */}
+            <a href="https://chat.whatsapp.com/LVpuUJluTpUEdIc4daAemQ" target="_blank" rel="noopener noreferrer" className="btn btn-sm" style={{
+              backgroundColor: '#f97316',
+              color: '#fff',
+              fontWeight: '700',
+              borderRadius: '20px',
+              fontSize: '0.78rem',
+              padding: '6px 14px',
+              border: 'none',
+              textTransform: 'uppercase',
+              letterSpacing: '0.3px',
+              textDecoration: 'none'
+            }}>
+              Join Us
+            </a>
+          </div>
+        </div>
+
+        {/* Relative Posted Time Banner */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: '10px 16px',
+          backgroundColor: '#f8fafc',
+          borderBottom: '1px solid #f1f5f9',
+          fontSize: '0.8rem',
+          color: '#64748b',
+          fontWeight: '500'
+        }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#16a34a', fontWeight: '600' }}>
+            <span style={{ fontSize: '1rem' }}>👍</span> Be an early applicant
+          </span>
+          <span>{job.createdAt ? timeAgo(job.createdAt) : 'Recently Posted'}</span>
+        </div>
+
+        {/* Sticky Mobile Tabs Bar */}
+        <div className="mobile-tabs" style={{
+          position: 'sticky',
+          top: '54px',
+          zIndex: 1010,
+          backgroundColor: '#ffffff',
+          borderBottom: '1px solid #e2e8f0',
+          display: 'flex',
+          overflowX: 'auto',
+          whiteSpace: 'nowrap',
+          padding: '0 8px',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none'
+        }}>
+          {tabs.map((tab) => (
+            <span
+              key={tab.id}
+              data-tab-id={tab.id}
+              onClick={() => handleTabClick(tab.id, tab.target)}
+              style={{
+                display: 'inline-block',
+                padding: '12px 14px',
+                fontSize: '0.86rem',
+                fontWeight: '700',
+                color: activeTab === tab.id ? '#0f172a' : '#64748b',
+                borderBottom: activeTab === tab.id ? `3px solid ${themeColor}` : '3px solid transparent',
+                cursor: 'pointer',
+                transition: 'all 150ms ease'
+              }}
+            >
+              {tab.label}
+            </span>
+          ))}
+        </div>
+
+        {/* Main Content Area (Animated - transform localized to content region) */}
+        <div className="animate-fade-in-up" style={{ padding: '20px 16px' }}>
+          
+          {/* Job details top block */}
+          <div id="job-details-top" style={{ marginBottom: '20px' }}>
+            {/* Title */}
+            <h1 style={{ fontSize: '1.45rem', fontWeight: '800', lineHeight: '1.35', color: '#0f172a', marginBottom: '8px' }}>
+              {job.title}
+            </h1>
+            {/* Company / Brand Name */}
+            <div style={{ fontSize: '1.05rem', fontWeight: '700', color: themeColor, marginBottom: '12px' }}>
+              {job.company || 'Government Recruitment'}
+            </div>
+            
+            {/* Posted Date & Publisher row (Naukri style meta section) */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', fontSize: '0.82rem', color: '#64748b', marginBottom: '12px' }}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+              <span>{job.createdAt ? new Date(job.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Recently Posted'}</span>
+              <span>•</span>
+              <span>Posted by <strong style={{ color: '#0d6efd' }}>NextJobPost</strong></span>
+            </div>
+
+            {/* Share and Follow Bar */}
+            <div className="share-follow-bar p-3 rounded-3 mt-3 d-flex align-items-center gap-2 flex-nowrap" style={{
+              backgroundColor: '#f0f7ff',
+              border: '1px solid #dbeafe',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
+              overflowX: 'auto',
+              whiteSpace: 'nowrap',
+              width: '100%',
+              maxWidth: '100%',
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+              marginBottom: '16px'
+            }}>
+              <button 
+                onClick={handleCopyLink}
+                className="btn btn-sm text-white fw-bold d-inline-flex align-items-center gap-1.5 btn-share-copylink"
+                style={{ fontSize: '0.78rem', padding: '5px 10px', borderRadius: '15px' }}
+              >
+                {copied ? 'Copied' : 'Copy Link'}
+              </button>
+
+              <div className="share-follow-bar-divider" style={{ width: '1px', height: '18px', backgroundColor: '#cbd5e1', margin: '0 6px', flexShrink: 0 }}></div>
+
+              <span className="share-follow-label" style={{ fontSize: '0.8rem', fontWeight: '800', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.5px', marginRight: '4px', flexShrink: 0 }}>Follow</span>
+
+              <a 
+                href={job.whatsapp ? (job.whatsapp.startsWith('http') ? job.whatsapp : 'https://wa.me/' + job.whatsapp.replace(/[^0-9+]/g, '')) : 'https://chat.whatsapp.com/LVpuUJluTpUEdIc4daAemQ'}
+                onClick={() => handleSocialJoinClick('WhatsApp')}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-sm fw-bold d-inline-flex align-items-center gap-1.5 btn-follow-whatsapp"
+                style={{ fontSize: '0.78rem', padding: '5px 10px', borderRadius: '15px' }}
+              >
+                Join WhatsApp
+              </a>
+
+              <a 
+                href={job.telegram ? (job.telegram.startsWith('http') ? job.telegram : 'https://t.me/' + job.telegram.replace(/^@/, '')) : 'https://t.me/nextjobpost'}
+                onClick={() => handleSocialJoinClick('Telegram')}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-sm fw-bold d-inline-flex align-items-center gap-1.5 btn-follow-telegram"
+                style={{ fontSize: '0.78rem', padding: '5px 10px', borderRadius: '15px' }}
+              >
+                Join Telegram
+              </a>
+            </div>
+
+            {/* Category / Post Type Badge */}
+            {job.isGovernment && (
+              <span className="badge rounded-pill px-3 py-1.5 mb-2" style={{
+                fontSize: '0.78rem',
+                backgroundColor: `${themeColor}12`,
+                color: themeColor,
+                border: `1px solid ${themeColor}30`,
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px',
+                fontWeight: '700'
+              }}>
+                {job.postType || 'Government Job'}
+              </span>
+            )}
+          </div>
+
+          {/* Job Highlights card */}
+          <div className="p-3 mb-4 rounded-3" style={{ backgroundColor: '#f8fafc', border: '1px solid #f1f5f9' }}>
+            <h3 style={{ fontSize: '0.92rem', fontWeight: '800', color: '#091e42', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.3px' }}>Job highlights</h3>
+            <p style={{ fontSize: '0.88rem', color: '#475569', margin: 0, lineHeight: '1.5', fontWeight: '500' }}>
+              {job.eligibility || job.education || 'Graduate / 12th Pass or equivalent qualification.'}
+            </p>
+          </div>
+
+          {/* Parameters List */}
+          <div className="d-flex flex-column gap-3 mb-4" style={{ padding: '4px 0' }}>
+            {job.experience && (
+              <div className="d-flex align-items-center gap-3">
+                <div style={{ color: '#64748b', display: 'flex', alignItems: 'center', width: '20px' }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <span style={{ fontSize: '0.92rem', color: '#334155', fontWeight: '600' }}>{job.experience}</span>
+              </div>
+            )}
+
+            <div className="d-flex align-items-center gap-3">
+              <div style={{ color: '#64748b', display: 'flex', alignItems: 'center', width: '20px' }}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <span style={{ fontSize: '0.92rem', color: '#334155', fontWeight: '600' }}>
+                {job.vacancies || extractVacancy(job.title) || 'As per official notification'}
+              </span>
+            </div>
+
+            {job.salary && (
+              <div className="d-flex align-items-center gap-3">
+                <div style={{ color: '#64748b', display: 'flex', alignItems: 'center', width: '20px' }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <span style={{ fontSize: '0.92rem', color: themeColor, fontWeight: '700' }}>{job.salary}</span>
+              </div>
+            )}
+
+            {job.location && (
+              <div className="d-flex align-items-center gap-3">
+                <div style={{ color: '#64748b', display: 'flex', alignItems: 'center', width: '20px' }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+                <span style={{ fontSize: '0.92rem', color: '#334155', fontWeight: '600' }}>{job.location}</span>
+              </div>
+            )}
+
+            {job.skills && job.skills.length > 0 && (
+              <div className="mt-2" style={{ borderTop: '1px solid #f1f5f9', paddingTop: '12px' }}>
+                <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: '800', textTransform: 'uppercase', display: 'block', marginBottom: '8px', letterSpacing: '0.5px' }}>Key skills</span>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                  {job.skills.map((skill, idx) => (
+                    <span key={idx} style={{
+                      backgroundColor: '#f8fafc',
+                      color: '#475569',
+                      fontSize: '0.82rem',
+                      padding: '5px 12px',
+                      borderRadius: '20px',
+                      fontWeight: '600',
+                      border: '1px solid #e2e8f0'
+                    }}>
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <hr style={{ borderTop: '1px solid #cbd5e1', margin: '24px 0' }} />
+
+          {/* Dynamic Content Sections */}
+          
+          {/* Job Description section */}
+          {(job.telegramFields || job.jobDescription) && (
+            <div id="job-description-section" className="mb-5 text-dark" style={{ scrollMarginTop: '110px' }}>
+              <h2 className="capsule-header p-3 rounded" style={getHeaderStyle()}>
+                {getJobDescriptionLabel()}
+              </h2>
+              {job.telegramFields && job.jobDescription && (
+                <div style={{ padding: '8px 4px 12px', fontSize: '0.97rem', color: '#334155', fontWeight: '500' }}>
+                  {stripUnicodeBold(job.jobDescription)}
+                </div>
+              )}
+              {job.telegramFields && (
+                <TelegramJobInfoGrid
+                  fields={job.telegramFields}
+                  themeColor={themeColor}
+                />
+              )}
+              {!job.telegramFields && job.jobDescription && (
+                <div className="rich-text-section ps-1">
+                  <RichTextDisplay content={job.jobDescription} />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* About Company Section */}
+          {job.aboutCompany && (
+            <div id="about-company-section" className="mb-5 text-dark" style={{ scrollMarginTop: '110px' }}>
+              <h2 className="capsule-header p-3 rounded" style={getHeaderStyle()}>
+                🏢 {job.isGovernment ? `About ${job.company}` : `About Company`}
+              </h2>
+              <div className="rich-text-section ps-1">
+                <RichTextDisplay content={job.aboutCompany} />
+              </div>
+            </div>
+          )}
+
+          {/* Responsibilities Section */}
+          {job.responsibilities && job.responsibilities.length > 0 && (
+            <div id="responsibilities-section" className="mb-5 text-dark" style={{ scrollMarginTop: '110px' }}>
+              <h2 className="capsule-header p-3 rounded" style={getHeaderStyle()}>
+                🎯 Job Responsibilities
+              </h2>
+              {renderList(job.responsibilities)}
+            </div>
+          )}
+
+          {/* Requirements/Eligibility Section */}
+          {job.requirements && job.requirements.length > 0 && (
+            <div id="requirements-section" className="mb-5 text-dark" style={{ scrollMarginTop: '110px' }}>
+              <h2 className="capsule-header p-3 rounded" style={getHeaderStyle()}>
+                🎓 Eligibility & Requirements
+              </h2>
+              {renderList(job.requirements)}
+            </div>
+          )}
+
+          {/* Why Join Section */}
+          {job.whyJoin && (
+            <div id="why-join-section" className="mb-5 text-dark" style={{ scrollMarginTop: '110px' }}>
+              <h2 className="capsule-header p-3 rounded" style={getHeaderStyle()}>
+                ✨ Why Join?
+              </h2>
+              {renderList(job.whyJoin)}
+            </div>
+          )}
+
+          {/* How to Apply Section */}
+          {job.howToApply && (
+            <div id="how-to-apply-section" className="mb-5 text-dark" style={{ scrollMarginTop: '110px' }}>
+              <h2 className="capsule-header p-3 rounded" style={getHeaderStyle()}>
+                🚀 How to Apply
+              </h2>
+              <div className="rich-text-section ps-1">
+                <RichTextDisplay content={job.howToApply} />
+              </div>
+            </div>
+          )}
+
+          {/* Essential Links Section */}
+          {(job.pdfLink || job.applyLink || (job.extractedLinks && job.extractedLinks.length > 0)) && (
+            <div id="essential-links-section" className="mb-5" style={{ scrollMarginTop: '110px' }}>
+              <h2 className="capsule-header p-3 rounded mb-3" style={getHeaderStyle()}>
+                🔗 Official Links
+              </h2>
+              
+              {/* PDF & Apply buttons box */}
+              {(job.pdfLink || job.applyLink) && (
+                <div className="p-3 rounded-3 mb-3 border border-light" style={{ backgroundColor: '#f8fafc' }}>
+                  <div className="d-flex flex-wrap gap-2.5">
+                    {job.pdfLink && (
+                      (!job.pdfLink.includes('govtjobsalert.in') && !job.pdfLink.includes('sarkariresult.com')) ||
+                      job.pdfLink.toLowerCase().endsWith('.pdf')
+                    ) && (
+                      <a href={job.pdfLink} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline-danger fw-bold d-inline-flex align-items-center gap-1.5 px-3 py-2" style={{ borderRadius: '6px', flex: '1 1 auto' }}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Download PDF
+                      </a>
+                    )}
+                    {job.applyLink && (
+                      <a 
+                        href={job.applyLink} 
+                        onClick={(e) => {
+                          handleApply(e, job.applyLink);
+                          handleApplyAction();
+                        }}
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="btn btn-sm text-white fw-bold d-inline-flex align-items-center gap-1.5 px-4 py-2" 
+                        style={{ backgroundColor: themeColor, borderRadius: '6px', border: 'none', flex: '1 1 auto' }}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                        Apply Online
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Extracted private links */}
+              {!job.isGovernment && job.extractedLinks && job.extractedLinks.length > 0 && (
+                <div className="essential-links-section">
+                  <ul>
+                    {job.extractedLinks.map((link, idx) => (
+                      <li key={idx}>
+                        <a href={link.url} target="_blank" rel="noopener noreferrer">
+                          {link.label}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Action Center - for mobile completeness */}
+          <div className="p-4 rounded-4 mb-5" style={{
+            background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+            border: '1px solid #e2e8f0'
+          }}>
+            <h4 className="fw-bold mb-2" style={{ fontSize: '1.1rem', color: '#1e293b' }}>
+              ⚡ Action Center
+            </h4>
+            <p style={{ fontSize: '0.88rem', color: '#475569', marginBottom: '12px' }}>
+              Apply directly, save this notification, or share it with your network!
+            </p>
+            {hasApplied && (
+              <div className="alert alert-success p-2.5 mb-3" style={{ borderRadius: '6px', fontSize: '0.88rem' }}>
+                🎉 <strong>Applied!</strong> Best of luck!
+              </div>
+            )}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <button 
+                onClick={handleSaveAction}
+                className="btn btn-sm d-inline-flex align-items-center justify-content-center fw-bold"
+                style={{
+                  padding: '10px 20px',
+                  fontSize: '0.9rem',
+                  borderRadius: '6px',
+                  backgroundColor: isSaved ? '#fef3c7' : '#ffffff',
+                  border: '1.5px solid #d97706',
+                  color: '#d97706',
+                  width: '100%'
+                }}
+              >
+                {isSaved ? '⭐ Saved' : '⏳ Save for Later'}
+              </button>
+            </div>
+            
+            {/* Mobile Share & Follow bar inside action center card */}
+            <div className="share-follow-bar p-3 rounded-3 mt-3 d-flex align-items-center gap-2 flex-nowrap" style={{
+              backgroundColor: '#ffffff',
+              border: '1px solid #e2e8f0',
+              overflowX: 'auto',
+              whiteSpace: 'nowrap',
+              width: '100%',
+              maxWidth: '100%'
+            }}>
+              <span className="share-follow-label" style={{ fontSize: '0.8rem', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', marginRight: '4px', flexShrink: 0 }}>Share</span>
+              <a href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`🔥 *${job.title}*\n👉 Apply Here: ${window.location.href}`)}`} target="_blank" rel="noopener noreferrer" className="btn btn-sm text-white fw-bold d-inline-flex align-items-center gap-1.5 btn-share-whatsapp">WhatsApp</a>
+              <a href={`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}`} target="_blank" rel="noopener noreferrer" className="btn btn-sm text-white fw-bold d-inline-flex align-items-center gap-1.5 btn-share-telegram">Telegram</a>
+            </div>
+          </div>
+
+          {/* Similar Jobs section */}
+          {recent.length > 0 && (
+            <div id="similar-jobs-section" className="mb-4" style={{ scrollMarginTop: '110px' }}>
+              <h3 className="fw-bold mb-3" style={{ fontSize: '1.15rem', color: '#1e293b' }}>
+                👥 Similar Jobs You Might Like
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {recent.slice(0, 5).map((relatedJob) => (
+                  <div key={relatedJob._id} className="p-3 bg-white rounded-3 shadow-sm border border-light" style={{ transition: 'transform 150ms ease' }}>
+                    <h4 style={{ fontSize: '0.95rem', fontWeight: '700', marginBottom: '4px', lineHeight: '1.3' }}>
+                      <Link to={`/${relatedJob.slug}`} className="text-decoration-none text-dark">
+                        {relatedJob.title}
+                      </Link>
+                    </h4>
+                    <p className="text-muted small mb-2">{relatedJob.company} • {relatedJob.location || 'India'}</p>
+                    <Link to={`/${relatedJob.slug}`} className="btn btn-sm btn-outline-primary fw-bold" style={{ fontSize: '0.8rem', padding: '4px 12px', borderRadius: '4px', border: `1.5px solid ${themeColor}`, color: themeColor }}>
+                      View details
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+        </div>
+
+        {/* Sticky Bottom Actions Bar (outside transform animation so fixed position works properly) */}
+        <div style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 1020,
+          backgroundColor: '#ffffff',
+          boxShadow: '0 -4px 16px rgba(0,0,0,0.06)',
+          borderTop: '1px solid #e2e8f0',
+          padding: '12px 16px',
+          display: 'flex',
+          gap: '12px',
+          alignItems: 'center',
+          height: '68px'
+        }}>
+          <button
+            onClick={scrollToRelatedJobs}
+            style={{
+              padding: '10px 18px',
+              fontSize: '0.9rem',
+              fontWeight: '700',
+              backgroundColor: '#ffffff',
+              border: '1.5px solid #cbd5e1',
+              color: '#475569',
+              borderRadius: '24px',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              height: '42px',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            </svg>
+            Similar Jobs
+          </button>
+          
+          <a
+            href={job.applyLink}
+            onClick={(e) => {
+              handleApply(e, job.applyLink);
+              handleApplyAction();
+            }}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn text-white fw-bold d-inline-flex align-items-center justify-content-center"
+            style={{
+              backgroundColor: themeColor,
+              borderRadius: '24px',
+              padding: '10px 24px',
+              fontSize: '0.95rem',
+              height: '42px',
+              flexGrow: 1,
+              border: 'none',
+              textDecoration: 'none'
+            }}
+          >
+            Apply Now
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  // Desktop View
   return (
     <div className="job-details mt-0 mb-4 animate-fade-in-up">
       <Helmet>
@@ -865,13 +1630,9 @@ export default function JobDetails() {
               position: 'relative',
               overflow: 'hidden'
             }}>
-              {/* Saffron, White, Green Tricolor Line for Gov Jobs, or Theme Color for Private Jobs */}
+              {/* Saffron/Yellow/Orange line for Gov Jobs, or Theme Color for Private Jobs */}
               {job.isGovernment ? (
-                <div style={{ display: 'flex', height: '5px', position: 'absolute', top: 0, left: 0, right: 0 }}>
-                  <div style={{ flex: 1, backgroundColor: '#ff9933' }}></div>
-                  <div style={{ flex: 1, backgroundColor: '#ffffff' }}></div>
-                  <div style={{ flex: 1, backgroundColor: '#138808' }}></div>
-                </div>
+                <div style={{ height: '5px', position: 'absolute', top: 0, left: 0, right: 0, backgroundColor: '#ff9933' }}></div>
               ) : (
                 <div style={{ height: '5px', position: 'absolute', top: 0, left: 0, right: 0, backgroundColor: themeColor }}></div>
               )}
@@ -932,7 +1693,7 @@ export default function JobDetails() {
                             <td className="overview-key">
                               <span style={{ marginRight: '8px' }}>💰</span> Salary / Pay Scale
                             </td>
-                            <td className="overview-value" style={{ color: '#16a34a' }}>
+                            <td className="overview-value" style={{ color: themeColor }}>
                               {job.salary}
                             </td>
                           </tr>
@@ -943,7 +1704,15 @@ export default function JobDetails() {
                               <span style={{ marginRight: '8px' }}>👥</span> Vacancies
                             </td>
                             <td className="overview-value">
-                              <span className="badge bg-secondary-subtle text-secondary-emphasis px-2.5 py-1" style={{ fontSize: '0.88rem' }}>
+                              <span className="badge rounded-pill px-3 py-1.5" style={{
+                                fontSize: '0.8rem',
+                                backgroundColor: '#fff7ed',
+                                color: '#ea580c',
+                                border: '1px solid #f9731630',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.5px',
+                                fontWeight: '700'
+                              }}>
                                 {job.vacancies || extractVacancy(job.title)}
                               </span>
                             </td>
@@ -1032,7 +1801,7 @@ export default function JobDetails() {
                             <td className="overview-key">
                               <span style={{ marginRight: '8px' }}>💰</span> Salary
                             </td>
-                            <td className="overview-value" style={{ color: '#16a34a' }}>
+                            <td className="overview-value" style={{ color: themeColor }}>
                               {job.salary}
                             </td>
                           </tr>
@@ -1120,7 +1889,7 @@ export default function JobDetails() {
           {(job.telegramFields || job.jobDescription) && (
             <div className="mb-4 text-dark" style={{ lineHeight: '1.7' }}>
               <h2 className="capsule-header p-3 rounded" style={getHeaderStyle()}>
-                Job Description
+                {getJobDescriptionLabel()}
               </h2>
               {/* Intro text (title line) above the grid */}
               {job.telegramFields && job.jobDescription && (
@@ -1421,9 +2190,8 @@ export default function JobDetails() {
         </div>
 
         <div className="col-12 col-lg-4 col-right">
-          <JoinUpdates />
           <div className="sidebar-sticky" style={{ display: 'flex', flexDirection: 'column', gap: '2rem', width: '100%' }}>
-            <SidebarCategories jobs={recent} />
+            <SidebarFilter />
             <SidebarAd />
           </div>
         </div>

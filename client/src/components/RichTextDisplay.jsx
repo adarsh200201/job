@@ -1,4 +1,5 @@
 import React from 'react';
+import { cleanTextBranding } from '../utils/textUtils.js';
 
 export default function RichTextDisplay({ content }) {
   if (!content) return null;
@@ -95,7 +96,7 @@ export default function RichTextDisplay({ content }) {
     const walk = document.createTreeWalker(div, NodeFilter.SHOW_TEXT, null, false);
     let node;
     while (node = walk.nextNode()) {
-      node.nodeValue = node.nodeValue.replace(/Apply Online/gi, 'Apply Now');
+      node.nodeValue = cleanTextBranding(node.nodeValue).replace(/Apply Online/gi, 'Apply Now');
     }
 
     return div.innerHTML;
@@ -110,8 +111,10 @@ export default function RichTextDisplay({ content }) {
     return text;
   };
 
-  const formattedContent = formatPlainText(content);
+  const cleanedContent = cleanTextBranding(content);
+  const formattedContent = formatPlainText(cleanedContent);
   const sanitizedHTML = sanitizeHTML(formattedContent);
+
 
   return (
     <div

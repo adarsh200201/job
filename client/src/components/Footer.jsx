@@ -123,6 +123,90 @@ export default function Footer() {
     { label: 'West Bengal', to: '/west-bengal-jobs' }
   ];
 
+  const [bellPos, setBellPos] = useState({ x: 0, y: 0 });
+  const [bellDragging, setBellDragging] = useState(false);
+  const bellDragStart = React.useRef({ x: 0, y: 0 });
+  const bellBasePos = React.useRef({ x: 0, y: 0 });
+  const bellHasMoved = React.useRef(false);
+
+  const handleBellPointerDown = (e) => {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    bellDragStart.current = { x: e.clientX, y: e.clientY };
+    bellBasePos.current = { ...bellPos };
+    setBellDragging(true);
+    bellHasMoved.current = false;
+  };
+
+  const handleBellPointerMove = (e) => {
+    if (!bellDragging) return;
+    const dx = e.clientX - bellDragStart.current.x;
+    const dy = e.clientY - bellDragStart.current.y;
+    if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+      bellHasMoved.current = true;
+    }
+    setBellPos({
+      x: bellBasePos.current.x + dx,
+      y: bellBasePos.current.y + dy
+    });
+  };
+
+  const handleBellPointerUp = (e) => {
+    if (!bellDragging) return;
+    e.currentTarget.releasePointerCapture(e.pointerId);
+    setBellDragging(false);
+  };
+
+  const handleBellClick = (e) => {
+    if (bellHasMoved.current) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    handleToggleMute();
+  };
+
+  const [scrollTopPos, setScrollTopPos] = useState({ x: 0, y: 0 });
+  const [scrollTopDragging, setScrollTopDragging] = useState(false);
+  const scrollTopDragStart = React.useRef({ x: 0, y: 0 });
+  const scrollTopBasePos = React.useRef({ x: 0, y: 0 });
+  const scrollTopHasMoved = React.useRef(false);
+
+  const handleScrollTopPointerDown = (e) => {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    scrollTopDragStart.current = { x: e.clientX, y: e.clientY };
+    scrollTopBasePos.current = { ...scrollTopPos };
+    setScrollTopDragging(true);
+    scrollTopHasMoved.current = false;
+  };
+
+  const handleScrollTopPointerMove = (e) => {
+    if (!scrollTopDragging) return;
+    const dx = e.clientX - scrollTopDragStart.current.x;
+    const dy = e.clientY - scrollTopDragStart.current.y;
+    if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+      scrollTopHasMoved.current = true;
+    }
+    setScrollTopPos({
+      x: scrollTopBasePos.current.x + dx,
+      y: scrollTopBasePos.current.y + dy
+    });
+  };
+
+  const handleScrollTopPointerUp = (e) => {
+    if (!scrollTopDragging) return;
+    e.currentTarget.releasePointerCapture(e.pointerId);
+    setScrollTopDragging(false);
+  };
+
+  const handleScrollTopClick = (e) => {
+    if (scrollTopHasMoved.current) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    handleScrollToTop();
+  };
+
   return (
     <footer className="site-footer">
       {/* Toast Alert */}
@@ -135,9 +219,17 @@ export default function Footer() {
 
       {/* Floating Buttons */}
       <button 
-        onClick={handleToggleMute} 
+        onPointerDown={handleBellPointerDown}
+        onPointerMove={handleBellPointerMove}
+        onPointerUp={handleBellPointerUp}
+        onClick={handleBellClick}
         className={`floating-btn floating-left ${muted ? 'muted' : ''}`}
         aria-label="Toggle notifications"
+        style={{
+          transform: `translate(${bellPos.x}px, ${bellPos.y}px)`,
+          touchAction: 'none',
+          cursor: bellDragging ? 'grabbing' : 'grab'
+        }}
       >
         {muted ? (
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -156,9 +248,17 @@ export default function Footer() {
 
       {showScrollBtn && (
         <button 
-          onClick={handleScrollToTop} 
+          onPointerDown={handleScrollTopPointerDown}
+          onPointerMove={handleScrollTopPointerMove}
+          onPointerUp={handleScrollTopPointerUp}
+          onClick={handleScrollTopClick}
           className="floating-btn floating-right animate-fade-in"
           aria-label="Scroll to top"
+          style={{
+            transform: `translate(${scrollTopPos.x}px, ${scrollTopPos.y}px)`,
+            touchAction: 'none',
+            cursor: scrollTopDragging ? 'grabbing' : 'grab'
+          }}
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="18 15 12 9 6 15" />
@@ -176,7 +276,7 @@ export default function Footer() {
               NextJobPost is India's trusted government job notification platform. Latest recruitment alerts, results, admit cards, and answer keys for UPSC, SSC, Railway, Banking, Defence, PSU and all 36 States & UTs.
             </p>
             <p className="footer-contact">
-              <strong>Contact:</strong> <a href="mailto:admin@nextjobpost.com">admin@nextjobpost.com</a>
+              <strong>Contact:</strong> <a href="mailto:nextjobpost@gmail.com">nextjobpost@gmail.com</a>
             </p>
             <div className="footer-social-buttons mt-3">
               <a href="https://chat.whatsapp.com/LVpuUJluTpUEdIc4daAemQ" target="_blank" rel="noopener noreferrer" className="footer-social-btn whatsapp">

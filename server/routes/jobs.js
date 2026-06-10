@@ -5,6 +5,7 @@ const ctrl = require('../controllers/jobsController');
 
 // Public routes
 router.get('/', ctrl.getJobs);
+router.get('/stats', ctrl.getJobStats);
 router.get('/:idOrSlug', ctrl.getJobById);
 router.get('/:id/related', ctrl.getRelatedJobs);
 

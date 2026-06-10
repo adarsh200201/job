@@ -307,6 +307,16 @@ function AppLayout() {
   const [mobileMoreOpen, setMobileMoreOpen] = React.useState(false);
   const [isMobile, setIsMobile] = React.useState(window.innerWidth <= 768);
 
+  const staticPaths = [
+    '/', '/student-career-center', '/salaries', '/about', '/contact',
+    '/faq', '/blog', '/terms', '/disclaimer', '/login', '/signup',
+    '/auth/callback', '/admin/login', '/admin', '/dashboard', '/onboarding', '/privacy',
+    '/govt-jobs', '/upsc-jobs', '/ssc-jobs', '/railway-jobs', '/banking-jobs', '/defence-jobs', '/other-govt-jobs', '/teaching-jobs', '/psu-jobs',
+    '/results', '/admit-cards', '/answer-keys',
+    ...Object.keys(MEGA_CATEGORIES).map(k => `/${k}`)
+  ];
+  const isJobDetail = !staticPaths.includes(location.pathname);
+
   // Reactive mobile breakpoint detection
   React.useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
@@ -335,16 +345,6 @@ function AppLayout() {
   }, [mobileMenuOpen]);
 
   useEffect(() => {
-    const staticPaths = [
-      '/', '/student-career-center', '/salaries', '/about', '/contact',
-      '/faq', '/blog', '/terms', '/disclaimer', '/login', '/signup',
-      '/auth/callback', '/admin/login', '/admin', '/dashboard', '/onboarding', '/privacy',
-      '/govt-jobs', '/upsc-jobs', '/ssc-jobs', '/railway-jobs', '/banking-jobs', '/defence-jobs', '/other-govt-jobs', '/teaching-jobs', '/psu-jobs',
-      '/results', '/admit-cards', '/answer-keys',
-      ...Object.keys(MEGA_CATEGORIES).map(k => `/${k}`)
-    ];
-    const isJobDetail = !staticPaths.includes(location.pathname);
-    
     // Track Page View for core/static pages. JobDetails page view is tracked in its own component once loaded.
     if (!isJobDetail) {
       const params = new URLSearchParams(location.search);
@@ -356,12 +356,12 @@ function AppLayout() {
     }
 
     // Prerender.io lifecycle signaling:
-    if (staticPaths.includes(location.pathname) && location.pathname !== '/') {
+    if (!isJobDetail && location.pathname !== '/') {
       window.prerenderReady = true;
     } else {
       window.prerenderReady = false;
     }
-  }, [location.pathname, location.search]);
+  }, [location.pathname, location.search, isJobDetail]);
 
   /* ── Nav dropdown link configs ── */
   const govtJobItems = [
@@ -392,214 +392,216 @@ function AppLayout() {
       `}</style>
 
       <ScrollToTop />
-      <header className="site-header">
-        {/* ── Row 1: Logo, Nav Links, and Auth ── */}
-        <div className="nav-top-bar">
-          <div className="nav-top-inner" style={{ gap: '1.5rem' }}>
-            <Link to="/" className="nav-logo-link">
-              <img src="/logo.png" alt="NextJobPost Logo" className="logo-img-nav" />
-              <span className="nav-brand">
-                <span className="nav-brand-next">Next</span>
-                <span className="nav-brand-job">Job</span>
-                <span className="nav-brand-post">Post</span>
-              </span>
-            </Link>
+      {!(isMobile && isJobDetail) && (
+        <header className="site-header">
+          {/* ── Row 1: Logo, Nav Links, and Auth ── */}
+          <div className="nav-top-bar">
+            <div className="nav-top-inner" style={{ gap: '1.5rem' }}>
+              <Link to="/" className="nav-logo-link">
+                <img src="/logo.png" alt="NextJobPost Logo" className="logo-img-nav" />
+                <span className="nav-brand">
+                  <span className="nav-brand-next">Next</span>
+                  <span className="nav-brand-job">Job</span>
+                  <span className="nav-brand-post">Post</span>
+                </span>
+              </Link>
 
-            <ul className="nav-links" style={{ flex: 1, display: isMobile ? 'none' : 'flex', justifyContent: 'flex-end', flexWrap: 'nowrap', gap: '4px', overflow: 'visible' }}>
-              <NavDropdown label="Govt Jobs" items={govtJobItems} to="/govt-jobs" />
-              
-              <li style={{ listStyle: 'none' }}>
-                <NavLink className="nav-link" to="/results">Result</NavLink>
-              </li>
-              <li style={{ listStyle: 'none' }}>
-                <NavLink className="nav-link" to="/admit-cards">Admit Card</NavLink>
-              </li>
-              <li style={{ listStyle: 'none' }}>
-                <NavLink className="nav-link" to="/answer-keys">Answer Key</NavLink>
-              </li>
+              <ul className="nav-links" style={{ flex: 1, display: isMobile ? 'none' : 'flex', justifyContent: 'flex-end', flexWrap: 'nowrap', gap: '4px', overflow: 'visible' }}>
+                <NavDropdown label="Govt Jobs" items={govtJobItems} to="/govt-jobs" />
+                
+                <li style={{ listStyle: 'none' }}>
+                  <NavLink className="nav-link" to="/results">Result</NavLink>
+                </li>
+                <li style={{ listStyle: 'none' }}>
+                  <NavLink className="nav-link" to="/admit-cards">Admit Card</NavLink>
+                </li>
+                <li style={{ listStyle: 'none' }}>
+                  <NavLink className="nav-link" to="/answer-keys">Answer Key</NavLink>
+                </li>
 
-              <NavDropdown label="More" items={moreItems} to="#" mega={true} />
+                <NavDropdown label="More" items={moreItems} to="#" mega={true} />
 
-              <li style={{ listStyle: 'none', display: 'flex', alignItems: 'center', position: 'relative', marginLeft: '6px' }}>
-                {showSearch && (
-                  <form 
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      if (searchQuery.trim()) {
-                        navigate(`/?q=${encodeURIComponent(searchQuery.trim())}`);
-                        setShowSearch(false);
-                        setSearchQuery('');
-                      }
-                    }}
+                <li style={{ listStyle: 'none', display: 'flex', alignItems: 'center', position: 'relative', marginLeft: '6px' }}>
+                  {showSearch && (
+                    <form 
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        if (searchQuery.trim()) {
+                          navigate(`/?q=${encodeURIComponent(searchQuery.trim())}`);
+                          setShowSearch(false);
+                          setSearchQuery('');
+                        }
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        animation: 'dropdownFade 0.2s ease',
+                        marginRight: '8px'
+                      }}
+                    >
+                      <input
+                        type="text"
+                        placeholder="Search jobs..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        autoFocus
+                        style={{
+                          padding: '0.4rem 1rem',
+                          fontSize: '0.9rem',
+                          borderRadius: '9999px',
+                          border: '1.5px solid #d1d5db',
+                          outline: 'none',
+                          width: '150px',
+                          transition: 'all 0.2s',
+                        }}
+                        onBlur={() => {
+                          setTimeout(() => {
+                            if (!searchQuery) setShowSearch(false);
+                          }, 200);
+                        }}
+                      />
+                    </form>
+                  )}
+                  <button
+                    onClick={() => setShowSearch(prev => !prev)}
+                    aria-label="Search jobs"
                     style={{
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      padding: '0.45rem',
+                      borderRadius: '50%',
                       display: 'flex',
                       alignItems: 'center',
-                      animation: 'dropdownFade 0.2s ease',
-                      marginRight: '8px'
+                      justifyContent: 'center',
+                      color: showSearch ? '#6d28d9' : '#475569',
+                      backgroundColor: showSearch ? 'rgba(109, 40, 217, 0.08)' : 'transparent',
+                      transition: 'all 200ms',
+                    }}
+                    onMouseEnter={e => {
+                      if (!showSearch) {
+                        e.currentTarget.style.color = '#1A3A6B';
+                        e.currentTarget.style.background = 'rgba(26,58,107,0.08)';
+                      }
+                    }}
+                    onMouseLeave={e => {
+                      if (!showSearch) {
+                        e.currentTarget.style.color = '#475569';
+                        e.currentTarget.style.background = 'none';
+                      }
                     }}
                   >
-                    <input
-                      type="text"
-                      placeholder="Search jobs..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      autoFocus
-                      style={{
-                        padding: '0.4rem 1rem',
-                        fontSize: '0.9rem',
-                        borderRadius: '9999px',
-                        border: '1.5px solid #d1d5db',
-                        outline: 'none',
-                        width: '150px',
-                        transition: 'all 0.2s',
-                      }}
-                      onBlur={() => {
-                        setTimeout(() => {
-                          if (!searchQuery) setShowSearch(false);
-                        }, 200);
-                      }}
-                    />
-                  </form>
-                )}
-                <button
-                  onClick={() => setShowSearch(prev => !prev)}
-                  aria-label="Search jobs"
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    padding: '0.45rem',
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: showSearch ? '#6d28d9' : '#475569',
-                    backgroundColor: showSearch ? 'rgba(109, 40, 217, 0.08)' : 'transparent',
-                    transition: 'all 200ms',
-                  }}
-                  onMouseEnter={e => {
-                    if (!showSearch) {
-                      e.currentTarget.style.color = '#1A3A6B';
-                      e.currentTarget.style.background = 'rgba(26,58,107,0.08)';
-                    }
-                  }}
-                  onMouseLeave={e => {
-                    if (!showSearch) {
-                      e.currentTarget.style.color = '#475569';
-                      e.currentTarget.style.background = 'none';
-                    }
-                  }}
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                  </button>
+                </li>
+              </ul>
+
+              {/* ── Mobile Hamburger Button ── */}
+              <button
+                className="mobile-menu-btn"
+                onClick={() => setMobileMenuOpen(prev => !prev)}
+                aria-label="Open navigation menu"
+                style={{ display: isMobile ? 'flex' : 'none', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <span className={`hamburger-icon ${mobileMenuOpen ? 'open' : ''}`}>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </span>
+              </button>
+
+              <NavActions />
+            </div>
+          </div>
+
+          {/* ── Mobile Slide-in Menu ── */}
+          <div className={`mobile-menu-overlay ${mobileMenuOpen ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)} />
+          <nav className={`mobile-menu-drawer ${mobileMenuOpen ? 'active' : ''}`}>
+            <div className="mobile-menu-header">
+              <Link to="/" className="nav-logo-link" onClick={() => setMobileMenuOpen(false)}>
+                <img src="/logo.png" alt="NextJobPost Logo" style={{ width: 28, height: 28, borderRadius: 5 }} />
+                <span className="nav-brand" style={{ fontSize: '1.1rem' }}>
+                  <span className="nav-brand-next">Next</span>
+                  <span className="nav-brand-job">Job</span>
+                  <span className="nav-brand-post">Post</span>
+                </span>
+              </Link>
+              <button className="mobile-menu-close" onClick={() => setMobileMenuOpen(false)} aria-label="Close menu">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="mobile-menu-body">
+              {/* Govt Jobs Accordion */}
+              <div className="mobile-menu-group">
+                <button className="mobile-menu-accordion" onClick={() => setMobileGovtOpen(o => !o)}>
+                  <span>🏛️ Govt Jobs</span>
+                  <svg width="14" height="14" viewBox="0 0 10 10" fill="currentColor" style={{ transform: mobileGovtOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.25s' }}>
+                    <path d="M1 3l4 4 4-4" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
                   </svg>
                 </button>
-              </li>
-            </ul>
-
-            {/* ── Mobile Hamburger Button ── */}
-            <button
-              className="mobile-menu-btn"
-              onClick={() => setMobileMenuOpen(prev => !prev)}
-              aria-label="Open navigation menu"
-              style={{ display: isMobile ? 'flex' : 'none', alignItems: 'center', justifyContent: 'center' }}
-            >
-              <span className={`hamburger-icon ${mobileMenuOpen ? 'open' : ''}`}>
-                <span></span>
-                <span></span>
-                <span></span>
-              </span>
-            </button>
-
-            <NavActions />
-          </div>
-        </div>
-
-        {/* ── Mobile Slide-in Menu ── */}
-        <div className={`mobile-menu-overlay ${mobileMenuOpen ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)} />
-        <nav className={`mobile-menu-drawer ${mobileMenuOpen ? 'active' : ''}`}>
-          <div className="mobile-menu-header">
-            <Link to="/" className="nav-logo-link" onClick={() => setMobileMenuOpen(false)}>
-              <img src="/logo.png" alt="NextJobPost Logo" style={{ width: 28, height: 28, borderRadius: 5 }} />
-              <span className="nav-brand" style={{ fontSize: '1.1rem' }}>
-                <span className="nav-brand-next">Next</span>
-                <span className="nav-brand-job">Job</span>
-                <span className="nav-brand-post">Post</span>
-              </span>
-            </Link>
-            <button className="mobile-menu-close" onClick={() => setMobileMenuOpen(false)} aria-label="Close menu">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            </button>
-          </div>
-
-          <div className="mobile-menu-body">
-            {/* Govt Jobs Accordion */}
-            <div className="mobile-menu-group">
-              <button className="mobile-menu-accordion" onClick={() => setMobileGovtOpen(o => !o)}>
-                <span>🏛️ Govt Jobs</span>
-                <svg width="14" height="14" viewBox="0 0 10 10" fill="currentColor" style={{ transform: mobileGovtOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.25s' }}>
-                  <path d="M1 3l4 4 4-4" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-                </svg>
-              </button>
-              <div className={`mobile-menu-sub ${mobileGovtOpen ? 'open' : ''}`}>
-                {govtJobItems.map((item, i) => (
-                  <NavLink key={i} to={item.to} className={({ isActive }) => `mobile-menu-sublink ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
-                    {item.label}
-                  </NavLink>
-                ))}
+                <div className={`mobile-menu-sub ${mobileGovtOpen ? 'open' : ''}`}>
+                  {govtJobItems.map((item, i) => (
+                    <NavLink key={i} to={item.to} className={({ isActive }) => `mobile-menu-sublink ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+                      {item.label}
+                    </NavLink>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            {/* Direct links */}
-            <NavLink to="/results" className={({ isActive }) => `mobile-menu-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
-              📋 Result
-            </NavLink>
-            <NavLink to="/admit-cards" className={({ isActive }) => `mobile-menu-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
-              🎫 Admit Card
-            </NavLink>
-            <NavLink to="/answer-keys" className={({ isActive }) => `mobile-menu-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
-              🔑 Answer Key
-            </NavLink>
+              {/* Direct links */}
+              <NavLink to="/results" className={({ isActive }) => `mobile-menu-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+                📋 Result
+              </NavLink>
+              <NavLink to="/admit-cards" className={({ isActive }) => `mobile-menu-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+                🎫 Admit Card
+              </NavLink>
+              <NavLink to="/answer-keys" className={({ isActive }) => `mobile-menu-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+                🔑 Answer Key
+              </NavLink>
 
-            {/* More Categories Accordion */}
-            <div className="mobile-menu-group">
-              <button className="mobile-menu-accordion" onClick={() => setMobileMoreOpen(o => !o)}>
-                <span>📂 More Categories</span>
-                <svg width="14" height="14" viewBox="0 0 10 10" fill="currentColor" style={{ transform: mobileMoreOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.25s' }}>
-                  <path d="M1 3l4 4 4-4" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-                </svg>
-              </button>
-              <div className={`mobile-menu-sub ${mobileMoreOpen ? 'open' : ''}`}>
-                {moreItems.map((item, i) => (
-                  <NavLink key={i} to={item.to} className={({ isActive }) => `mobile-menu-sublink ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
-                    {item.label}
-                  </NavLink>
-                ))}
+              {/* More Categories Accordion */}
+              <div className="mobile-menu-group">
+                <button className="mobile-menu-accordion" onClick={() => setMobileMoreOpen(o => !o)}>
+                  <span>📂 More Categories</span>
+                  <svg width="14" height="14" viewBox="0 0 10 10" fill="currentColor" style={{ transform: mobileMoreOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.25s' }}>
+                    <path d="M1 3l4 4 4-4" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+                  </svg>
+                </button>
+                <div className={`mobile-menu-sub ${mobileMoreOpen ? 'open' : ''}`}>
+                  {moreItems.map((item, i) => (
+                    <NavLink key={i} to={item.to} className={({ isActive }) => `mobile-menu-sublink ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+                      {item.label}
+                    </NavLink>
+                  ))}
+                </div>
               </div>
+
+              <div className="mobile-menu-divider" />
+
+              <NavLink to="/student-career-center" className={({ isActive }) => `mobile-menu-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+                📝 Practice Tests
+              </NavLink>
+              <NavLink to="/about" className={({ isActive }) => `mobile-menu-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+                ℹ️ About Us
+              </NavLink>
+              <NavLink to="/contact" className={({ isActive }) => `mobile-menu-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+                📞 Contact
+              </NavLink>
             </div>
+          </nav>
 
-            <div className="mobile-menu-divider" />
+          {isHome && <HeroSearch />}
+        </header>
+      )}
 
-            <NavLink to="/student-career-center" className={({ isActive }) => `mobile-menu-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
-              📝 Practice Tests
-            </NavLink>
-            <NavLink to="/about" className={({ isActive }) => `mobile-menu-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
-              ℹ️ About Us
-            </NavLink>
-            <NavLink to="/contact" className={({ isActive }) => `mobile-menu-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
-              📞 Contact
-            </NavLink>
-          </div>
-        </nav>
-
-        {isHome && <HeroSearch />}
-      </header>
-
-      <main className="container py-4">
+      <main className={isMobile && isJobDetail ? "container p-0" : "container py-4"}>
         <Suspense fallback={<LoadingFallback />}>
           <Routes>
             {/* Public */}

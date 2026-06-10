@@ -1,8 +1,10 @@
 import axios from 'axios';
 
+const RENDER_BACKEND = 'https://nextjobpost-backend.onrender.com/api';
+
 const envBaseURL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL;
 
-const baseURL = envBaseURL || (import.meta.env.DEV ? 'http://localhost:4000/api' : '/api');
+const baseURL = envBaseURL || RENDER_BACKEND;
 
 const api = axios.create({ baseURL });
 

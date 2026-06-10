@@ -64,14 +64,25 @@ const parseAllowedOrigins = (value) =>
     .map((s) => s.trim())
     .filter(Boolean);
 
-const allowedOrigins = parseAllowedOrigins(CLIENT_ORIGIN);
+// Always include localhost for local dev; production origins come from CLIENT_ORIGIN
+const allowedOrigins = [
+  ...parseAllowedOrigins(CLIENT_ORIGIN),
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'http://127.0.0.1:3000',
+];
 
 app.use(
   cors({
     origin(origin, callback) {
+      // Allow server-to-server / curl / Postman (no origin header)
       if (!origin) return callback(null, true);
+      // Wildcard: allow everything
       if (allowedOrigins.includes('*')) return callback(null, true);
+      // Check explicit list
       if (allowedOrigins.includes(origin)) return callback(null, true);
+      // Allow any Vercel / Netlify / Render preview URLs for this project
+      if (/nextjobpost/i.test(origin)) return callback(null, true);
       return callback(new Error(`CORS blocked for origin: ${origin}`));
     },
     credentials: false,

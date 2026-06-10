@@ -20,16 +20,16 @@ export default function PreFooterSections() {
   ]);
 
   const [titles, setTitles] = useState([
-    { label: 'Software Engineer - Fresher', to: '/?q=Software' },
-    { label: 'Frontend Developer Internship', to: '/?q=Frontend' },
-    { label: 'Junior QA Engineer', to: '/?q=QA' },
-    { label: 'Part-time Content Writer', to: '/?q=Writer' },
-    { label: 'Work From Home - Data Entry', to: '/?q=Data' },
-    { label: 'Full Stack Developer', to: '/?q=Developer' },
-    { label: 'Backend Developer', to: '/?q=Backend' },
-    { label: 'DevOps Intern', to: '/?q=DevOps' },
-    { label: 'Graphic Designer', to: '/?q=Designer' },
-    { label: 'Data Analyst - Fresher', to: '/?q=Data' }
+    { label: 'Software Engineer Fresher…', to: '/?q=Software' },
+    { label: 'Frontend Developer Internship…', to: '/?q=Frontend' },
+    { label: 'Junior QA Engineer…', to: '/?q=QA' },
+    { label: 'Part-time Content Writer…', to: '/?q=Writer' },
+    { label: 'Work From Home Data…', to: '/?q=Data' },
+    { label: 'Full Stack Developer…', to: '/?q=Developer' },
+    { label: 'Backend Developer…', to: '/?q=Backend' },
+    { label: 'DevOps Intern…', to: '/?q=DevOps' },
+    { label: 'Graphic Designer…', to: '/?q=Designer' },
+    { label: 'Data Analyst Fresher…', to: '/?q=Data' }
   ]);
 
   const [locations, setLocations] = useState([
@@ -88,8 +88,16 @@ export default function PreFooterSections() {
         }
 
         // 2. Process Titles dynamically - point directly to actual job detail routes
+        // Truncate long titles to first 5 words to keep the list clean
+        const truncateTitle = (title) => {
+          if (!title) return '';
+          const words = title.trim().split(/\s+/);
+          if (words.length <= 5) return title;
+          return words.slice(0, 5).join(' ') + '…';
+        };
+
         const titleList = jobsArray.slice(0, 10).map(job => ({
-          label: job.title,
+          label: truncateTitle(job.title),
           to: `/${job.slug}`
         }));
         if (titleList.length > 0) {
@@ -203,11 +211,32 @@ export default function PreFooterSections() {
           </div>
 
           <div className="pf-popular-action">
-            <button 
-              className="pf-btn-collapse"
+            <button
+              className={`pf-btn-collapse ${isExpanded ? 'expanded' : ''}`}
               onClick={() => setIsExpanded(!isExpanded)}
             >
-              {isExpanded ? 'See Fewer NextJobPost Jobs ^' : 'See More NextJobPost Jobs ˅'}
+              {/* Eye icon */}
+              {isExpanded ? (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/>
+                  <path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/>
+                  <line x1="1" y1="1" x2="23" y2="23"/>
+                </svg>
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              )}
+              <span>{isExpanded ? 'See Fewer Jobs' : 'See All Jobs'}</span>
+              {/* Animated chevron */}
+              <svg
+                className={`pf-chevron ${isExpanded ? 'rotated' : ''}`}
+                width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+              >
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
             </button>
           </div>
         </div>

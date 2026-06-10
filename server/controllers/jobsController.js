@@ -41,6 +41,25 @@ function buildFilters(query) {
   if (query.education) {
     filters.education = new RegExp(query.education, 'i');
   }
+
+  // Filter by salary range
+  if (query.salary) {
+    let salaryRegex;
+    if (query.salary === '0-3') {
+      salaryRegex = /(?:^[0-3](?:\.\d+)?\s*(?:lpa|lakh|lac))|(?:\b(?:[1-9]\d{3}|1\d{4}|2[0-5]\d{3})\b)/i;
+    } else if (query.salary === '3-6') {
+      salaryRegex = /(?:^[3-6](?:\.\d+)?\s*(?:lpa|lakh|lac))|(?:\b(?:2[5-9]\d{3}|[3-4]\d{4}|50000)\b)/i;
+    } else if (query.salary === '6-10') {
+      salaryRegex = /(?:^(?:[6-9]|10)(?:\.\d+)?\s*(?:lpa|lakh|lac))|(?:\b(?:5\d{4}|[6-7]\d{4}|8[0-5]\d{3})\b)/i;
+    } else if (query.salary === '10-15') {
+      salaryRegex = /(?:^(?:1[0-5])(?:\.\d+)?\s*(?:lpa|lakh|lac))|(?:\b(?:8[5-9]\d{3}|9\d{4}|1[0-2]\d{4})\b)/i;
+    } else if (query.salary === '15+') {
+      salaryRegex = /(?:^(?:1[5-9]|[2-9]\d)(?:\.\d+)?\s*(?:lpa|lakh|lac))|(?:\b(?:1[3-9]\d{4}|[2-9]\d{5})\b)/i;
+    }
+    if (salaryRegex) {
+      filters.salary = salaryRegex;
+    }
+  }
   
   // Filter by featured jobs
   if (query.featured === 'true') {
@@ -57,6 +76,19 @@ function buildFilters(query) {
     filters.postType = query.postType;
   } else if (query.status !== 'all') {
     filters.postType = { $nin: ['Admit Card', 'Result', 'Answer Key'] };
+  }
+
+  // Exclude specific post types (comma-separated) e.g. excludePostType=Syllabus
+  if (query.excludePostType) {
+    const excludeList = query.excludePostType.split(',').map(s => s.trim()).filter(Boolean);
+    if (excludeList.length > 0) {
+      if (filters.postType && filters.postType.$nin) {
+        // Merge with existing $nin array
+        filters.postType.$nin = [...new Set([...filters.postType.$nin, ...excludeList])];
+      } else if (!filters.postType) {
+        filters.postType = { $nin: excludeList };
+      }
+    }
   }
   
   return filters;
@@ -458,6 +490,146 @@ exports.getRelatedJobs = async (req, res) => {
     res.status(500).json({ 
       success: false, 
       message: 'Failed to fetch related jobs',
+      error: process.env.NODE_ENV === 'development' ? e.message : undefined
+    });
+  }
+};
+
+// Get job stats/counts for sidebar filters
+// GET /api/jobs/stats
+exports.getJobStats = async (req, res) => {
+  try {
+    const baseQuery = { isActive: true };
+
+    const [
+      // Work Mode & Type
+      remoteTypeCount,
+      hybridTypeCount,
+      fullTimeCount,
+      partTimeCount,
+      internshipCount,
+
+      // Experience
+      fresherCount,
+      exp1to3Count,
+      exp3to5Count,
+      exp5plusCount,
+
+      // Job Category
+      govCount,
+      privateCount,
+
+      // Locations
+      remoteLocCount,
+      delhiCount,
+      blrCount,
+      mumbaiCount,
+      puneCount,
+      hydCount,
+
+      // Education
+      graduateCount,
+      btechCount,
+      diplomaCount,
+      twelfthCount,
+      tenthCount,
+
+      // Salary Ranges
+      salary0to3Count,
+      salary3to6Count,
+      salary6to10Count,
+      salary10to15Count,
+      salary15plusCount
+    ] = await Promise.all([
+      // Work Mode & Type
+      Job.countDocuments({ ...baseQuery, $or: [{ type: 'Remote' }, { location: /remote/i }] }),
+      Job.countDocuments({ ...baseQuery, type: 'Hybrid' }),
+      Job.countDocuments({ ...baseQuery, type: 'Full-Time' }),
+      Job.countDocuments({ ...baseQuery, type: 'Part-Time' }),
+      Job.countDocuments({ ...baseQuery, type: 'Internship' }),
+
+      // Experience
+      Job.countDocuments({ ...baseQuery, experience: /fresher/i }),
+      Job.countDocuments({ ...baseQuery, experience: /1|2|3/ }),
+      Job.countDocuments({ ...baseQuery, experience: /3|4|5/ }),
+      Job.countDocuments({ ...baseQuery, experience: /[5-9]|10/ }),
+
+      // Job Category
+      Job.countDocuments({ ...baseQuery, isGovernment: true }),
+      Job.countDocuments({ ...baseQuery, isGovernment: { $ne: true } }),
+
+      // Locations
+      Job.countDocuments({ ...baseQuery, $or: [{ location: /remote/i }, { type: 'Remote' }] }),
+      Job.countDocuments({ ...baseQuery, location: /delhi|ncr|noida|gurgaon/i }),
+      Job.countDocuments({ ...baseQuery, location: /bengaluru|bangalore/i }),
+      Job.countDocuments({ ...baseQuery, location: /mumbai/i }),
+      Job.countDocuments({ ...baseQuery, location: /pune/i }),
+      Job.countDocuments({ ...baseQuery, location: /hyderabad/i }),
+
+      // Education
+      Job.countDocuments({ ...baseQuery, education: /graduate|degree/i }),
+      Job.countDocuments({ ...baseQuery, education: /b\.?tech|b\.?e\.?|bachelor/i }),
+      Job.countDocuments({ ...baseQuery, education: /diploma/i }),
+      Job.countDocuments({ ...baseQuery, education: /12th|intermediate/i }),
+      Job.countDocuments({ ...baseQuery, education: /10th|ssc|matric/i }),
+
+      // Salary Ranges
+      Job.countDocuments({ ...baseQuery, salary: /(?:^[0-3](?:\.\d+)?\s*(?:lpa|lakh|lac))|(?:\b(?:[1-9]\d{3}|1\d{4}|2[0-5]\d{3})\b)/i }),
+      Job.countDocuments({ ...baseQuery, salary: /(?:^[3-6](?:\.\d+)?\s*(?:lpa|lakh|lac))|(?:\b(?:2[5-9]\d{3}|[3-4]\d{4}|50000)\b)/i }),
+      Job.countDocuments({ ...baseQuery, salary: /(?:^(?:[6-9]|10)(?:\.\d+)?\s*(?:lpa|lakh|lac))|(?:\b(?:5\d{4}|[6-7]\d{4}|8[0-5]\d{3})\b)/i }),
+      Job.countDocuments({ ...baseQuery, salary: /(?:^(?:1[0-5])(?:\.\d+)?\s*(?:lpa|lakh|lac))|(?:\b(?:8[5-9]\d{3}|9\d{4}|1[0-2]\d{4})\b)/i }),
+      Job.countDocuments({ ...baseQuery, salary: /(?:^(?:1[5-9]|[2-9]\d)(?:\.\d+)?\s*(?:lpa|lakh|lac))|(?:\b(?:1[3-9]\d{4}|[2-9]\d{5})\b)/i })
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        type: {
+          Remote: remoteTypeCount,
+          Hybrid: hybridTypeCount,
+          'Full-Time': fullTimeCount,
+          'Part-Time': partTimeCount,
+          Internship: internshipCount
+        },
+        experience: {
+          Fresher: fresherCount,
+          '1-3 Years': exp1to3Count,
+          '3-5 Years': exp3to5Count,
+          '5+ Years': exp5plusCount
+        },
+        category: {
+          Government: govCount,
+          Private: privateCount
+        },
+        location: {
+          Remote: remoteLocCount,
+          Delhi: delhiCount,
+          Bengaluru: blrCount,
+          Mumbai: mumbaiCount,
+          Pune: puneCount,
+          Hyderabad: hydCount
+        },
+        education: {
+          Graduate: graduateCount,
+          Btech: btechCount,
+          Diploma: diplomaCount,
+          '12th': twelfthCount,
+          '10th': tenthCount
+        },
+        salary: {
+          '0-3': salary0to3Count,
+          '3-6': salary3to6Count,
+          '6-10': salary6to10Count,
+          '10-15': salary10to15Count,
+          '15+': salary15plusCount
+        }
+      }
+    });
+  } catch (e) {
+    console.error('Error getting job stats:', e);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get job statistics',
       error: process.env.NODE_ENV === 'development' ? e.message : undefined
     });
   }

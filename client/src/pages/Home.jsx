@@ -28,6 +28,10 @@ export default function Home() {
         if (!searchParams.has('limit')) {
           searchParams.set('limit', '20');
         }
+        // Never show Syllabus posts on the home listing
+        if (!searchParams.has('postType')) {
+          searchParams.set('excludePostType', 'Syllabus');
+        }
         const query = `?${searchParams.toString()}`;
         const response = await cache.get(
           (url) => api.get(url),
@@ -127,41 +131,123 @@ export default function Home() {
             
             {/* Pagination */}
             {pagination.totalPages > 1 && (
-              <nav aria-label="Job listings pagination" className="mt-4">
-                <ul className="pagination justify-content-center">
-                  <li className={`page-item ${pagination.currentPage === 1 ? 'disabled' : ''}`}>
-                    <button className="page-link" onClick={() => goToPage(pagination.currentPage - 1)} disabled={pagination.currentPage === 1}>
-                      Previous
-                    </button>
-                  </li>
-                  
+              <nav aria-label="Job listings pagination" className="mt-5 mb-3">
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '2px',
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '9999px',
+                  boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+                  padding: '5px',
+                  width: 'fit-content',
+                  margin: '0 auto'
+                }}>
+                  {/* Previous */}
+                  <button
+                    onClick={() => goToPage(pagination.currentPage - 1)}
+                    disabled={pagination.currentPage === 1}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      padding: '8px 18px',
+                      fontSize: '0.9rem',
+                      fontWeight: '600',
+                      color: pagination.currentPage === 1 ? '#94a3b8' : '#374151',
+                      cursor: pagination.currentPage === 1 ? 'not-allowed' : 'pointer',
+                      borderRadius: '9999px',
+                      transition: 'background 160ms ease, color 160ms ease',
+                      whiteSpace: 'nowrap'
+                    }}
+                    onMouseEnter={e => { if (pagination.currentPage !== 1) e.currentTarget.style.background = '#f1f5f9'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}
+                  >
+                    Previous
+                  </button>
+
+                  {/* Page Numbers */}
                   {[...Array(pagination.totalPages)].map((_, i) => {
                     const page = i + 1;
-                    // Show first page, last page, current page, and pages around current
+                    const isActive = pagination.currentPage === page;
+                    const isEllipsis =
+                      page !== 1 &&
+                      page !== pagination.totalPages &&
+                      !(page >= pagination.currentPage - 1 && page <= pagination.currentPage + 1);
+                    const showEllipsis =
+                      page === pagination.currentPage - 2 || page === pagination.currentPage + 2;
+
                     if (
-                      page === 1 || 
-                      page === pagination.totalPages || 
+                      page === 1 ||
+                      page === pagination.totalPages ||
                       (page >= pagination.currentPage - 1 && page <= pagination.currentPage + 1)
                     ) {
                       return (
-                        <li key={page} className={`page-item ${pagination.currentPage === page ? 'active' : ''}`}>
-                          <button className="page-link" onClick={() => goToPage(page)}>
-                            {page}
-                          </button>
-                        </li>
+                        <button
+                          key={page}
+                          onClick={() => goToPage(page)}
+                          style={{
+                            minWidth: '38px',
+                            height: '38px',
+                            padding: '0 6px',
+                            border: 'none',
+                            borderRadius: '9999px',
+                            fontSize: '0.9rem',
+                            fontWeight: '700',
+                            cursor: 'pointer',
+                            transition: 'all 160ms ease',
+                            background: isActive ? '#2563eb' : 'transparent',
+                            color: isActive ? '#ffffff' : '#374151',
+                            boxShadow: isActive ? '0 2px 8px rgba(37,99,235,0.3)' : 'none'
+                          }}
+                          onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = '#eff6ff'; }}
+                          onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent'; }}
+                        >
+                          {page}
+                        </button>
                       );
-                    } else if (page === pagination.currentPage - 2 || page === pagination.currentPage + 2) {
-                      return <li key={page} className="page-item disabled"><span className="page-link">...</span></li>;
+                    } else if (showEllipsis) {
+                      return (
+                        <span key={page} style={{
+                          minWidth: '38px',
+                          height: '38px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '0.9rem',
+                          color: '#94a3b8',
+                          fontWeight: '600'
+                        }}>
+                          …
+                        </span>
+                      );
                     }
                     return null;
                   })}
-                  
-                  <li className={`page-item ${pagination.currentPage === pagination.totalPages ? 'disabled' : ''}`}>
-                    <button className="page-link" onClick={() => goToPage(pagination.currentPage + 1)} disabled={pagination.currentPage === pagination.totalPages}>
-                      Next
-                    </button>
-                  </li>
-                </ul>
+
+                  {/* Next */}
+                  <button
+                    onClick={() => goToPage(pagination.currentPage + 1)}
+                    disabled={pagination.currentPage === pagination.totalPages}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      padding: '8px 18px',
+                      fontSize: '0.9rem',
+                      fontWeight: '600',
+                      color: pagination.currentPage === pagination.totalPages ? '#94a3b8' : '#374151',
+                      cursor: pagination.currentPage === pagination.totalPages ? 'not-allowed' : 'pointer',
+                      borderRadius: '9999px',
+                      transition: 'background 160ms ease, color 160ms ease',
+                      whiteSpace: 'nowrap'
+                    }}
+                    onMouseEnter={e => { if (pagination.currentPage !== pagination.totalPages) e.currentTarget.style.background = '#f1f5f9'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}
+                  >
+                    Next
+                  </button>
+                </div>
               </nav>
             )}
           </section>
