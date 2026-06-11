@@ -52,6 +52,35 @@ export default function HeroSearch() {
   const navigate = useNavigate();
   const loc = useLocation();
 
+  // Sync input values with URL params (e.g. when page loads or user navigates)
+  useEffect(() => {
+    const params = new URLSearchParams(loc.search);
+    setQuery(params.get('q') || '');
+    setLocation(params.get('location') || '');
+  }, [loc.search]);
+
+  const handleClearQuery = () => {
+    setQuery('');
+    setSuggestions([]);
+    const params = new URLSearchParams(loc.search);
+    params.delete('q');
+    navigate(`/?${params.toString()}`);
+    setTimeout(() => {
+      document.getElementById('hero-job-search')?.focus();
+    }, 0);
+  };
+
+  const handleClearLocation = () => {
+    setLocation('');
+    setLocSuggestions([]);
+    const params = new URLSearchParams(loc.search);
+    params.delete('location');
+    navigate(`/?${params.toString()}`);
+    setTimeout(() => {
+      document.getElementById('hero-location-search')?.focus();
+    }, 0);
+  };
+
   // Fetch job titles once for suggestions
   useEffect(() => {
     api.get('/jobs?limit=200')
@@ -138,10 +167,14 @@ export default function HeroSearch() {
     navigate(`/?${params.toString()}`);
   };
 
-  const handleSelectLocation = (loc) => {
-    setLocation(loc);
+  const handleSelectLocation = (locName) => {
+    setLocation(locName);
     setShowLocSuggestions(false);
     setActiveLocSuggestion(-1);
+    const params = new URLSearchParams(loc.search);
+    if (locName.trim()) params.set('location', locName.trim()); else params.delete('location');
+    if (query.trim()) params.set('q', query.trim());
+    navigate(`/?${params.toString()}`);
   };
 
   const handleQueryKeyDown = (e) => {
@@ -220,6 +253,18 @@ export default function HeroSearch() {
                 aria-label="Search jobs"
                 autoComplete="off"
               />
+              {query && (
+                <button
+                  type="button"
+                  className="hero-input-clear-btn"
+                  onClick={handleClearQuery}
+                  aria-label="Clear search query"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              )}
               {/* Suggestions Dropdown */}
               {showSuggestions && (
                 <ul className="hero-suggestions-dropdown">
@@ -259,6 +304,18 @@ export default function HeroSearch() {
                 aria-label="Location"
                 autoComplete="off"
               />
+              {location && (
+                <button
+                  type="button"
+                  className="hero-input-clear-btn"
+                  onClick={handleClearLocation}
+                  aria-label="Clear location query"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              )}
               {showLocSuggestions && (
                 <ul className="hero-suggestions-dropdown">
                   {locSuggestions.map((l, idx) => (

@@ -452,7 +452,7 @@ main.container {
   box-shadow: 0 12px 48px rgba(0,0,0,0.35);
   overflow: visible; /* allow suggestion dropdowns to escape */
   margin-bottom: 1rem;
-  padding: 6px 8px 6px 16px;
+  padding: 4px 6px 4px 16px;
   border: 2px solid rgba(255,255,255,0.12);
   position: relative;
 }
@@ -487,7 +487,7 @@ main.container {
   font-size: 1rem;
   color: #1f2937;
   width: 100%;
-  padding: 0.8rem 0;
+  padding: 0.5rem 0;
   font-weight: 500;
 }
 
@@ -498,7 +498,7 @@ main.container {
 
 .hero-input-divider {
   width: 1px;
-  height: 32px;
+  height: 28px;
   background: #e5e7eb;
   flex-shrink: 0;
 }
@@ -555,8 +555,8 @@ main.container {
   border: none;
   color: #fff;
   padding: 0;
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   border-radius: 50% !important;
   cursor: pointer;
   display: flex;
@@ -568,6 +568,26 @@ main.container {
 
 .hero-search-btn:hover {
   background: #6d28d9;
+}
+
+.hero-input-clear-btn {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 150ms ease, color 150ms ease;
+  margin-right: 0.25rem;
+  flex-shrink: 0;
+}
+
+.hero-input-clear-btn:hover {
+  background: #f3f4f6;
+  color: #4b5563;
 }
 
 /* Popular searches */
