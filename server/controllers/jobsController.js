@@ -11,15 +11,27 @@ function buildFilters(query) {
   }  
   // Text search across multiple fields
   if (query.q) {
+    const qClean = query.q.trim().toLowerCase();
     const regex = new RegExp(query.q, 'i');
-    filters.$or = [
-      { title: regex },
-      { company: regex },
-      { location: regex },
-      { jobDescription: regex },
-      { 'education': regex },
-      { 'skills': { $in: [new RegExp(query.q, 'i')] } }
-    ];
+    
+    // Avoid matching template/description texts for government boards like SSC/UPSC
+    const isGovtBoardSearch = qClean.includes('ssc') || qClean.includes('upsc');
+    
+    if (isGovtBoardSearch) {
+      filters.$or = [
+        { title: regex },
+        { company: regex }
+      ];
+    } else {
+      filters.$or = [
+        { title: regex },
+        { company: regex },
+        { location: regex },
+        { jobDescription: regex },
+        { education: regex },
+        { 'skills': { $in: [regex] } }
+      ];
+    }
   }
   
   // Filter by location (case-insensitive partial match)
@@ -73,7 +85,12 @@ function buildFilters(query) {
 
   // Filter by post type
   if (query.postType) {
-    filters.postType = query.postType;
+    // 'Government Job' is the display label – match all equivalent DB values
+    if (query.postType === 'Government Job') {
+      filters.postType = { $in: ['Job', 'Job Post', 'Government Job'] };
+    } else {
+      filters.postType = query.postType;
+    }
   } else if (query.status !== 'all') {
     filters.postType = { $nin: ['Admit Card', 'Result', 'Answer Key'] };
   }
@@ -126,7 +143,7 @@ exports.getJobs = async (req, res) => {
     
     // Pagination
     const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 10;
+    const limit = parseInt(req.query.limit, 10) || 20;
     const skip = (page - 1) * limit;
     const total = await Job.countDocuments(filters);
     

@@ -669,6 +669,12 @@ export default function JobDetails() {
 
   const themeColor = getThemeColor();
 
+  // Remap generic postType values to a user-friendly label for display
+  const rawPostType = String(job.postType || '').trim();
+  const displayPostType = (rawPostType === 'Job Post' || rawPostType === 'Job')
+    ? 'Government Job'
+    : rawPostType || 'Government Job';
+
   const getHeaderStyle = () => ({
     background: `linear-gradient(90deg, ${themeColor}e0, ${themeColor})`,
     color: '#fff',
@@ -1029,7 +1035,7 @@ export default function JobDetails() {
                 letterSpacing: '0.5px',
                 fontWeight: '700'
               }}>
-                {job.postType || 'Government Job'}
+                {displayPostType}
               </span>
             )}
           </div>
@@ -1673,7 +1679,7 @@ export default function JobDetails() {
                                 textTransform: 'uppercase',
                                 letterSpacing: '0.5px'
                               }}>
-                                {job.postType || 'Government Job'}
+                                {displayPostType}
                               </span>
                             </td>
                           </tr>

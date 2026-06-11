@@ -16,7 +16,7 @@ const CATEGORY_CONFIGS = {
   'govt-jobs': {
     postTypeQuery: 'Government Job',
     searchQuery: '',
-    typeQuery: 'Full-Time',
+    typeQuery: '',
     title: 'Latest Govt Jobs 2026 - State & Central Govt Recruitment & Vacancies',
     heading: '🏛️ Latest Government Jobs & Recruitment 2026',
     description: 'Find the latest government job vacancies, notifications, and recruitment schedules for state and central government departments across India.',
@@ -152,6 +152,9 @@ export default function GovtJobsCategory({ categoryKey }) {
         
         if (config.postTypeQuery) {
           params.set('postType', config.postTypeQuery);
+        } else {
+          // Exclude non-job post types from general category listings
+          params.set('excludePostType', 'Syllabus');
         }
         if (config.searchQuery) {
           params.set('q', config.searchQuery);
@@ -160,6 +163,10 @@ export default function GovtJobsCategory({ categoryKey }) {
           params.set('type', config.typeQuery);
         }
         params.set('isGovernment', 'true');
+        // Always show 20 per page — same as home page
+        if (!params.has('limit')) {
+          params.set('limit', '20');
+        }
         
         const query = params.toString() ? `?${params.toString()}` : '';
 
@@ -268,40 +275,119 @@ export default function GovtJobsCategory({ categoryKey }) {
             
             {/* Pagination */}
             {pagination.totalPages > 1 && (
-              <nav aria-label="Job listings pagination" className="mt-4">
-                <ul className="pagination justify-content-center">
-                  <li className={`page-item ${pagination.currentPage === 1 ? 'disabled' : ''}`}>
-                    <button className="page-link" onClick={() => goToPage(pagination.currentPage - 1)} disabled={pagination.currentPage === 1}>
-                      Previous
-                    </button>
-                  </li>
-                  
+              <nav aria-label="Job listings pagination" className="mt-4 mb-3">
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '2px',
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '9999px',
+                  boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+                  padding: '5px',
+                  width: 'fit-content',
+                  margin: '0 auto'
+                }}>
+                  {/* Previous */}
+                  <button
+                    onClick={() => goToPage(pagination.currentPage - 1)}
+                    disabled={pagination.currentPage === 1}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      padding: '8px 18px',
+                      fontSize: '0.9rem',
+                      fontWeight: '600',
+                      color: pagination.currentPage === 1 ? '#94a3b8' : '#374151',
+                      cursor: pagination.currentPage === 1 ? 'not-allowed' : 'pointer',
+                      borderRadius: '9999px',
+                      transition: 'background 160ms ease, color 160ms ease',
+                      whiteSpace: 'nowrap'
+                    }}
+                    onMouseEnter={e => { if (pagination.currentPage !== 1) e.currentTarget.style.background = '#f1f5f9'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}
+                  >
+                    Previous
+                  </button>
+
+                  {/* Page Numbers */}
                   {[...Array(pagination.totalPages)].map((_, i) => {
                     const page = i + 1;
+                    const isActive = pagination.currentPage === page;
+                    const showEllipsis =
+                      page === pagination.currentPage - 2 || page === pagination.currentPage + 2;
+
                     if (
-                      page === 1 || 
-                      page === pagination.totalPages || 
+                      page === 1 ||
+                      page === pagination.totalPages ||
                       (page >= pagination.currentPage - 1 && page <= pagination.currentPage + 1)
                     ) {
                       return (
-                        <li key={page} className={`page-item ${pagination.currentPage === page ? 'active' : ''}`}>
-                          <button className="page-link" onClick={() => goToPage(page)}>
-                            {page}
-                          </button>
-                        </li>
+                        <button
+                          key={page}
+                          onClick={() => goToPage(page)}
+                          style={{
+                            minWidth: '38px',
+                            height: '38px',
+                            padding: '0 6px',
+                            border: 'none',
+                            borderRadius: '9999px',
+                            fontSize: '0.9rem',
+                            fontWeight: '700',
+                            cursor: 'pointer',
+                            transition: 'all 160ms ease',
+                            background: isActive ? '#2563eb' : 'transparent',
+                            color: isActive ? '#ffffff' : '#374151',
+                            boxShadow: isActive ? '0 2px 8px rgba(37,99,235,0.3)' : 'none'
+                          }}
+                          onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = '#eff6ff'; }}
+                          onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent'; }}
+                        >
+                          {page}
+                        </button>
                       );
-                    } else if (page === pagination.currentPage - 2 || page === pagination.currentPage + 2) {
-                      return <li key={page} className="page-item disabled"><span className="page-link">...</span></li>;
+                    } else if (showEllipsis) {
+                      return (
+                        <span key={page} style={{
+                          minWidth: '38px',
+                          height: '38px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '0.9rem',
+                          color: '#94a3b8',
+                          fontWeight: '600'
+                        }}>
+                          …
+                        </span>
+                      );
                     }
                     return null;
                   })}
-                  
-                  <li className={`page-item ${pagination.currentPage === pagination.totalPages ? 'disabled' : ''}`}>
-                    <button className="page-link" onClick={() => goToPage(pagination.currentPage + 1)} disabled={pagination.currentPage === pagination.totalPages}>
-                      Next
-                    </button>
-                  </li>
-                </ul>
+
+                  {/* Next */}
+                  <button
+                    onClick={() => goToPage(pagination.currentPage + 1)}
+                    disabled={pagination.currentPage === pagination.totalPages}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      padding: '8px 18px',
+                      fontSize: '0.9rem',
+                      fontWeight: '600',
+                      color: pagination.currentPage === pagination.totalPages ? '#94a3b8' : '#374151',
+                      cursor: pagination.currentPage === pagination.totalPages ? 'not-allowed' : 'pointer',
+                      borderRadius: '9999px',
+                      transition: 'background 160ms ease, color 160ms ease',
+                      whiteSpace: 'nowrap'
+                    }}
+                    onMouseEnter={e => { if (pagination.currentPage !== pagination.totalPages) e.currentTarget.style.background = '#f1f5f9'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}
+                  >
+                    Next
+                  </button>
+                </div>
               </nav>
             )}
           </section>

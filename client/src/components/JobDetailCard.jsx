@@ -117,7 +117,11 @@ function JobDetailCard({ job: rawJob, adLink: propAdLink }) {
   let formattedLastDate = job.lastDate ? formatDate(job.lastDate) : null;
 
   if (job.isGovernment) {
-    const postType = String(job.postType || 'Job Post').toUpperCase();
+    let postType = String(job.postType || 'Job Post').toUpperCase();
+    // Remap generic job types to the user-facing label "GOVERNMENT JOB"
+    if (postType === 'JOB POST' || postType === 'JOB') {
+      postType = 'GOVERNMENT JOB';
+    }
     badgeText = `🏛️ ${postType}`;
     if (postType.includes('RESULT')) {
       badgeClass = 'jc-govt-badge-result';
