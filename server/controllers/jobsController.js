@@ -1,5 +1,7 @@
 const Job = require('../models/Job');
 const slugify = require('slugify');
+const { getProfileAndActivityData, calculateJobMatchScore } = require('./recommendationController');
+const GovernmentJobPreferences = require('../models/GovernmentJobPreferences');
 
 // Helper function to build filters for job search
 function buildFilters(query) {
@@ -122,40 +124,91 @@ exports.getJobs = async (req, res) => {
     // Build filters
     const filters = buildFilters(req.query);
     
-    // Build query
-    let query = Job.find(filters);
-    
-    // Sorting
-    if (req.query.sort) {
-      const sortBy = req.query.sort.split(',').join(' ');
-      query = query.sort(sortBy);
-    } else {
-      query = query.sort('-createdAt'); // Default: newest first
-    }
-    
-    // Field limiting
-    if (req.query.fields) {
-      const fields = req.query.fields.split(',').join(' ');
-      query = query.select(fields);
-    } else {
-      query = query.select('-__v -updatedAt'); // Exclude some fields by default
-    }
-    
-    // Pagination
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 20;
     const skip = (page - 1) * limit;
-    const total = await Job.countDocuments(filters);
     
-    query = query.skip(skip).limit(limit);
+    // Check if the user has saved preferences in their profile or session activity
+    let hasPrefs = false;
+    let profile = null;
+    let activity = null;
+    let govPrefs = null;
+    const userId = req.user?.id || null;
+    const sessionId = req.query.sessionId || '';
     
-    // Execute query
-    const jobs = await query.lean();
+    const data = await getProfileAndActivityData(userId, sessionId);
+    profile = data.profile;
+    activity = data.activity;
     
-    // Calculate total pages
+    hasPrefs = !!(
+      (profile.roles && profile.roles.length > 0) ||
+      (profile.locations && profile.locations.length > 0) ||
+      (profile.skills && profile.skills.length > 0) ||
+      (activity.viewedJobIds && activity.viewedJobIds.length > 0) ||
+      (activity.savedJobIds && activity.savedJobIds.length > 0) ||
+      (activity.appliedJobIds && activity.appliedJobIds.length > 0)
+    );
+    
+    if (hasPrefs && userId) {
+      govPrefs = await GovernmentJobPreferences.findOne({ userId });
+    }
+    
+    let jobs;
+    let total;
+    
+    if (hasPrefs && userId) {
+      // Fetch a pool of candidate jobs matching filters, sorted by date
+      total = await Job.countDocuments(filters);
+      
+      // Calculate a dynamic limit for candidates to support pagination gracefully
+      const candidateLimit = Math.max(300, skip + limit + 100);
+      const candidates = await Job.find(filters)
+        .sort('-createdAt')
+        .limit(candidateLimit)
+        .select('-__v -updatedAt')
+        .lean();
+      
+      // Compute match score and assign it to each job
+      const scoredJobs = candidates.map(job => {
+        const score = calculateJobMatchScore(job, profile, activity, govPrefs);
+        return { ...job, matchScore: score };
+      });
+      
+      // Sort: Match Score (descending), then createdAt (descending)
+      scoredJobs.sort((a, b) => {
+        const scoreDiff = b.matchScore - a.matchScore;
+        if (Math.abs(scoreDiff) > 0) {
+          return scoreDiff;
+        }
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      });
+      
+      // Paginate the in-memory array
+      jobs = scoredJobs.slice(skip, skip + limit);
+    } else {
+      // Standard chronological flow
+      total = await Job.countDocuments(filters);
+      let query = Job.find(filters);
+      
+      if (req.query.sort) {
+        const sortBy = req.query.sort.split(',').join(' ');
+        query = query.sort(sortBy);
+      } else {
+        query = query.sort('-createdAt');
+      }
+      
+      if (req.query.fields) {
+        const fields = req.query.fields.split(',').join(' ');
+        query = query.select(fields);
+      } else {
+        query = query.select('-__v -updatedAt');
+      }
+      
+      jobs = await query.skip(skip).limit(limit).lean();
+    }
+    
     const totalPages = Math.ceil(total / limit);
     
-    // Send response with pagination info
     res.json({
       success: true,
       count: jobs.length,

@@ -280,9 +280,9 @@ B.Tech Computer Science | IIT (Graduated 2024)
                     transition: 'all 200ms ease'
                   }}>
                     <div>
-                      <h4 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.5rem', color: '#111827' }}>
+                      <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.5rem', color: '#111827' }}>
                         {template.name}
-                      </h4>
+                      </h3>
                       <p style={{ fontSize: '0.85rem', color: '#4b5563', lineHeight: 1.4, marginBottom: '1rem' }}>
                         {template.desc}
                       </p>
@@ -330,9 +330,9 @@ B.Tech Computer Science | IIT (Graduated 2024)
             boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
             marginBottom: '2rem'
           }}>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1.25rem', color: '#2d0057' }}>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1.25rem', color: '#2d0057' }}>
               Curated Internship Hub
-            </h3>
+            </h2>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {loadingInternships ? (
@@ -375,9 +375,9 @@ B.Tech Computer Science | IIT (Graduated 2024)
                     }}>
                       {intern.salary || intern.stipend || 'Stipend: Best in Industry'}
                     </span>
-                    <h4 style={{ fontSize: '0.95rem', fontWeight: 700, margin: '0 0 0.2rem 0', color: '#111827' }}>
+                    <h3 style={{ fontSize: '0.95rem', fontWeight: 700, margin: '0 0 0.2rem 0', color: '#111827' }}>
                       {intern.title}
-                    </h4>
+                    </h3>
                     <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: '0 0 0.6rem 0' }}>
                       {intern.company} • {intern.location || intern.loc || 'Remote'}
                     </p>
@@ -409,9 +409,9 @@ B.Tech Computer Science | IIT (Graduated 2024)
             color: '#ffffff',
             boxShadow: '0 4px 20px rgba(79,70,229,0.15)'
           }}>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem' }}>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem' }}>
               Career Center Tip 💡
-            </h3>
+            </h2>
             <p style={{ fontSize: '0.88rem', lineHeight: 1.5, color: '#e0e7ff', margin: 0 }}>
               "Over 75% of resumes are discarded by ATS systems before ever reaching a human recruiter. Keep formatting simple: use standard fonts, avoid tables or graphic elements, and use exact keywords from the job description."
             </p>

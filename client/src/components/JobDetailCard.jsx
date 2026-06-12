@@ -6,7 +6,7 @@ import { cleanJobBranding } from '../utils/textUtils.js';
 import RichTextDisplay from './RichTextDisplay.jsx';
 import api from '../api/index.js';
 import { getImageUrl } from '../utils/imageUtils.js';
-import { trackApplyJobClicked } from '../utils/analytics.js';
+import { trackApplyJobClicked, trackJobImpression, trackJobCardClicked } from '../utils/analytics.js';
 
 const DEFAULT_AD_LINK = 'https://www.effectivegatecpm.com/s738fegejz?key=12ac1ed2eeb4ac73b7d41add24630c1e1e';
 
@@ -96,6 +96,13 @@ function JobDetailCard({ job: rawJob, adLink: propAdLink }) {
     }
   }, [propAdLink]);
 
+  // Fire Job Impression once when card enters viewport
+  useEffect(() => {
+    if (isVisible && job?._id) {
+      trackJobImpression(job);
+    }
+  }, [isVisible]);
+
   const handleApply = (e) => {
     // Track Apply Job Clicked
     trackApplyJobClicked(job);
@@ -149,6 +156,20 @@ function JobDetailCard({ job: rawJob, adLink: propAdLink }) {
                   <span className={`jc-govt-badge ${badgeClass}`} style={{ padding: '3px 8px', fontSize: '0.78rem', fontWeight: '800' }}>
                     {badgeText}
                   </span>
+                  {job.matchScore && window.location.pathname !== '/' && (
+                    <span className="jc-govt-badge" style={{
+                      padding: '3px 8px',
+                      fontSize: '0.78rem',
+                      fontWeight: '800',
+                      background: job.matchScore >= 80 ? 'linear-gradient(135deg, #10b981, #059669)' : 'linear-gradient(135deg, #6366f1, #4f46e5)',
+                      color: '#ffffff',
+                      borderRadius: '4px',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                      border: 'none'
+                    }}>
+                      🎯 {job.matchScore}% Match
+                    </span>
+                  )}
                   {formattedLastDate && (
                     <span className="jc-govt-last-date" style={{ padding: '2px 6px', fontSize: '0.78rem' }}>
                       📅 Last Date: {formattedLastDate}
@@ -276,6 +297,20 @@ function JobDetailCard({ job: rawJob, adLink: propAdLink }) {
                 <span className={`jc-govt-badge ${badgeClass}`} style={{ padding: '3px 8px', fontSize: '0.78rem', fontWeight: '800' }}>
                   {badgeText}
                 </span>
+                {job.matchScore && window.location.pathname !== '/' && (
+                  <span className="jc-govt-badge" style={{
+                    padding: '3px 8px',
+                    fontSize: '0.78rem',
+                    fontWeight: '800',
+                    background: job.matchScore >= 80 ? 'linear-gradient(135deg, #10b981, #059669)' : 'linear-gradient(135deg, #6366f1, #4f46e5)',
+                    color: '#ffffff',
+                    borderRadius: '4px',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                    border: 'none'
+                  }}>
+                    🎯 {job.matchScore}% Match
+                  </span>
+                )}
                 {formattedLastDate && (
                   <span className="jc-govt-last-date" style={{ padding: '2px 6px', fontSize: '0.78rem' }}>
                     📅 Last Date: {formattedLastDate}

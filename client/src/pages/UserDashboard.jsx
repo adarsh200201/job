@@ -9,8 +9,17 @@ export default function UserDashboard() {
   const navigate = useNavigate();
 
   const [profile, setProfile] = useState(null);
-  const [jobs, setJobs] = useState([]);
+  const [widgets, setWidgets] = useState({
+    recommendedJobs: [],
+    recommendedGovt: [],
+    recommendedInternships: [],
+    jobsNearYou: [],
+    recentlyViewed: [],
+    savedJobs: [],
+    becauseYouApplied: []
+  });
   const [savedJobs, setSavedJobs] = useState([]);
+  const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('recommended');
 
@@ -38,37 +47,46 @@ export default function UserDashboard() {
     }
   }, [profile]);
 
-  // Load recommended jobs
+  // Load widgets data (Recommended, Govt, Internships, Near You, Recent Views, Saves, Because You Applied)
   useEffect(() => {
     let mounted = true;
-    const fetchJobs = async () => {
+    const fetchWidgets = async () => {
       setLoading(true);
       try {
-        const query = profile?.preferredRole
-          ? `/jobs?q=${encodeURIComponent(profile.preferredRole)}&limit=12`
-          : '/jobs?limit=12';
-        const res = await api.get(query);
-        const data = res.data?.data || res.data || [];
-        if (mounted) setJobs(Array.isArray(data) ? data : []);
-      } catch {
-        if (mounted) setJobs([]);
+        const res = await api.get('/recommendations/widgets');
+        if (mounted && res.data?.success) {
+          setWidgets(res.data.data);
+          if (res.data.data.savedJobs) {
+            setSavedJobs(res.data.data.savedJobs.map(j => j._id));
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load dashboard widgets:', err);
       } finally {
         if (mounted) setLoading(false);
       }
     };
-    if (profile !== null) fetchJobs();
+
+    const fetchNotifications = async () => {
+      try {
+        const res = await api.get('/recommendations/notifications');
+        if (mounted && res.data?.success) {
+          setNotifications(res.data.data);
+        }
+      } catch (err) {
+        console.error('Failed to load notifications:', err);
+      }
+    };
+
+    if (profile !== null) {
+      fetchWidgets();
+      fetchNotifications();
+    }
+    return () => { mounted = false; };
   }, [profile]);
 
-  // Load saved jobs from localStorage
-  useEffect(() => {
-    const allKeys = Object.keys(localStorage).filter(k => k.startsWith('saved_'));
-    const saved = allKeys
-      .filter(k => localStorage.getItem(k) === 'true')
-      .map(k => k.replace('saved_', ''));
-    setSavedJobs(saved);
-  }, []);
-
   const matchScore = (job) => {
+    if (job.matchScore) return job.matchScore;
     if (!profile) return null;
     let score = 40;
     const titleLower = (job.title || '').toLowerCase();
@@ -82,10 +100,6 @@ export default function UserDashboard() {
     if (profile.location && (job.location || '').toLowerCase().includes(profile.location.toLowerCase())) score += 10;
     return Math.min(score, 99);
   };
-
-  const displayJobs = activeTab === 'saved'
-    ? jobs.filter(j => savedJobs.includes(j._id))
-    : jobs;
 
   const initials = (name) => {
     if (!name) return '?';
@@ -122,7 +136,7 @@ export default function UserDashboard() {
           flexShrink: 0,
         }}>
           {profile?.avatar
-            ? <img src={profile.avatar} alt="avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+            ? <img src={profile.avatar} alt="avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} width="72" height="72" loading="lazy" />
             : initials(profile?.name || username)
           }
         </div>
@@ -189,10 +203,12 @@ export default function UserDashboard() {
       </div>
 
       {/* ── Tabs ─────────────────────────────────────────────────── */}
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '2px solid #f1f5f9', paddingBottom: '0' }}>
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '2px solid #f1f5f9', paddingBottom: '0', flexWrap: 'wrap' }}>
         {[
-          { key: 'recommended', label: '🔥 Recommended' },
-          { key: 'saved', label: `⭐ Saved (${savedJobs.length})` },
+          { key: 'recommended', label: '🔥 Recommended Matches' },
+          { key: 'saved', label: `⭐ Saved (${widgets.savedJobs?.length || 0})` },
+          { key: 'recent', label: `🕒 Recently Viewed (${widgets.recentlyViewed?.length || 0})` },
+          { key: 'notifications', label: `🔔 Alerts (${notifications.length})` },
           { key: 'interview', label: '🎤 Interview Prep' },
         ].map(tab => (
           <button key={tab.key} onClick={() => {
@@ -239,94 +255,132 @@ export default function UserDashboard() {
       )}
 
       {/* ── Jobs Grid (Recommended / Saved) ─────────────────────── */}
-      {activeTab !== 'interview' && (
+      {activeTab !== 'interview' && activeTab !== 'notifications' && (
         <>
           {loading ? (
             <div style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>
               <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>⏳</div>
               Loading your matched jobs…
             </div>
-          ) : displayJobs.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '3rem', background: '#f8fafc', borderRadius: 16 }}>
-              <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>
-                {activeTab === 'saved' ? '⭐' : '🔍'}
-              </div>
-              <p style={{ color: '#64748b', fontWeight: 600 }}>
-                {activeTab === 'saved'
-                  ? "You haven't saved any jobs yet. Click ⏳ Save on any job to bookmark it."
-                  : "No matched jobs found. Update your profile to get better recommendations."}
-              </p>
-              {activeTab !== 'saved' && (
-                <Link to="/onboarding" style={{
-                  display: 'inline-block', marginTop: '1rem', padding: '0.65rem 1.5rem',
-                  background: '#6d28d9', color: '#fff', borderRadius: 9999,
-                  fontWeight: 700, textDecoration: 'none', fontSize: '0.9rem',
-                }}>Update Profile →</Link>
-              )}
-            </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.25rem' }}>
-              {displayJobs.map(job => {
-                const score = matchScore(job);
-                return (
-                  <div key={job._id} style={{
-                    background: '#fff', borderRadius: 14, padding: '1.25rem 1.5rem',
-                    border: '1px solid #f1f5f9', boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-                    display: 'flex', flexDirection: 'column', gap: '0.5rem',
-                    transition: 'transform 0.15s ease, box-shadow 0.15s ease',
-                  }}
-                    onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(109,40,217,0.09)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)'; }}
-                  >
-                    {/* Company + score */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#6d28d9', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                        {job.company}
-                      </span>
-                      {score !== null && (
-                        <span style={{
-                          fontSize: '0.75rem', fontWeight: 800,
-                          background: score >= 70 ? '#dcfce7' : score >= 50 ? '#fef9c3' : '#f1f5f9',
-                          color: score >= 70 ? '#16a34a' : score >= 50 ? '#ca8a04' : '#64748b',
-                          padding: '0.2rem 0.55rem', borderRadius: 9999,
-                        }}>
-                          {score}% match
-                        </span>
-                      )}
+            <div>
+              {/* 1. Recommended Tab Section */}
+              {activeTab === 'recommended' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+                  {/* Section A: Recommended Jobs */}
+                  {widgets.recommendedJobs?.length > 0 && (
+                    <WidgetSection title="Recommended Jobs For You" emoji="🎯">
+                      {renderJobGrid(widgets.recommendedJobs)}
+                    </WidgetSection>
+                  )}
+
+                  {/* Section B: Government Jobs For You */}
+                  {widgets.recommendedGovt?.length > 0 && (
+                    <WidgetSection title="Recommended Government Jobs" emoji="🏛️">
+                      {renderJobGrid(widgets.recommendedGovt)}
+                    </WidgetSection>
+                  )}
+
+                  {/* Section C: Recommended Internships */}
+                  {widgets.recommendedInternships?.length > 0 && (
+                    <WidgetSection title="Recommended Internships" emoji="🎓">
+                      {renderJobGrid(widgets.recommendedInternships)}
+                    </WidgetSection>
+                  )}
+
+                  {/* Section D: Jobs Near You */}
+                  {widgets.jobsNearYou?.length > 0 && (
+                    <WidgetSection title={`Jobs Near ${profile?.location || 'You'}`} emoji="📍">
+                      {renderJobGrid(widgets.jobsNearYou)}
+                    </WidgetSection>
+                  )}
+
+                  {/* Section E: Because You Applied To */}
+                  {widgets.becauseYouApplied?.length > 0 && (
+                    <WidgetSection title="Because You Applied to Similar Roles" emoji="🎯">
+                      {renderJobGrid(widgets.becauseYouApplied)}
+                    </WidgetSection>
+                  )}
+                </div>
+              )}
+
+              {/* 2. Saved Tab Section */}
+              {activeTab === 'saved' && (
+                <div>
+                  {widgets.savedJobs?.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '3rem', background: '#f8fafc', borderRadius: 16 }}>
+                      <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>⭐</div>
+                      <p style={{ color: '#64748b', fontWeight: 600 }}>You haven't saved any jobs yet. Bookmark jobs to see them here.</p>
                     </div>
+                  ) : (
+                    renderJobGrid(widgets.savedJobs)
+                  )}
+                </div>
+              )}
 
-                    {/* Title */}
-                    <Link to={`/${job.slug}`} style={{ fontWeight: 700, color: '#1e293b', textDecoration: 'none', fontSize: '0.97rem', lineHeight: 1.4 }}>
-                      {job.title}
-                    </Link>
-
-                    {/* Meta */}
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginTop: '0.25rem' }}>
-                      {job.location && <Tag>📍 {job.location}</Tag>}
-                      {job.type && <Tag>{job.type}</Tag>}
-                      {job.salary && <Tag>💰 {job.salary}</Tag>}
+              {/* 3. Recently Viewed Tab Section */}
+              {activeTab === 'recent' && (
+                <div>
+                  {widgets.recentlyViewed?.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '3rem', background: '#f8fafc', borderRadius: 16 }}>
+                      <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>🕒</div>
+                      <p style={{ color: '#64748b', fontWeight: 600 }}>Your recently viewed jobs will appear here.</p>
                     </div>
-
-                    {/* Apply button */}
-                    <Link to={`/${job.slug}`} style={{
-                      marginTop: 'auto', paddingTop: '0.75rem',
-                      display: 'block', textAlign: 'center',
-                      padding: '0.5rem 1rem', background: '#6d28d9',
-                      color: '#fff', borderRadius: 9999, fontWeight: 700,
-                      fontSize: '0.84rem', textDecoration: 'none',
-                      transition: 'background 0.15s ease',
-                    }}
-                      onMouseEnter={e => e.currentTarget.style.background = '#5b21b6'}
-                      onMouseLeave={e => e.currentTarget.style.background = '#6d28d9'}
-                    >
-                      View Job →
-                    </Link>
-                  </div>
-                );
-              })}
+                  ) : (
+                    renderJobGrid(widgets.recentlyViewed)
+                  )}
+                </div>
+              )}
             </div>
           )}
         </>
+      )}
+
+      {/* ── Alerts/Notifications Tab ────────────────────────────── */}
+      {activeTab === 'notifications' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {notifications.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '3rem', background: '#f8fafc', borderRadius: 16 }}>
+              <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>🔔</div>
+              <p style={{ color: '#64748b', fontWeight: 600 }}>No matching job alerts at the moment. We will notify you when new matching roles are found!</p>
+            </div>
+          ) : (
+            notifications.map(n => (
+              <div key={n._id} style={{
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderRadius: 12,
+                padding: '1.25rem 1.5rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1rem',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+                animation: 'fadeInUp 0.3s ease both'
+              }}>
+                <div style={{
+                  width: 42,
+                  height: 42,
+                  borderRadius: '50%',
+                  background: '#eff6ff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '1.25rem',
+                  flexShrink: 0
+                }}>
+                  🔔
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 700, color: '#1e293b', fontSize: '0.94rem' }}>{n.title}</div>
+                  <div style={{ color: '#64748b', fontSize: '0.84rem', marginTop: '0.2rem' }}>{n.message}</div>
+                </div>
+                <div style={{ color: '#94a3b8', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
+                  {new Date(n.createdAt).toLocaleDateString()}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       )}
 
       {/* ── Quick Links ──────────────────────────────────────────── */}
@@ -334,9 +388,9 @@ export default function UserDashboard() {
         marginTop: '2.5rem', background: '#f8fafc', borderRadius: 16,
         padding: '1.5rem', border: '1px solid #f1f5f9',
       }}>
-        <h3 style={{ margin: '0 0 1rem', fontSize: '1rem', fontWeight: 700, color: '#1e293b' }}>
+        <h2 style={{ margin: '0 0 1rem', fontSize: '1rem', fontWeight: 700, color: '#1e293b' }}>
           🧭 Quick Links
-        </h3>
+        </h2>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
           {[
             { to: '/', label: '🔍 Browse All Jobs' },
@@ -359,6 +413,79 @@ export default function UserDashboard() {
           ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+function renderJobGrid(jobList) {
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.25rem' }}>
+      {jobList.map(job => {
+        const score = job.matchScore || 70;
+        return (
+          <div key={job._id} style={{
+            background: '#fff', borderRadius: 14, padding: '1.25rem 1.5rem',
+            border: '1px solid #f1f5f9', boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+            display: 'flex', flexDirection: 'column', gap: '0.5rem',
+            transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+          }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(109,40,217,0.09)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)'; }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#6d28d9', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                {job.company}
+              </span>
+              <span style={{
+                fontSize: '0.75rem', fontWeight: 800,
+                background: score >= 80 ? 'linear-gradient(135deg, #10b981, #059669)' : 'linear-gradient(135deg, #6366f1, #4f46e5)',
+                color: '#ffffff',
+                padding: '0.2rem 0.55rem', borderRadius: 9999,
+              }}>
+                🎯 {score}% Match
+              </span>
+            </div>
+
+            <Link to={`/${job.slug}`} style={{ fontWeight: 700, color: '#1e293b', textDecoration: 'none', fontSize: '0.97rem', lineHeight: 1.4 }}>
+              {job.title}
+            </Link>
+
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginTop: '0.25rem' }}>
+              {job.location && <Tag>📍 {job.location}</Tag>}
+              {job.type && <Tag>{job.type}</Tag>}
+              {job.salary && <Tag>💰 {job.salary}</Tag>}
+            </div>
+
+            <Link to={`/${job.slug}`} style={{
+              marginTop: 'auto', paddingTop: '0.75rem',
+              display: 'block', textAlign: 'center',
+              padding: '0.5rem 1rem', background: '#6d28d9',
+              color: '#fff', borderRadius: 9999, fontWeight: 700,
+              fontSize: '0.84rem', textDecoration: 'none',
+              transition: 'background 0.15s ease',
+            }}
+              onMouseEnter={e => e.currentTarget.style.background = '#5b21b6'}
+              onMouseLeave={e => e.currentTarget.style.background = '#6d28d9'}
+            >
+              View Job →
+            </Link>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function WidgetSection({ title, emoji, children }) {
+  return (
+    <div style={{ width: '100%' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.25rem' }}>
+        <span style={{ fontSize: '1.4rem' }}>{emoji}</span>
+        <h2 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#1e293b', margin: 0 }}>
+          {title}
+        </h2>
+      </div>
+      {children}
     </div>
   );
 }

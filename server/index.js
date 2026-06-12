@@ -6,16 +6,25 @@ dotenv.config(); // fallback: also check current dir .env
 
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
+const cookieParser = require('cookie-parser');
+const mongoSanitize = require('express-mongo-sanitize');
 const session = require('express-session');
 const passport = require('./config/passport');
 const { connectDB } = require('./utils/db');
 const jobsRoutes = require('./routes/jobs');
 const adminRoutes = require('./routes/admin');
+const controlRoutes = require('./routes/control');
 const uploadRoutes = require('./routes/upload');
 const settingsRoutes = require('./routes/settings');
 const seoRoutes = require('./routes/seo');
 const authRoutes = require('./routes/auth');
+const recommendationRoutes = require('./routes/recommendation');
+const activityRoutes = require('./routes/activity');
+const preparationRoutes = require('./routes/preparation');
+const inputSanitizer = require('./middleware/inputSanitizer');
 const { seedAdminIfNeeded, seedJobsIfNeeded, ensureMinimumJobs, seedDetailedJob } = require('./utils/seed');
+const { seedPrepData } = require('./scripts/seedPrepData');
 
 /* ─── Auto DB Cleanup (prevents Atlas 512 MB quota breach) ─── */
 async function autoCleanupDB() {
@@ -85,10 +94,19 @@ app.use(
       if (/nextjobpost/i.test(origin)) return callback(null, true);
       return callback(new Error(`CORS blocked for origin: ${origin}`));
     },
-    credentials: false,
+    credentials: true,
   })
 );
+
+// ─── Security Middleware ───────────────────────────────────────────────────────
+app.use(helmet({
+  contentSecurityPolicy: false, // Disable for now as it can break React app
+  crossOriginEmbedderPolicy: false,
+}));
+app.use(cookieParser());
+app.use(mongoSanitize());
 app.use(express.json());
+app.use(inputSanitizer);
 
 // Prerender middleware for SEO crawler bots (Option 1)
 const prerenderNode = require('prerender-node');
@@ -121,10 +139,21 @@ app.get('/api/health', (req, res) => {
 });
 
 app.use('/api/jobs', jobsRoutes);
-app.use('/api/admin', adminRoutes);
+
+// ─── New hardened admin route (control-center) ────────────────────────────────
+app.use('/api/control', controlRoutes);
+
+// ─── Legacy admin route — block completely (prevent enumeration/brute-force) ──
+app.use('/api/admin', (req, res) => {
+  res.status(404).json({ message: 'Not found' });
+});
+
 app.use('/api/upload', uploadRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/recommendations', recommendationRoutes);
+app.use('/api/activity', activityRoutes);
+app.use('/api/preparation', preparationRoutes);
 app.use('/', seoRoutes);
 
 app.use((err, req, res, next) => {
@@ -139,6 +168,7 @@ connectDB()
     await seedJobsIfNeeded();
     await seedDetailedJob();
     await ensureMinimumJobs(12);
+    await seedPrepData();
     scheduleAutoCleanup();
   })
   .catch((err) => {

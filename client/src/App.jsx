@@ -6,6 +6,8 @@ import HeroSearch from './components/HeroSearch.jsx';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { startKeepAlive, stopKeepAlive } from './utils/keepAlive.js';
 import { trackPageView, useScrollDepth } from './utils/analytics.js';
+import { usePageTracking } from './hooks/usePageTracking.js';
+import { useSessionTracking } from './hooks/useSessionTracking.js';
 import ScrollToTop from './components/ScrollToTop.jsx';
 import { MEGA_CATEGORIES } from './utils/categoryConfig.js';
 
@@ -30,6 +32,14 @@ const Onboarding = React.lazy(() => import('./pages/Onboarding.jsx'));
 const PrivacyPolicy = React.lazy(() => import('./pages/PrivacyPolicy.jsx'));
 const GovtJobsCategory = React.lazy(() => import('./pages/GovtJobsCategory.jsx'));
 const RootSlugHandler = React.lazy(() => import('./pages/RootSlugHandler.jsx'));
+const PreparationHub = React.lazy(() => import('./pages/Preparation/PreparationHub.jsx'));
+const AptitudePrep = React.lazy(() => import('./pages/Preparation/AptitudePrep.jsx'));
+const TechnicalPrep = React.lazy(() => import('./pages/Preparation/TechnicalPrep.jsx'));
+const DSAPrep = React.lazy(() => import('./pages/Preparation/DSAPrep.jsx'));
+const CompanyPrepPage = React.lazy(() => import('./pages/Preparation/CompanyPrepPage.jsx'));
+const GovPrepPage = React.lazy(() => import('./pages/Preparation/GovPrepPage.jsx'));
+const MockTests = React.lazy(() => import('./pages/Preparation/MockTests.jsx'));
+const ResumeBuilder = React.lazy(() => import('./pages/ResumeBuilder.jsx'));
 
 // Loading fallback
 function LoadingFallback() {
@@ -86,13 +96,13 @@ function ProfileDropdown({ username, isAdmin, logout }) {
         }}>
           {/* Profile / Admin */}
           <Link
-            to={isAdmin ? '/admin' : '/dashboard'}
+            to={isAdmin ? '/control-center' : '/dashboard'}
             onClick={() => setOpen(false)}
             style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '11px 16px', textDecoration: 'none', color: '#1e293b', fontSize: '0.9rem', fontWeight: 600, borderBottom: '1px solid #f1f5f9', transition: 'background 0.15s' }}
             onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
           >
-            <span>🏠</span> {isAdmin ? 'Admin Panel' : 'My Profile'}
+            <span>🏠</span> {isAdmin ? 'Control Center' : 'My Profile'}
           </Link>
 
           {/* Saved Jobs */}
@@ -270,8 +280,27 @@ function NavDropdown({ label, items, to, showArrow = true, mega = false }) {
 
 // Admin-only protected route
 function AdminRoute({ children }) {
-  const { token, isAdmin } = useAuth();
-  if (!token || !isAdmin) return <Navigate to="/admin/login" replace />;
+  const { isAdmin, adminReady, adminRestoring } = useAuth();
+
+  // While we're trying to restore the session from refresh-token cookie, show spinner
+  if (adminRestoring) {
+    return (
+      <div style={{
+        minHeight: '100vh', display: 'flex', alignItems: 'center',
+        justifyContent: 'center', background: '#0f172a', flexDirection: 'column', gap: '16px'
+      }}>
+        <div style={{
+          width: '44px', height: '44px', border: '4px solid rgba(255,255,255,0.15)',
+          borderTop: '4px solid #818cf8', borderRadius: '50%',
+          animation: 'spin 0.8s linear infinite'
+        }} />
+        <p style={{ color: '#94a3b8', fontSize: '0.9rem', margin: 0 }}>Restoring session…</p>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
+
+  if (!isAdmin || !adminReady) return <Navigate to="/control-center/login" replace />;
   return children;
 }
 
@@ -299,20 +328,26 @@ function AppLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const isHome = location.pathname === '/';
+  const isAdminPage = location.pathname === '/control-center';
+  const isPrepPage = location.pathname.startsWith('/preparation');
 
   const [showSearch, setShowSearch] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [mobileGovtOpen, setMobileGovtOpen] = React.useState(false);
+  const [mobileExamOpen, setMobileExamOpen] = React.useState(false);
   const [mobileMoreOpen, setMobileMoreOpen] = React.useState(false);
   const [isMobile, setIsMobile] = React.useState(window.innerWidth <= 768);
 
   const staticPaths = [
     '/', '/student-career-center', '/salaries', '/about', '/contact',
     '/faq', '/blog', '/terms', '/disclaimer', '/login', '/signup',
-    '/auth/callback', '/admin/login', '/admin', '/dashboard', '/onboarding', '/privacy',
-    '/govt-jobs', '/upsc-jobs', '/ssc-jobs', '/railway-jobs', '/banking-jobs', '/defence-jobs', '/other-govt-jobs', '/teaching-jobs', '/psu-jobs',
+    '/auth/callback', '/control-center/login', '/control-center', '/dashboard', '/onboarding', '/privacy',
+    '/govt-jobs', '/exam-updates', '/upsc-jobs', '/ssc-jobs', '/railway-jobs', '/banking-jobs', '/defence-jobs', '/other-govt-jobs', '/teaching-jobs', '/psu-jobs',
     '/results', '/admit-cards', '/answer-keys',
+    '/preparation', '/preparation/aptitude', '/preparation/technical', '/preparation/dsa',
+    '/preparation/company', '/preparation/gov', '/preparation/mock-tests',
+    '/resume-builder',
     ...Object.keys(MEGA_CATEGORIES).map(k => `/${k}`)
   ];
   const isJobDetail = !staticPaths.includes(location.pathname);
@@ -327,10 +362,15 @@ function AppLayout() {
   // Track scroll depth globally on all pages
   useScrollDepth(location.pathname);
 
+  // ── Enterprise Analytics: auto page + session tracking ──
+  usePageTracking();
+  useSessionTracking();
+
   // Close mobile menu on route change
   useEffect(() => {
     setMobileMenuOpen(false);
     setMobileGovtOpen(false);
+    setMobileExamOpen(false);
     setMobileMoreOpen(false);
   }, [location.pathname]);
 
@@ -375,12 +415,42 @@ function AppLayout() {
     { label: 'Teaching Jobs',      to: '/teaching-jobs' },
     { label: 'PSU Jobs',           to: '/psu-jobs' },
   ];
+  const examUpdatesItems = [
+    { label: '📋 Results',     to: '/results' },
+    { label: '🎫 Admit Cards', to: '/admit-cards' },
+    { label: '🔑 Answer Keys', to: '/answer-keys' },
+  ];
+
+
+
+  const prepItems = [
+    { label: '🧮 Aptitude & Reasoning', to: '/preparation/aptitude' },
+    { label: '💻 Technical MCQ',        to: '/preparation/technical' },
+    { label: '🌲 DSA Practice',          to: '/preparation/dsa' },
+    { label: '🏢 Company Wise',          to: '/preparation/company' },
+    { label: '🏛️ Govt Exam Prep',        to: '/preparation/gov' },
+    { label: '📝 Mock Tests',            to: '/preparation/mock-tests' },
+  ];
 
 
   const moreItems = Object.entries(MEGA_CATEGORIES).map(([key, config]) => ({
     label: config.label,
     to: `/${key}`
   }));
+
+  // Control-center page: full-screen, no header/footer
+  if (isAdminPage) {
+    return (
+      <>
+        <ScrollToTop />
+        <Suspense fallback={<LoadingFallback />}>
+          <Routes>
+            <Route path="/control-center" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+          </Routes>
+        </Suspense>
+      </>
+    );
+  }
 
   return (
     <>
@@ -398,7 +468,7 @@ function AppLayout() {
           <div className="nav-top-bar">
             <div className="nav-top-inner" style={{ gap: '1.5rem' }}>
               <Link to="/" className="nav-logo-link">
-                <img src="/logo.png" alt="NextJobPost Logo" className="logo-img-nav" />
+                <img src="/logo.png" alt="NextJobPost Logo" className="logo-img-nav" width="34" height="34" />
                 <span className="nav-brand">
                   <span className="nav-brand-next">Next</span>
                   <span className="nav-brand-job">Job</span>
@@ -408,22 +478,18 @@ function AppLayout() {
 
               <ul className="nav-links" style={{ flex: 1, display: isMobile ? 'none' : 'flex', justifyContent: 'flex-end', flexWrap: 'nowrap', gap: '4px', overflow: 'visible' }}>
                 <NavDropdown label="Govt Jobs" items={govtJobItems} to="/govt-jobs" />
-                
-                <li style={{ listStyle: 'none' }}>
-                  <NavLink className="nav-link" to="/results">Result</NavLink>
-                </li>
-                <li style={{ listStyle: 'none' }}>
-                  <NavLink className="nav-link" to="/admit-cards">Admit Card</NavLink>
-                </li>
-                <li style={{ listStyle: 'none' }}>
-                  <NavLink className="nav-link" to="/answer-keys">Answer Key</NavLink>
-                </li>
+
+                <NavDropdown label="Exam Updates" items={examUpdatesItems} to="/results" />
+
+                <NavDropdown label="Preparation" items={prepItems} to="/preparation" />
+
+
 
                 <NavDropdown label="More" items={moreItems} to="#" mega={true} />
 
                 <li style={{ listStyle: 'none', display: 'flex', alignItems: 'center', position: 'relative', marginLeft: '6px' }}>
                   {showSearch && (
-                    <form 
+                    <form
                       onSubmit={(e) => {
                         e.preventDefault();
                         if (searchQuery.trim()) {
@@ -522,7 +588,7 @@ function AppLayout() {
           <nav className={`mobile-menu-drawer ${mobileMenuOpen ? 'active' : ''}`}>
             <div className="mobile-menu-header">
               <Link to="/" className="nav-logo-link" onClick={() => setMobileMenuOpen(false)}>
-                <img src="/logo.png" alt="NextJobPost Logo" style={{ width: 28, height: 28, borderRadius: 5 }} />
+                <img src="/logo.png" alt="NextJobPost Logo" style={{ width: 28, height: 28, borderRadius: 5 }} width="28" height="28" />
                 <span className="nav-brand" style={{ fontSize: '1.1rem' }}>
                   <span className="nav-brand-next">Next</span>
                   <span className="nav-brand-job">Job</span>
@@ -555,16 +621,22 @@ function AppLayout() {
                 </div>
               </div>
 
-              {/* Direct links */}
-              <NavLink to="/results" className={({ isActive }) => `mobile-menu-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
-                📋 Result
-              </NavLink>
-              <NavLink to="/admit-cards" className={({ isActive }) => `mobile-menu-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
-                🎫 Admit Card
-              </NavLink>
-              <NavLink to="/answer-keys" className={({ isActive }) => `mobile-menu-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
-                🔑 Answer Key
-              </NavLink>
+              {/* Exam Updates Accordion */}
+              <div className="mobile-menu-group">
+                <button className="mobile-menu-accordion" onClick={() => setMobileExamOpen(o => !o)}>
+                  <span>📅 Exam Updates</span>
+                  <svg width="14" height="14" viewBox="0 0 10 10" fill="currentColor" style={{ transform: mobileExamOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.25s' }}>
+                    <path d="M1 3l4 4 4-4" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+                  </svg>
+                </button>
+                <div className={`mobile-menu-sub ${mobileExamOpen ? 'open' : ''}`}>
+                  {examUpdatesItems.map((item, i) => (
+                    <NavLink key={i} to={item.to} className={({ isActive }) => `mobile-menu-sublink ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+                      {item.label}
+                    </NavLink>
+                  ))}
+                </div>
+              </div>
 
               {/* More Categories Accordion */}
               <div className="mobile-menu-group">
@@ -588,6 +660,10 @@ function AppLayout() {
               <NavLink to="/student-career-center" className={({ isActive }) => `mobile-menu-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
                 📝 Practice Tests
               </NavLink>
+              <NavLink to="/preparation" className={({ isActive }) => `mobile-menu-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+                🎓 Preparation Hub
+              </NavLink>
+
               <NavLink to="/about" className={({ isActive }) => `mobile-menu-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
                 ℹ️ About Us
               </NavLink>
@@ -601,14 +677,21 @@ function AppLayout() {
         </header>
       )}
 
-      <main className={isMobile && isJobDetail ? "container p-0" : "container py-4"}>
+      <main className={isMobile && isJobDetail ? "container p-0" : isPrepPage ? "container p-0 is-prep-page" : "container py-4"}>
         <Suspense fallback={<LoadingFallback />}>
           <Routes>
             {/* Public */}
             <Route path="/" element={<Home />} />
             
-
-
+            {/* Preparation Hub */}
+            <Route path="/preparation" element={<PreparationHub />} />
+            <Route path="/preparation/aptitude" element={<AptitudePrep />} />
+            <Route path="/preparation/technical" element={<TechnicalPrep />} />
+            <Route path="/preparation/dsa" element={<DSAPrep />} />
+            <Route path="/preparation/company" element={<CompanyPrepPage />} />
+            <Route path="/preparation/gov" element={<GovPrepPage />} />
+            <Route path="/preparation/mock-tests" element={<MockTests />} />
+            <Route path="/resume-builder" element={<ResumeBuilder />} />
             <Route path="/student-career-center" element={<StudentCareerCenter />} />
             <Route path="/salaries" element={<SalarySearch />} />
             <Route path="/about" element={<About />} />
@@ -621,10 +704,13 @@ function AppLayout() {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
-            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/control-center/login" element={<AdminLogin />} />
+            {/* Block old /admin routes */}
+            <Route path="/admin" element={<Navigate to="/control-center/login" replace />} />
+            <Route path="/admin/login" element={<Navigate to="/control-center/login" replace />} />
 
-            {/* Admin only */}
-            <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+            {/* Control center — handled above in isAdminPage branch, kept here as fallback */}
+            <Route path="/control-center" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
 
             {/* Regular user only */}
             <Route path="/dashboard" element={<UserRoute><UserDashboard /></UserRoute>} />

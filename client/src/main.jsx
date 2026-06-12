@@ -6,9 +6,10 @@ import App from './App.jsx';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/global.css';
 import { initMixpanel } from './utils/analytics.js';
+import { initAnalytics } from './services/analytics/index.js';
 
-// Initialize Mixpanel
-initMixpanel();
+// Initialize Mixpanel + register global super-properties
+initAnalytics();
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>

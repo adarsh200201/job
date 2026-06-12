@@ -1,13 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/adminAuth');
+const optionalAuth = require('../middleware/optionalAuth');
 const ctrl = require('../controllers/jobsController');
+const recCtrl = require('../controllers/recommendationController');
 
 // Public routes
-router.get('/', ctrl.getJobs);
+router.get('/', optionalAuth, ctrl.getJobs);
 router.get('/stats', ctrl.getJobStats);
 router.get('/:idOrSlug', ctrl.getJobById);
-router.get('/:id/related', ctrl.getRelatedJobs);
+router.get('/:id/related', recCtrl.getSimilarJobs);
 
 // Protected routes (require authentication)
 router.use(auth);

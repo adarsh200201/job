@@ -384,7 +384,7 @@ export default function Footer() {
       <div className="footer-bottom">
         <div className="container footer-bottom-flex">
           <p className="copyright-text">
-            © {new Date().getFullYear()} NextJobPost.com
+            © {new Date().getFullYear()} NextJobPost.in
           </p>
           <div className="footer-bottom-links">
             <Link to="/about">About us</Link>

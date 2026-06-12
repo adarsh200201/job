@@ -11,6 +11,7 @@ html, body, #root {
 }
 
 body {
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   display: flex;
   flex-direction: column;
 }
@@ -132,9 +133,10 @@ main.container {
    ======================================== */
 
 .site-header {
+  position: relative;
   background: transparent;
   border: none;
-  z-index: 40;
+  z-index: 150;
 }
 
 /* ── Row 1: white bar with logo + auth buttons ── */
@@ -3335,12 +3337,12 @@ main.container {
 /* Responsive adjustments to fit on one line without overflow */
 @media (max-width: 992px) {
   .share-follow-bar {
-    padding: 10px !important;
-    gap: 6px !important;
+    padding: 8px !important;
+    gap: 5px !important;
   }
   .share-follow-bar .btn {
-    padding: 5px 8px !important;
-    font-size: 0.78rem !important;
+    padding: 4px 6px !important;
+    font-size: 0.72rem !important;
   }
 }
 
@@ -3355,15 +3357,15 @@ main.container {
 
 @media (max-width: 576px) {
   .share-follow-bar {
-    padding: 8px 6px !important;
-    gap: 5px !important;
+    padding: 6px 4px !important;
+    gap: 4px !important;
   }
   .share-follow-bar .btn {
-    padding: 4px 6px !important;
-    font-size: 0.72rem !important;
+    padding: 3px 5px !important;
+    font-size: 0.68rem !important;
   }
   .share-follow-label {
-    font-size: 0.75rem !important;
+    font-size: 0.7rem !important;
   }
 }
 
@@ -3388,9 +3390,9 @@ main.container {
   background-color: #25D366 !important;
   color: #ffffff !important;
   border-radius: 6px !important;
-  padding: 6px 12px !important;
+  padding: 5px 9px !important;
   border: none !important;
-  font-size: 0.82rem !important;
+  font-size: 0.76rem !important;
   flex-shrink: 0 !important;
   transition: all 200ms ease !important;
 }
@@ -3404,9 +3406,9 @@ main.container {
   background-color: #0088cc !important;
   color: #ffffff !important;
   border-radius: 6px !important;
-  padding: 6px 12px !important;
+  padding: 5px 9px !important;
   border: none !important;
-  font-size: 0.82rem !important;
+  font-size: 0.76rem !important;
   flex-shrink: 0 !important;
   transition: all 200ms ease !important;
 }
@@ -3420,9 +3422,9 @@ main.container {
   background-color: #64748b !important;
   color: #ffffff !important;
   border-radius: 6px !important;
-  padding: 6px 12px !important;
+  padding: 5px 9px !important;
   border: none !important;
-  font-size: 0.82rem !important;
+  font-size: 0.76rem !important;
   flex-shrink: 0 !important;
   transition: all 200ms ease !important;
 }
@@ -3438,9 +3440,9 @@ main.container {
   border: 1.5px solid #25D366 !important;
   background-color: #ffffff !important;
   border-radius: 6px !important;
-  padding: 5px 11px !important;
+  padding: 4px 8px !important;
   transition: all 200ms ease !important;
-  font-size: 0.82rem !important;
+  font-size: 0.76rem !important;
   flex-shrink: 0 !important;
 }
 .btn-follow-whatsapp:hover {
@@ -3454,9 +3456,9 @@ main.container {
   border: 1.5px solid #0088cc !important;
   background-color: #ffffff !important;
   border-radius: 6px !important;
-  padding: 5px 11px !important;
+  padding: 4px 8px !important;
   transition: all 200ms ease !important;
-  font-size: 0.82rem !important;
+  font-size: 0.76rem !important;
   flex-shrink: 0 !important;
 }
 .btn-follow-telegram:hover {

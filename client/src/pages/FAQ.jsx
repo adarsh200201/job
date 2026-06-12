@@ -8,16 +8,16 @@ export default function FAQ() {
       category: 'Getting Started',
       questions: [
         {
-          q: 'What is Job For Fresher?',
-          a: 'Job For Fresher is a curated platform dedicated to helping fresh graduates find job opportunities, internships, and work-from-home positions from top companies across India. We filter opportunities specifically for freshers and recent graduates.'
+          q: 'What is NextJobPost.in?',
+          a: 'NextJobPost.in is a curated online platform designed to connect job seekers (including fresh graduates and experienced professionals) with employers across India. We offer job listings, internships, and extensive career preparation resources like aptitude tests and technical preparation modules.'
         },
         {
           q: 'Is it free to use?',
-          a: 'Yes! Job For Fresher is completely free. There are no hidden charges, premium memberships, or subscription fees. You can browse all job listings and apply directly to companies without any cost.'
+          a: 'Yes! NextJobPost.in is completely free to use. There are no hidden fees, premium memberships, or subscription charges for job seekers. You can browse, practice, and apply to jobs directly without any cost.'
         },
         {
           q: 'Do I need to create an account?',
-          a: 'No, you don\'t need to create an account to browse jobs. You can directly visit company links to apply from there. However, we recommend checking back regularly for new opportunities.'
+          a: 'No, you do not need to create an account to browse jobs or practice prep questions. However, creating an account allows you to build resumes, save progress, and access dashboard features.'
         }
       ]
     },
@@ -26,15 +26,15 @@ export default function FAQ() {
       questions: [
         {
           q: 'How are jobs filtered on this platform?',
-          a: 'All jobs listed are specifically marked as "Fresher Friendly" or explicitly mention openness to recent graduates. We verify that companies are genuinely hiring for entry-level positions.'
+          a: 'We list a wide range of job opportunities. We categorize listings clearly so you can filter for freshers, experienced individuals, remote roles, or internships depending on your needs.'
         },
         {
           q: 'How often are new jobs posted?',
-          a: 'New job listings are added regularly throughout the week. We recommend visiting the site frequently or checking the "Recent Jobs" section to stay updated on the latest opportunities.'
+          a: 'New job listings and internships are added regularly. We recommend checking back frequently to stay updated on the newest opportunities.'
         },
         {
           q: 'Can I filter jobs by location?',
-          a: 'Yes! You can use the search filters to narrow down by location, job type (Full-Time, Internship, Remote), experience level, education, and other criteria.'
+          a: 'Yes! You can use our search filters to narrow down jobs by location, job type (Full-Time, Internship, Remote), experience level, and industry.'
         }
       ]
     },
@@ -43,15 +43,15 @@ export default function FAQ() {
       questions: [
         {
           q: 'How do I apply for a job?',
-          a: 'Each job listing has an "Apply Now" button that takes you directly to the company\'s application portal. You apply directly with the company, not through our platform.'
+          a: 'Each job listing contains details and an option to apply. In many cases, we redirect you directly to the company\'s official application portal to ensure your application goes straight to the recruiter.'
         },
         {
-          q: 'Will you sell my information to companies?',
-          a: 'No. We never share or sell your personal information. When you apply, you\'re applying directly with the company through their own application system.'
+          q: 'Will you sell my personal information?',
+          a: 'No. We take privacy seriously and do not sell your personal data. Please refer to our Privacy Policy for more information on how we handle and protect your data.'
         },
         {
-          q: 'Can I track my applications on this platform?',
-          a: 'Job For Fresher shows available opportunities, but tracking applications is managed by each company directly. Keep your application credentials saved and follow up with companies accordingly.'
+          q: 'Can I track my application status on NextJobPost.in?',
+          a: 'NextJobPost.in connects you with opportunities, but tracking individual applications is typically managed by the hiring companies. We recommend following up directly with the employer or checking their recruitment portal.'
         }
       ]
     },
@@ -60,15 +60,15 @@ export default function FAQ() {
       questions: [
         {
           q: 'What should I prepare before applying?',
-          a: 'Update your resume with your academic achievements, projects, and any internship experience. Prepare your LinkedIn profile, write a brief cover letter, and practice answering common interview questions about your background and career goals.'
+          a: 'Update your resume with your latest achievements, education, projects, and skills. Use our free Resume Builder to create a professional CV, and practice using our Aptitude and Technical Prep modules.'
         },
         {
           q: 'Do you provide interview preparation resources?',
-          a: 'Yes! Check our Blog section for interview tips, resume writing guides, and preparation resources. We regularly publish helpful articles for freshers.'
+          a: 'Yes! We offer free preparation sections covering Quantitative Aptitude, Logical Reasoning, Verbal Ability, Data Interpretation, and Technical topics like JavaScript, Java, DBMS, and Python, complete with MCQs and Interview Q&As.'
         },
         {
           q: 'What is the typical interview process for freshers?',
-          a: 'Most fresher interviews include: Online Assessment/Aptitude Test → Technical Interview → HR Interview. Some companies have additional group discussions or case studies. Each company has its own process - check the job posting for specifics.'
+          a: 'The process generally includes: Resume Screening → Online Aptitude & Technical Assessment → Technical Interviews → HR Interview. Using our preparation resources helps you prepare for each of these stages.'
         }
       ]
     },
@@ -76,16 +76,16 @@ export default function FAQ() {
       category: 'Technical Issues',
       questions: [
         {
-          q: 'The job link is not working. What should I do?',
-          a: 'Some company links may expire or change. If you encounter a broken link, please contact us at nextjobpost@gmail.com with the job title and company name so we can update it.'
+          q: 'A job link is not working. What should I do?',
+          a: 'Occasionally company links may expire or change. If you find a broken link, please let us know at nextjobpost@gmail.com with the job details, and we will update or remove it.'
         },
         {
           q: 'Can I use this platform on my mobile phone?',
-          a: 'Yes! Our platform is fully responsive and works great on mobile devices. You can browse, search, and apply to jobs directly from your smartphone.'
+          a: 'Yes! NextJobPost.in is fully responsive and optimized for mobile devices. You can browse job listings, practice prep questions, and build resumes on your smartphone or tablet.'
         },
         {
-          q: 'Why are jobs not loading on my screen?',
-          a: 'Try refreshing the page or clearing your browser cache. Make sure you have a stable internet connection. If the issue persists, try a different browser or contact us.'
+          q: 'Why are job details not loading on my screen?',
+          a: 'Try refreshing the page or clearing your browser cache. If you still experience issues, verify your internet connection or try accessing the site from a different web browser.'
         }
       ]
     }
@@ -98,7 +98,7 @@ export default function FAQ() {
         {/* Header */}
         <div className="mb-5 text-center">
           <h1 className="display-5 fw-bold mb-3" style={{ color: '#162c4a' }}>Frequently Asked Questions</h1>
-          <p className="lead text-muted">Find answers to common questions about Job For Fresher</p>
+          <p className="lead text-muted">Find answers to common questions about NextJobPost.in</p>
         </div>
 
         {/* FAQ Categories */}

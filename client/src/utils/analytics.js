@@ -1,223 +1,113 @@
-import mixpanel from 'mixpanel-browser';
+/**
+ * NextJobPost — Analytics Utility (Legacy Compatibility Layer)
+ *
+ * All exports from this file are preserved for backwards compatibility.
+ * New code should import directly from src/services/analytics/index.js.
+ *
+ * Existing usages across the codebase continue to work without any changes:
+ *   - initMixpanel()        → used in main.jsx
+ *   - trackPageView()       → used in App.jsx
+ *   - trackJobDetailViewed() → used in JobDetails.jsx
+ *   - trackApplyJobClicked() → used in JobDetails.jsx
+ *   - trackJobSearch()       → used in Home.jsx
+ *   - trackCategoryViewed()  → used in Home.jsx
+ *   - trackJobShared()       → used in JobDetails.jsx
+ *   - trackAdClicked()       → used in JobDetails.jsx
+ *   - useScrollDepth()       → used in App.jsx (replaced by useScrollTracking hook)
+ *   - identifyUser()         → used in AuthContext.jsx
+ *   - resetUser()            → used in AuthContext.jsx
+ *   - getEngagementProps()   → used in trackPageView
+ */
 import { useEffect } from 'react';
+import {
+  initAnalytics,
+  track,
+  trackPage,
+  trackJobDetailViewed,
+  trackApplyJobClicked,
+  trackJobImpression,
+  trackJobCardClicked,
+  trackJobSearch,
+  trackCategoryViewed,
+  trackJobShared,
+  trackAdClicked,
+  trackScrollDepth,
+  identifyUser,
+  resetUser,
+  EVENTS,
+} from '../services/analytics/index.js';
+import { getPageType } from '../services/analytics/globalProps.js';
 
-const MIXPANEL_TOKEN = '99f55a1e0ff42d36dbf679a878e375fa';
+// ─── Backwards-compatible exports ─────────────────────────────────────────
 
-// Helper to parse UTM and referrer information
-const parseUTMAndReferrer = () => {
-  const params = new URLSearchParams(window.location.search);
-  const utmProps = {};
-  
-  // Parse standard UTM codes
-  ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'].forEach(param => {
-    if (params.has(param)) {
-      utmProps[param] = params.get(param);
-    }
-  });
+/** @deprecated Call initAnalytics() directly in new code */
+export const initMixpanel = initAnalytics;
 
-  // Handle current and initial referrer
-  if (document.referrer) {
-    utmProps['current_referrer'] = document.referrer;
-    if (!localStorage.getItem('initial_referrer')) {
-      localStorage.setItem('initial_referrer', document.referrer);
-    }
-  } else {
-    utmProps['current_referrer'] = 'Direct';
-  }
-  
-  const initialReferrer = localStorage.getItem('initial_referrer') || 'Direct';
-  utmProps['initial_referrer'] = initialReferrer;
-  
-  return utmProps;
-};
+/** @deprecated Use track(EVENTS.X, props) in new code */
+export const trackEvent = track;
 
-// Helper to fetch/update session user engagement metrics
-export const getEngagementProps = () => {
-  // Session pages viewed counter
+/**
+ * @deprecated Use trackPage(path, props) in new code
+ * Kept for App.jsx compatibility
+ */
+export function trackPageView(pathOrName, properties = {}) {
+  const path = typeof pathOrName === 'string' ? pathOrName : window.location.pathname;
+  trackPage(path, properties, 150);
+}
+
+export function getEngagementProps() {
   let pagesViewed = parseInt(sessionStorage.getItem('pages_viewed_count') || '0', 10);
   pagesViewed += 1;
   sessionStorage.setItem('pages_viewed_count', pagesViewed.toString());
 
-  // Session start time tracking
-  let startTime = sessionStorage.getItem('session_start_time');
+  let startTime = sessionStorage.getItem('_njp_session_start');
   if (!startTime) {
     startTime = Date.now().toString();
-    sessionStorage.setItem('session_start_time', startTime);
+    sessionStorage.setItem('_njp_session_start', startTime);
   }
-  const sessionDuration = Math.round((Date.now() - parseInt(startTime, 10)) / 1000); // duration in seconds
+  const sessionDuration = Math.round((Date.now() - parseInt(startTime, 10)) / 1000);
+  return { pages_viewed: pagesViewed, session_duration: sessionDuration };
+}
 
-  return {
-    pages_viewed: pagesViewed,
-    session_duration: sessionDuration
-  };
-};
-
-export const initMixpanel = () => {
-  try {
-    mixpanel.init(MIXPANEL_TOKEN, {
-      debug: false,
-      track_pageview: false, // Track manually to keep it precise and router-aligned
-      persistence: 'localstorage',
-    });
-    
-    // Register traffic attribution parameters as super properties
-    const trafficProps = parseUTMAndReferrer();
-    mixpanel.register(trafficProps);
-  } catch (error) {
-    console.error('Failed to initialize Mixpanel:', error);
-  }
-};
-
-export const trackEvent = (eventName, properties = {}) => {
-  try {
-    mixpanel.track(eventName, properties);
-  } catch (error) {
-    console.error(`Mixpanel failed to track event "${eventName}":`, error);
-  }
-};
-
-export const trackPageView = (pageName, properties = {}) => {
-  try {
-    const engagement = getEngagementProps();
-    
-    // Slight delay so React Helmet can write the document.title first
-    setTimeout(() => {
-      mixpanel.track('Page View', {
-        current_url: window.location.href,
-        current_path: window.location.pathname,
-        page_title: document.title,
-        ...engagement,
-        ...properties
-      });
-    }, 150);
-  } catch (error) {
-    console.error(`Mixpanel failed to track page view for "${pageName}":`, error);
-  }
-};
-
-// Helper for Job Detail Viewed event
-export const trackJobDetailViewed = (job) => {
-  if (!job) return;
-  trackEvent('Job Detail Viewed', {
-    jobId: job._id || job.id,
-    jobTitle: job.title,
-    company: job.company,
-    location: job.location,
-    salary: job.salary || 'Best in Industry',
-    category: job.type,
-    current_path: window.location.pathname
-  });
-};
-
-// Helper for Apply Job Clicked event
-export const trackApplyJobClicked = (job) => {
-  if (!job) return;
-  trackEvent('Apply Job Clicked', {
-    jobId: job._id || job.id,
-    jobTitle: job.title,
-    company: job.company,
-    location: job.location,
-    salary: job.salary || 'Best in Industry',
-    category: job.type,
-    current_url: window.location.href,
-    current_path: window.location.pathname,
-    referrer: document.referrer || 'Direct'
-  });
-};
-
-// Helper for Job Search event
-export const trackJobSearch = (keyword, resultsCount) => {
-  trackEvent('Job Search', {
-    keyword: keyword || '',
-    results_count: resultsCount || 0
-  });
-};
-
-// Helper for Category Viewed event
-export const trackCategoryViewed = (category) => {
-  trackEvent('Category Viewed', {
-    category: category || 'General',
-    current_path: window.location.pathname
-  });
-};
-
-// Helper for Job Shared event
-export const trackJobShared = (platform, job) => {
-  if (!job) return;
-  trackEvent('Job Shared', {
-    platform: platform || 'Copy Link',
-    jobId: job._id || job.id,
-    jobTitle: job.title
-  });
-};
-
-// Helper for Ad Clicked event
-export const trackAdClicked = (adPosition) => {
-  trackEvent('Ad Clicked', {
-    ad_position: adPosition || 'sidebar_banner',
-    current_path: window.location.pathname
-  });
-};
-
-// React hook to handle scroll depth tracking on page paths
-export const useScrollDepth = (path) => {
+/**
+ * Scroll depth hook — backwards-compatible with App.jsx.
+ * New code should use useScrollTracking() hook instead.
+ */
+export function useScrollDepth(path) {
   useEffect(() => {
     const triggered = new Set();
+    const pageType  = getPageType(path);
 
     const handleScroll = () => {
-      const scrollTop = window.scrollY || document.documentElement.scrollTop;
+      const scrollTop    = window.scrollY || document.documentElement.scrollTop;
       const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
       if (scrollHeight <= 0) return;
 
       const percentage = Math.round((scrollTop / scrollHeight) * 100);
-      const thresholds = [25, 50, 75, 100];
-
-      thresholds.forEach(threshold => {
+      [25, 50, 75, 100].forEach(threshold => {
         if (percentage >= threshold && !triggered.has(threshold)) {
           triggered.add(threshold);
-
-          let pageType = 'static';
-          if (path === '/') {
-            pageType = 'home';
-          } else if (path === '/salaries') {
-            pageType = 'salaries';
-          } else if (path === '/student-career-center') {
-            pageType = 'student_career_center';
-          } else if (!['/about', '/contact', '/faq', '/terms', '/disclaimer', '/login', '/signup', '/auth/callback', '/admin/login', '/admin', '/dashboard', '/onboarding'].includes(path)) {
-            pageType = 'job_detail';
-          }
-
-          trackEvent('Scroll Depth', {
-            scroll_depth: `${threshold}%`,
-            current_path: path,
-            page_type: pageType
-          });
+          trackScrollDepth(threshold, path, pageType);
         }
       });
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
   }, [path]);
-};
+}
 
-export const identifyUser = (userId, traits = {}) => {
-  try {
-    mixpanel.identify(userId);
-    if (Object.keys(traits).length > 0) {
-      mixpanel.people.set(traits);
-    }
-  } catch (error) {
-    console.error('Mixpanel failed to identify user:', error);
-  }
-};
-
-export const resetUser = () => {
-  try {
-    mixpanel.reset();
-  } catch (error) {
-    console.error('Mixpanel failed to reset user:', error);
-  }
+// Re-export new service functions under legacy names
+export {
+  trackJobDetailViewed,
+  trackApplyJobClicked,
+  trackJobSearch,
+  trackCategoryViewed,
+  trackJobShared,
+  trackAdClicked,
+  trackJobImpression,
+  trackJobCardClicked,
+  identifyUser,
+  resetUser,
+  EVENTS,
 };

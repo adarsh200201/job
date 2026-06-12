@@ -24,6 +24,8 @@ const PostCard = memo(({ job }) => {
             src={getImageUrl(job.image)}
             alt={job.title}
             className="rj-img"
+            width="52"
+            height="40"
             loading="lazy"
             onError={(e) => { e.target.style.display = 'none'; }}
           />

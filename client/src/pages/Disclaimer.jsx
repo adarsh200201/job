@@ -1,107 +1,85 @@
 import React from 'react';
 
 export default function Disclaimer() {
-
   return (
     <div className="legal-page">
       <div className="row g-4 justify-content-center">
         <div className="col-12 col-lg-8">
           <div className="legal-header">
             <h1 className="legal-page-title">Disclaimer</h1>
-            <p className="legal-last-updated">Last Updated: December 2024</p>
+            <p className="legal-last-updated">Last Updated: June 12, 2026</p>
           </div>
 
           <div className="legal-body">
             <section className="legal-section">
               <h2 className="legal-section-title">General Disclaimer</h2>
               <p>
-                The information provided on the NextJobPost website is for informational purposes only. While we strive to provide accurate and up-to-date information, we make no representations or warranties of any kind regarding the completeness, accuracy, reliability, or availability of information contained on this website.
+                The information provided on the NextJobPost.in website is for general informational and educational purposes only. While we strive to provide accurate, up-to-date, and reliable information, we make no representations, warranties, or guarantees of any kind, express or implied, regarding the completeness, accuracy, reliability, suitability, or availability of the information, products, services, or related graphics contained on the website for any purpose.
               </p>
             </section>
 
             <section className="legal-section">
               <h2 className="legal-section-title">Job Listings Disclaimer</h2>
-              <p className="section-subtitle"><strong>Important:</strong></p>
+              <p className="section-subtitle"><strong>Important Safety Notice:</strong></p>
               <ul className="legal-list">
-                <li><strong>Third-Party Content:</strong> All job listings on our platform are provided by employers and third parties. We do not create, prepare, or verify job descriptions.</li>
-                <li><strong>No Verification:</strong> We do not independently verify the authenticity, legitimacy, or details of job postings. We recommend that you independently verify any job opportunity before applying.</li>
-                <li><strong>Liability:</strong> NextJobPost is not responsible for any misrepresentation, fraud, or misleading information in job listings.</li>
-                <li><strong>Scam Protection:</strong> Be cautious of job offers that seem too good to be true. Never share sensitive information like passwords, financial details, or personal identification numbers.</li>
+                <li><strong>Third-Party Content:</strong> All job postings, notifications, internships, and recruiter listings on our website are aggregated or submitted by third parties and employers. We do not prepare, create, or control these postings.</li>
+                <li><strong>No Verification:</strong> We do not verify the legitimacy, background, or operational status of the employers listing vacancies. Job seekers are strongly urged to independently verify the credentials of any company before applying or attending interviews.</li>
+                <li><strong>No Placement Fees:</strong> NextJobPost.in does not charge job seekers any fee at any stage. You should never pay any money to secure a job or interview. Any listing demanding payments for training, registration, or processing should be treated as fraudulent.</li>
+                <li><strong>No Liability:</strong> NextJobPost.in shall not be held responsible for any loss, damage, or misrepresentation arising from job listings published on the site.</li>
               </ul>
             </section>
 
             <section className="legal-section">
-              <h2 className="legal-section-title">Employment Advice Disclaimer</h2>
+              <h2 className="legal-section-title">Advertisements & Third-Party Cookies</h2>
               <p>
-                While we provide articles and tips on career preparation, interview techniques, and resume writing, these are general guidelines only. They should not be considered professional legal, financial, or employment advice. We recommend consulting with appropriate professionals before making career decisions.
+                We serve third-party advertisements on NextJobPost.in, including ads powered by Google AdSense. Google and other advertising partners use cookies (such as the DoubleClick cookie) and beacons to track user behavior and serve personalized ads based on your visits to our site and other pages on the internet. We have no access to, control over, or responsibility for these tracking technologies. You can manage your preferences or opt-out of personalized advertisements via Google's Ads Settings or the AboutAds.info portal.
+              </p>
+            </section>
+
+            <section className="legal-section">
+              <h2 className="legal-section-title">Employment & Career Advice Disclaimer</h2>
+              <p>
+                Any articles, tips, preparation strategies, resume templates, and study guides offered on this platform represent general guidance. They do not constitute professional legal, recruitment, career, or financial advice. Job seekers should exercise their own judgment and consult with professional counselors before making critical career decisions.
               </p>
             </section>
 
             <section className="legal-section">
               <h2 className="legal-section-title">No Endorsement</h2>
               <p>
-                Inclusion of a job listing on our platform does not constitute an endorsement of the employer or the job opportunity. NextJobPost is not affiliated with, nor do we endorse, any employer or organization listed on our website.
+                The inclusion of any job vacancy, company profile, banner ad, or outbound link on NextJobPost.in does not imply or constitute an endorsement, recommendation, or approval of that company or listing. Outbound links to external websites are visited at the user's own risk, and we have no control over their content, terms, or privacy practices.
               </p>
             </section>
 
             <section className="legal-section">
               <h2 className="legal-section-title">Technical Disclaimer</h2>
               <p>
-                NextJobPost is provided on an "as-is" basis without any warranties of any kind. We do not warrant that:
+                NextJobPost.in is provided on an "as-is" and "as-available" basis. We do not warrant that:
               </p>
               <ul className="legal-list">
-                <li>The website will be error-free or uninterrupted</li>
-                <li>The website will be secure or free from viruses</li>
-                <li>Any defects will be corrected</li>
-                <li>Your use of the website will be successful or meet your expectations</li>
+                <li>The website will operate without interruptions, delays, or technical errors.</li>
+                <li>The server hosting the website is free of viruses, malware, or other harmful digital components.</li>
+                <li>Any bugs, glitches, or database errors will be corrected immediately.</li>
               </ul>
-            </section>
-
-            <section className="legal-section">
-              <h2 className="legal-section-title">Data Accuracy</h2>
-              <p>
-                While we strive to maintain accurate information about job listings, we cannot guarantee that all information is current or error-free. Job postings may be updated, removed, or expired by employers without our notification. We recommend checking job listings with the original employer before applying.
-              </p>
-            </section>
-
-            <section className="legal-section">
-              <h2 className="legal-section-title">Geographic Scope</h2>
-              <p>
-                The information and services provided on NextJobPost are intended for use within India. We do not warrant that the website or the information contained therein is appropriate for use in other locations or jurisdictions.
-              </p>
             </section>
 
             <section className="legal-section">
               <h2 className="legal-section-title">Limitation of Liability</h2>
               <p>
-                To the maximum extent permitted by law, NextJobPost shall not be liable for any indirect, incidental, special, or consequential damages arising out of or in connection with your use of this website or the information contained therein.
+                To the fullest extent permitted by applicable laws, NextJobPost.in, its team, and associates shall not be liable for any direct, indirect, incidental, special, punitive, or consequential damages (including loss of employment, data, profits, or goodwill) arising out of or in connection with your access, use, or inability to use this website.
               </p>
             </section>
 
             <section className="legal-section">
-              <h2 className="legal-section-title">User Responsibility</h2>
+              <h2 className="legal-section-title">Changes to This Disclaimer</h2>
               <p>
-                You are responsible for:
-              </p>
-              <ul className="legal-list">
-                <li>Maintaining the confidentiality of any account information</li>
-                <li>Verifying the authenticity of job opportunities independently</li>
-                <li>Understanding and complying with all terms and conditions before applying</li>
-                <li>Making informed decisions about your career based on reliable research</li>
-              </ul>
-            </section>
-
-            <section className="legal-section">
-              <h2 className="legal-section-title">Changes to Disclaimer</h2>
-              <p>
-                NextJobPost reserves the right to update this disclaimer at any time without prior notice. Your continued use of the website constitutes acceptance of the updated disclaimer.
+                We reserve the right to revise or update this disclaimer page at any time without prior notice. Your continued use of NextJobPost.in following the posting of changes will be deemed as your acceptance of those updates.
               </p>
             </section>
 
             <section className="legal-section last-section">
               <h2 className="legal-section-title">Contact Us</h2>
               <p>
-                If you have any questions or concerns regarding this disclaimer, please contact us at:
+                If you have questions, feedback, or need to report a suspicious job listing, please contact us at:
               </p>
               <p className="contact-info">
                 <strong>Email:</strong> <a href="mailto:nextjobpost@gmail.com">nextjobpost@gmail.com</a>
@@ -119,7 +97,6 @@ export default function Disclaimer() {
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );

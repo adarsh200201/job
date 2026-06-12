@@ -144,7 +144,7 @@ export default function SalarySearch() {
   }, [selectedRole, filterText]);
 
   return (
-    <div className="salary-search" style={{ fontFamily: 'Inter, system-ui, sans-serif', color: '#1e293b' }}>
+    <div className="salary-search" style={{ fontFamily: 'Inter, system-ui, sans-serif', color: '#1e293b', overflowX: 'hidden' }}>
       
       {/* Hero Banner */}
       <section style={{
@@ -243,7 +243,7 @@ export default function SalarySearch() {
               marginBottom: '1.75rem'
             }}>
               {/* Min pin */}
-              <div style={{ position: 'absolute', left: '0%', top: '16px', transform: 'translateX(-50%)', textAlign: 'center' }}>
+              <div style={{ position: 'absolute', left: '0%', top: '16px', textAlign: 'left' }}>
                 <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#4b5563' }}>Min: {currentData.min}</span>
               </div>
               {/* Avg pin */}
@@ -252,7 +252,7 @@ export default function SalarySearch() {
                 <span style={{ height: '8px', width: '2px', backgroundColor: '#4f46e5', marginTop: '2px' }}></span>
               </div>
               {/* Max pin */}
-              <div style={{ position: 'absolute', right: '0%', top: '16px', transform: 'translateX(50%)', textAlign: 'center' }}>
+              <div style={{ position: 'absolute', right: '0%', top: '16px', textAlign: 'right' }}>
                 <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#4b5563' }}>Max: {currentData.max}</span>
               </div>
             </div>

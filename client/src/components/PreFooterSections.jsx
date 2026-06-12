@@ -150,6 +150,9 @@ export default function PreFooterSections() {
                 src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=800" 
                 alt="Students graduating" 
                 className="pf-grad-image"
+                width="800"
+                height="533"
+                loading="lazy"
               />
             </div>
             <div className="pf-grad-content">

@@ -23,6 +23,11 @@ const POPULAR_SEARCHES = [
   'Defence',
   'Nursing',
   'Accountant',
+  'Graduate',
+  '10th Pass',
+  '12th Pass',
+  'Police Jobs',
+  'B.Tech',
 ];
 
 const LOCATIONS = [
@@ -35,6 +40,7 @@ export default function HeroSearch() {
   const [query, setQuery] = useState('');
   const [location, setLocation] = useState('');
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 640);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // Suggestions state
   const [suggestions, setSuggestions] = useState([]);
@@ -345,7 +351,7 @@ export default function HeroSearch() {
         <div className="hero-popular">
           <span className="hero-popular-label">Popular Searches</span>
           <div className="hero-popular-tags">
-            {POPULAR_SEARCHES.map((term) => (
+            {(isExpanded ? POPULAR_SEARCHES : POPULAR_SEARCHES.slice(0, 7)).map((term) => (
               <button
                 key={term}
                 className="hero-popular-tag"
@@ -358,6 +364,19 @@ export default function HeroSearch() {
                 {term}
               </button>
             ))}
+            <button
+              className="hero-popular-tag"
+              style={{
+                background: 'rgba(255, 255, 255, 0.15)',
+                borderColor: 'rgba(255, 255, 255, 0.35)',
+                color: '#ffffff',
+                fontWeight: '700'
+              }}
+              onClick={() => setIsExpanded(!isExpanded)}
+              type="button"
+            >
+              {isExpanded ? '– Less' : '+ More'}
+            </button>
           </div>
         </div>
       </div>

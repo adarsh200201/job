@@ -62,6 +62,9 @@ const AlsoReadCard = ({ relatedJob, themeColor = '#dc3545' }) => {
             src={getImageUrl(relatedJob.image)} 
             alt={relatedJob.title} 
             style={{ width: '80px', height: '56px', objectFit: 'cover', borderRadius: '4px' }} 
+            width="80"
+            height="56"
+            loading="lazy"
             onError={(e) => { e.target.style.display = 'none'; }}
           />
         )}
@@ -435,6 +438,7 @@ export default function JobDetails() {
   };
   const [loading, setLoading] = useState(true);
   const [recent, setRecent] = useState([]);
+  const [recommendations, setRecommendations] = useState(null);
   const [adLink, setAdLink] = useState(DEFAULT_AD_LINK);
   const cache = useCache();
   const [hasApplied, setHasApplied] = useState(false);
@@ -530,6 +534,11 @@ export default function JobDetails() {
       }
       setHasApplied(true);
       trackApplyJobClicked(job);
+      api.post('/activity/log', {
+        activityType: 'apply',
+        jobId: job._id,
+        sessionId: sessionStorage.getItem('_njp_session_id') || sessionStorage.getItem('session_id') || 'guest'
+      }).catch(() => {});
     }
   };
 
@@ -545,6 +554,11 @@ export default function JobDetails() {
           title: job.title,
           company: job.company
         });
+        api.post('/activity/log', {
+          activityType: nextSaved ? 'save' : 'unsave',
+          jobId: job._id,
+          sessionId: sessionStorage.getItem('_njp_session_id') || sessionStorage.getItem('session_id') || 'guest'
+        }).catch(() => {});
       } catch (e) {
         console.error("Local storage error during save:", e);
       }
@@ -628,13 +642,27 @@ export default function JobDetails() {
             jobTitle: currentJob.title
           });
 
-          const recentRes = await cache.get((url) => api.get(url), '/jobs?limit=25');
-          const allJobs = recentRes.data?.data || recentRes.data || [];
-          const otherJobs = Array.isArray(allJobs) ? allJobs.filter((j) => j.slug !== slug) : [];
+          // Log view activity to backend
+          api.post('/activity/log', {
+            activityType: 'view',
+            jobId: currentJob._id,
+            sessionId: sessionStorage.getItem('_njp_session_id') || sessionStorage.getItem('session_id') || 'guest'
+          }).catch(() => {});
+
+          const recentRes = await cache.get((url) => api.get(url), `/jobs/${currentJob._id}/related?limit=6`);
+          const otherJobs = recentRes.data?.data || recentRes.data || [];
 
           if (isMounted) {
             setRecent(otherJobs);
           }
+
+          // Fetch personalized recommendations in the background
+          const sessionVal = sessionStorage.getItem('_njp_session_id') || sessionStorage.getItem('session_id') || 'guest';
+          api.get(`/recommendations?sessionId=${sessionVal}`).then(recRes => {
+            if (isMounted && recRes.data?.success) {
+              setRecommendations(recRes.data.data);
+            }
+          }).catch(() => {});
         } else {
           if (isMounted) { setJob(null); }
         }
@@ -651,6 +679,17 @@ export default function JobDetails() {
 
     return () => { isMounted = false; };
   }, [slug]);
+
+  const displayRecommendedJobs = React.useMemo(() => {
+    let list = [];
+    if (recommendations && recommendations.recommended && recommendations.recommended.length > 0) {
+      list = recommendations.recommended.filter(j => j._id !== job?._id);
+    }
+    if (list.length === 0) {
+      list = recent.filter(j => j._id !== job?._id);
+    }
+    return list.slice(0, 3);
+  }, [recommendations, recent, job?._id]);
 
   if (loading) return <JobDetailsSkeleton />;
   if (!job) return <p className="text-center text-muted">Job not found.</p>;
@@ -1266,9 +1305,9 @@ export default function JobDetails() {
             background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
             border: '1px solid #e2e8f0'
           }}>
-            <h4 className="fw-bold mb-2" style={{ fontSize: '1.1rem', color: '#1e293b' }}>
+            <h3 className="fw-bold mb-2" style={{ fontSize: '1.1rem', color: '#1e293b' }}>
               ⚡ Action Center
-            </h4>
+            </h3>
             <p style={{ fontSize: '0.88rem', color: '#475569', marginBottom: '12px' }}>
               Apply directly, save this notification, or share it with your network!
             </p>
@@ -1310,26 +1349,70 @@ export default function JobDetails() {
             </div>
           </div>
 
-          {/* Similar Jobs section */}
-          {recent.length > 0 && (
+          {/* Recommended Jobs section */}
+          {displayRecommendedJobs.length > 0 && (
             <div id="similar-jobs-section" className="mb-4" style={{ scrollMarginTop: '110px' }}>
-              <h3 className="fw-bold mb-3" style={{ fontSize: '1.15rem', color: '#1e293b' }}>
-                👥 Similar Jobs You Might Like
-              </h3>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
+                <span style={{ fontSize: '1.4rem' }}>🎯</span>
+                <h3 className="fw-bold m-0" style={{ fontSize: '1.15rem', color: '#1e293b' }}>
+                  Recommended Jobs For You
+                </h3>
+              </div>
+              <p className="text-muted" style={{ fontSize: '0.82rem', marginBottom: '1rem' }}>
+                Personalized matches based on your profile and recent activities.
+              </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {recent.slice(0, 5).map((relatedJob) => (
-                  <div key={relatedJob._id} className="p-3 bg-white rounded-3 shadow-sm border border-light" style={{ transition: 'transform 150ms ease' }}>
-                    <h4 style={{ fontSize: '0.95rem', fontWeight: '700', marginBottom: '4px', lineHeight: '1.3' }}>
-                      <Link to={`/${relatedJob.slug}`} className="text-decoration-none text-dark">
-                        {relatedJob.title}
+                {displayRecommendedJobs.map((relatedJob) => {
+                  const score = relatedJob.matchScore || 75;
+                  return (
+                    <div key={relatedJob._id} className="p-3 bg-white rounded-3 shadow-sm border border-light" style={{ transition: 'transform 150ms ease' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
+                        <span className="text-muted small fw-bold" style={{ textTransform: 'uppercase' }}>
+                          {relatedJob.company}
+                        </span>
+                        <span style={{
+                          fontSize: '0.72rem',
+                          fontWeight: '800',
+                          background: score >= 80 ? 'linear-gradient(135deg, #10b981, #059669)' : 'linear-gradient(135deg, #6366f1, #4f46e5)',
+                          color: '#ffffff',
+                          padding: '0.15rem 0.45rem',
+                          borderRadius: '4px'
+                        }}>
+                          🎯 {score}% Match
+                        </span>
+                      </div>
+                      <h4 style={{ fontSize: '0.95rem', fontWeight: '700', marginBottom: '6px', lineHeight: '1.3' }}>
+                        <Link to={`/${relatedJob.slug}`} className="text-decoration-none text-dark">
+                          {relatedJob.title}
+                        </Link>
+                      </h4>
+                      <p className="text-muted small mb-2">{relatedJob.location || 'India'}</p>
+                      <Link 
+                        to={`/${relatedJob.slug}`} 
+                        className="btn btn-sm fw-bold" 
+                        style={{ 
+                          fontSize: '0.8rem', 
+                          padding: '4px 12px', 
+                          borderRadius: '4px', 
+                          border: `1.5px solid ${themeColor}`, 
+                          color: themeColor,
+                          backgroundColor: 'transparent',
+                          transition: 'all 150ms ease'
+                        }}
+                        onMouseEnter={e => {
+                          e.currentTarget.style.backgroundColor = themeColor;
+                          e.currentTarget.style.color = '#ffffff';
+                        }}
+                        onMouseLeave={e => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                          e.currentTarget.style.color = themeColor;
+                        }}
+                      >
+                        View details
                       </Link>
-                    </h4>
-                    <p className="text-muted small mb-2">{relatedJob.company} • {relatedJob.location || 'India'}</p>
-                    <Link to={`/${relatedJob.slug}`} className="btn btn-sm btn-outline-primary fw-bold" style={{ fontSize: '0.8rem', padding: '4px 12px', borderRadius: '4px', border: `1.5px solid ${themeColor}`, color: themeColor }}>
-                      View details
-                    </Link>
-                  </div>
-                ))}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -1498,7 +1581,7 @@ export default function JobDetails() {
             </div>
 
             {/* Share and Follow Bar */}
-            <div className="share-follow-bar p-3 rounded-3 mt-3 d-flex align-items-center gap-2 flex-nowrap" style={{
+            <div className="share-follow-bar p-2 rounded-3 mt-3 d-flex align-items-center gap-2 flex-nowrap" style={{
               backgroundColor: '#f0f7ff',
               border: '1px solid #dbeafe',
               boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
@@ -1594,6 +1677,8 @@ export default function JobDetails() {
                 loading="lazy" 
                 className="img-fluid rounded-4 shadow-sm w-100" 
                 style={{ maxHeight: '400px', objectFit: 'cover' }}
+                width="1200"
+                height="400"
                 onError={(e) => { e.target.style.display = 'none'; }}
               />
             </div>
@@ -2036,9 +2121,9 @@ export default function JobDetails() {
             background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
             border: '1px solid #e2e8f0'
           }}>
-            <h4 className="fw-bold mb-3" style={{ fontSize: '1.25rem', color: '#1e293b' }}>
+            <h3 className="fw-bold mb-3" style={{ fontSize: '1.25rem', color: '#1e293b' }}>
               ⚡ Action Center
-            </h4>
+            </h3>
             <p style={{ fontSize: '0.95rem', color: '#475569', marginBottom: '1.5rem' }}>
               Take the next step. Apply directly, save this notification, or share it with your network!
             </p>
@@ -2105,7 +2190,7 @@ export default function JobDetails() {
             <hr style={{ borderTop: '1px solid #cbd5e1', margin: '1.5rem 0' }} />
 
             {/* Share and Follow Bar */}
-            <div className="share-follow-bar p-3 rounded-3 mt-3 d-flex align-items-center gap-2 flex-nowrap" style={{
+            <div className="share-follow-bar p-2 rounded-3 mt-3 d-flex align-items-center gap-2 flex-nowrap" style={{
               backgroundColor: '#f0f7ff',
               border: '1px solid #dbeafe',
               boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
@@ -2192,6 +2277,77 @@ export default function JobDetails() {
               </a>
             </div>
           </div>
+
+          {/* Recommended Jobs section (Desktop) */}
+          {displayRecommendedJobs.length > 0 && (
+            <div className="mb-5">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
+                <span style={{ fontSize: '1.4rem' }}>🎯</span>
+                <h3 className="fw-bold m-0" style={{ fontSize: '1.15rem', color: '#1e293b' }}>
+                  Recommended Jobs For You
+                </h3>
+              </div>
+              <p className="text-muted" style={{ fontSize: '0.82rem', marginBottom: '1.25rem' }}>
+                Personalized matches based on your profile and recent activities.
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
+                {displayRecommendedJobs.map((relatedJob) => {
+                  const score = relatedJob.matchScore || 75;
+                  return (
+                    <div key={relatedJob._id} className="p-3 bg-white rounded-3 shadow-sm border border-light" style={{ transition: 'transform 150ms ease', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
+                          <span className="text-muted small fw-bold" style={{ textTransform: 'uppercase' }}>
+                            {relatedJob.company}
+                          </span>
+                          <span style={{
+                            fontSize: '0.72rem',
+                            fontWeight: '800',
+                            background: score >= 80 ? 'linear-gradient(135deg, #10b981, #059669)' : 'linear-gradient(135deg, #6366f1, #4f46e5)',
+                            color: '#ffffff',
+                            padding: '0.15rem 0.45rem',
+                            borderRadius: '4px'
+                          }}>
+                            🎯 {score}% Match
+                          </span>
+                        </div>
+                        <h4 style={{ fontSize: '0.95rem', fontWeight: '700', marginBottom: '6px', lineHeight: '1.3' }}>
+                          <Link to={`/${relatedJob.slug}`} className="text-decoration-none text-dark">
+                            {relatedJob.title}
+                          </Link>
+                        </h4>
+                        <p className="text-muted small mb-3">{relatedJob.location || 'India'}</p>
+                      </div>
+                      <Link 
+                        to={`/${relatedJob.slug}`} 
+                        className="btn btn-sm fw-bold" 
+                        style={{ 
+                          fontSize: '0.8rem', 
+                          padding: '4px 12px', 
+                          borderRadius: '4px', 
+                          border: `1.5px solid ${themeColor}`, 
+                          color: themeColor,
+                          backgroundColor: 'transparent',
+                          transition: 'all 150ms ease',
+                          width: 'fit-content'
+                        }}
+                        onMouseEnter={e => {
+                          e.currentTarget.style.backgroundColor = themeColor;
+                          e.currentTarget.style.color = '#ffffff';
+                        }}
+                        onMouseLeave={e => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                          e.currentTarget.style.color = themeColor;
+                        }}
+                      >
+                        View details
+                      </Link>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
         </div>
 

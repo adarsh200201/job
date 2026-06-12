@@ -16,86 +16,108 @@ export default function Contact() {
   };
 
   return (
-    <section className="contact-page" style={{ paddingTop: '2rem', paddingBottom: '3rem' }}>
-      <div className="container narrow-container">
+    <section className="contact-page" style={{ paddingTop: '3rem', paddingBottom: '4rem', background: '#f8fafc' }}>
+      <div className="container">
         
-        {/* Header */}
+        {/* Header Section */}
         <div className="mb-5 text-center">
-          <h1 className="display-5 fw-bold mb-3" style={{ color: '#162c4a' }}>Get In Touch</h1>
-          <p className="lead text-muted">Have feedback, questions, or want to list your job? We're here to help!</p>
+          <span 
+            className="badge mb-3" 
+            style={{ 
+              background: '#0d6efd', 
+              fontSize: '0.9rem', 
+              padding: '0.6rem 1.2rem', 
+              borderRadius: '30px',
+              fontWeight: '600'
+            }}
+          >
+            Help & Support
+          </span>
+          <h1 className="display-5 fw-bold mb-3" style={{ color: '#0f172a' }}>Contact NextJobPost.in</h1>
+          <p className="lead text-muted mx-auto" style={{ maxWidth: '700px', fontSize: '1.15rem' }}>
+            Have a suggestion, found a bug in a practice MCQ, or want to publish a verified job listing? We are here to help. Reach out to us directly!
+          </p>
         </div>
 
-        <div className="row g-4">
-          {/* Contact Form */}
-          <div className="col-lg-7">
-            <div className="p-4" style={{ background: '#fff', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)', border: '1px solid #e0e7f1' }}>
+        <div className="row g-5">
+          {/* Contact Form Column */}
+          <div className="col-lg-6">
+            <div 
+              className="p-5 bg-white border border-light-subtle h-100" 
+              style={{ 
+                borderRadius: '24px', 
+                boxShadow: '0 12px 30px rgba(0, 0, 0, 0.03)' 
+              }}
+            >
+              <h3 className="fw-bold mb-4" style={{ color: '#0f172a' }}>Send Us a Message</h3>
+              
               {submitted && (
-                <div className="alert alert-success mb-4" role="alert">
-                  ✓ Thank you! Your message has been received. We'll get back to you soon.
+                <div className="alert alert-success mb-4 py-3" style={{ borderRadius: '12px' }} role="alert">
+                  <strong>✓ Message Received!</strong> Thank you for reaching out. We will respond to you within 24 hours.
                 </div>
               )}
               
               <form onSubmit={handleSubmit}>
                 <div className="mb-3">
-                  <label className="form-label fw-bold" style={{ color: '#162c4a' }}>Full Name</label>
+                  <label className="form-label fw-semibold" style={{ color: '#334155' }}>Full Name</label>
                   <input 
                     type="text" 
                     className="form-control" 
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
-                    placeholder="Your full name"
+                    placeholder="Enter your name"
                     required
-                    style={{ borderRadius: '8px', padding: '0.75rem' }}
+                    style={{ borderRadius: '10px', padding: '0.8rem', border: '1px solid #e2e8f0' }}
                   />
                 </div>
 
                 <div className="mb-3">
-                  <label className="form-label fw-bold" style={{ color: '#162c4a' }}>Email Address</label>
+                  <label className="form-label fw-semibold" style={{ color: '#334155' }}>Email Address</label>
                   <input 
                     type="email" 
                     className="form-control" 
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    placeholder="your.email@example.com"
+                    placeholder="yourname@example.com"
                     required
-                    style={{ borderRadius: '8px', padding: '0.75rem' }}
+                    style={{ borderRadius: '10px', padding: '0.8rem', border: '1px solid #e2e8f0' }}
                   />
                 </div>
 
                 <div className="mb-3">
-                  <label className="form-label fw-bold" style={{ color: '#162c4a' }}>Subject</label>
+                  <label className="form-label fw-semibold" style={{ color: '#334155' }}>Subject</label>
                   <input 
                     type="text" 
                     className="form-control" 
                     name="subject"
                     value={formData.subject}
                     onChange={handleChange}
-                    placeholder="How can we help?"
+                    placeholder="e.g. Job Posting Request, MCQ correction"
                     required
-                    style={{ borderRadius: '8px', padding: '0.75rem' }}
+                    style={{ borderRadius: '10px', padding: '0.8rem', border: '1px solid #e2e8f0' }}
                   />
                 </div>
 
                 <div className="mb-4">
-                  <label className="form-label fw-bold" style={{ color: '#162c4a' }}>Message</label>
+                  <label className="form-label fw-semibold" style={{ color: '#334155' }}>Message</label>
                   <textarea 
                     className="form-control" 
                     name="message"
                     value={formData.message}
                     onChange={handleChange}
                     rows="5" 
-                    placeholder="Tell us more..."
+                    placeholder="Write your query or feedback here..."
                     required
-                    style={{ borderRadius: '8px', padding: '0.75rem' }}
+                    style={{ borderRadius: '10px', padding: '0.8rem', border: '1px solid #e2e8f0' }}
                   />
                 </div>
 
                 <button 
                   type="submit" 
-                  className="btn btn-primary fw-bold"
-                  style={{ padding: '0.8rem 2rem', borderRadius: '8px' }}
+                  className="btn btn-primary fw-bold w-100"
+                  style={{ padding: '0.9rem', borderRadius: '10px', fontSize: '1.05rem' }}
                 >
                   Send Message
                 </button>
@@ -103,43 +125,77 @@ export default function Contact() {
             </div>
           </div>
 
-          {/* Contact Info */}
-          <div className="col-lg-5">
-            <div className="mb-4 p-4" style={{ background: 'linear-gradient(135deg, #e3f2fd, #e1f5fe)', borderRadius: '12px', border: '2px solid #b3e5fc' }}>
-              <h5 style={{ color: '#01579b', marginBottom: '1rem' }}>📧 Email</h5>
-              <p style={{ color: '#465a6b', marginBottom: '0.75rem' }}>
-                <strong>nextjobpost@gmail.com</strong><br/>
-                We typically respond within 24 hours
-              </p>
-            </div>
-
-            <div className="mb-4 p-4" style={{ background: 'linear-gradient(135deg, #f3e5f5, #f1f5f7)', borderRadius: '12px', border: '2px solid #e1bee7' }}>
-              <h5 style={{ color: '#4a148c', marginBottom: '1rem' }}>💬 Social Media</h5>
-              <p style={{ color: '#465a6b', marginBottom: '1rem' }}>Follow us for job updates and career tips:</p>
-              <div style={{ display: 'flex', gap: '1rem' }}>
-                <a href="#" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '44px', height: '44px', borderRadius: '50%', background: '#1f2937', color: '#fff', textDecoration: 'none', fontSize: '1.2rem', transition: 'all 200ms ease' }} onMouseEnter={(e) => e.target.style.transform = 'scale(1.1)'} onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}><span>f</span></a>
-                <a href="#" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '44px', height: '44px', borderRadius: '50%', background: '#1f2937', color: '#fff', textDecoration: 'none', fontSize: '1.2rem', transition: 'all 200ms ease' }} onMouseEnter={(e) => e.target.style.transform = 'scale(1.1)'} onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}><span>𝕏</span></a>
-                <a href="#" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '44px', height: '44px', borderRadius: '50%', background: '#1f2937', color: '#fff', textDecoration: 'none', fontSize: '1.2rem', transition: 'all 200ms ease' }} onMouseEnter={(e) => e.target.style.transform = 'scale(1.1)'} onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}><span>in</span></a>
+          {/* Contact Details Column */}
+          <div className="col-lg-6">
+            <div className="d-flex flex-column gap-4 h-100">
+              
+              {/* Email Support Card */}
+              <div 
+                className="p-4 bg-white border border-light-subtle" 
+                style={{ borderRadius: '20px', boxShadow: '0 8px 24px rgba(0, 0, 0, 0.02)' }}
+              >
+                <div className="d-flex align-items-center mb-3">
+                  <span className="fs-3 me-3">📧</span>
+                  <h3 className="fw-bold mb-0" style={{ fontSize: '1.2rem', color: '#0f172a' }}>Direct Email Support</h3>
+                </div>
+                <p className="text-muted small mb-2" style={{ lineHeight: '1.6' }}>
+                  For general queries, advertiser inquiries, partnership proposals, or technical support with the preparation portal:
+                </p>
+                <a 
+                  href="mailto:nextjobpost@gmail.com" 
+                  className="fw-bold text-decoration-none fs-5 text-primary"
+                >
+                  nextjobpost@gmail.com
+                </a>
               </div>
-            </div>
 
-            <div className="p-4" style={{ background: 'linear-gradient(135deg, #e8f5e9, #f1f8e9)', borderRadius: '12px', border: '2px solid #c8e6c9' }}>
-              <h5 style={{ color: '#1b5e20', marginBottom: '1rem' }}>⏰ Response Time</h5>
-              <p style={{ color: '#465a6b', marginBottom: '0.5rem' }}>
-                <strong>Monday - Friday:</strong> 9 AM - 6 PM IST<br/>
-                <strong>Saturday - Sunday:</strong> Closed
-              </p>
+              {/* Recruitment Submissions Card */}
+              <div 
+                className="p-4 bg-white border border-light-subtle" 
+                style={{ borderRadius: '20px', boxShadow: '0 8px 24px rgba(0, 0, 0, 0.02)' }}
+              >
+                <div className="d-flex align-items-center mb-3">
+                  <span className="fs-3 me-3">💼</span>
+                  <h3 className="fw-bold mb-0" style={{ fontSize: '1.2rem', color: '#0f172a' }}>Post a Free Job Listing</h3>
+                </div>
+                <p className="text-muted small mb-3" style={{ lineHeight: '1.6' }}>
+                  Are you an employer looking to post job descriptions, placement notices, or internship drives? We publish verified listings for free. Email us the listing details:
+                </p>
+                <div className="p-3 bg-light rounded" style={{ fontSize: '0.85rem', color: '#475569' }}>
+                  <strong>Required Information:</strong> Company name, position, salary/stipend range, location (or remote), eligibility criteria, and link to apply. Send listings to: <a href="mailto:nextjobpost@gmail.com" className="fw-bold text-decoration-none">nextjobpost@gmail.com</a>
+                </div>
+              </div>
+
+              {/* Response Times Card */}
+              <div 
+                className="p-4 bg-white border border-light-subtle" 
+                style={{ borderRadius: '20px', boxShadow: '0 8px 24px rgba(0, 0, 0, 0.02)' }}
+              >
+                <div className="d-flex align-items-center mb-3">
+                  <span className="fs-3 me-3">⏱️</span>
+                  <h3 className="fw-bold mb-0" style={{ fontSize: '1.2rem', color: '#0f172a' }}>Average Response Guarantee</h3>
+                </div>
+                <p className="text-muted small mb-0" style={{ lineHeight: '1.6' }}>
+                  Our team reads and filters every message. We typically get back to you within <strong>24 business hours</strong>. Our operational hours are:
+                  <br />
+                  <span className="fw-semibold text-dark mt-2 d-inline-block">Monday to Friday — 9 AM to 6 PM IST</span>
+                </p>
+              </div>
+
             </div>
           </div>
         </div>
 
-        {/* FAQ Section */}
-        <div className="mt-5 p-4" style={{ background: '#f8f9fa', borderRadius: '12px', border: '1px solid #e0e7f1' }}>
-          <h3 className="h5 mb-3" style={{ color: '#162c4a' }}>Frequently Asked Questions</h3>
-          <p style={{ color: '#465a6b', marginBottom: 0 }}>
-            Have a common question? Check out our <a href="/faq" style={{ color: '#0d6efd', textDecoration: 'none', fontWeight: '600' }}>FAQ page</a> for quick answers.
+        {/* FAQ redirection banner */}
+        <div 
+          className="mt-5 p-4 text-center bg-white border border-light-subtle" 
+          style={{ borderRadius: '20px', boxShadow: '0 8px 24px rgba(0, 0, 0, 0.02)' }}
+        >
+          <p className="mb-0 text-muted">
+            Have a common question about application limits or resume builder PDF exports? Check out our <a href="/faq" className="fw-bold text-decoration-none text-primary">Frequently Asked Questions (FAQ)</a>.
           </p>
         </div>
+
       </div>
     </section>
   );
