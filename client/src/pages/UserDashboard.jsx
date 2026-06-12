@@ -186,8 +186,8 @@ export default function UserDashboard() {
       {/* ── Stats Row ────────────────────────────────────────────── */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
         {[
-          { icon: '🔥', label: 'Matched Jobs', value: jobs.length, color: '#6d28d9' },
-          { icon: '⭐', label: 'Saved Jobs', value: savedJobs.length, color: '#d97706' },
+          { icon: '🔥', label: 'Matched Jobs', value: (widgets.recommendedJobs?.length || 0) + (widgets.recommendedGovt?.length || 0) + (widgets.recommendedInternships?.length || 0), color: '#6d28d9' },
+          { icon: '⭐', label: 'Saved Jobs', value: widgets.savedJobs?.length || 0, color: '#d97706' },
           { icon: '🎯', label: 'Profile Match', value: profile?.preferredRole ? 'Active' : 'Set Up →', color: '#059669' },
           { icon: '📍', label: 'Location', value: profile?.location || 'Not set', color: '#0ea5e9' },
         ].map(stat => (

@@ -87,23 +87,25 @@ export default function DSAPrep() {
 
   useEffect(() => {
     document.title = 'DSA Practice | Preparation Hub';
-    fetch(`${API}/api/preparation/dsa/topics`)
-      .then(r => r.json())
-      .then(d => setTopics(d.topics || []));
+    api.get('/preparation/dsa/topics')
+      .then(res => setTopics(res.data.topics || []))
+      .catch(err => console.error(err));
   }, []);
 
   const loadQuestions = (p = 1) => {
     setLoading(true);
-    const params = new URLSearchParams({ page: p, limit: 10 });
-    if (selectedTopic) params.set('topic', selectedTopic);
-    if (difficulty) params.set('difficulty', difficulty);
-    fetch(`${API}/api/preparation/dsa?${params}`)
-      .then(r => r.json())
-      .then(d => {
+    const params = { page: p, limit: 10 };
+    if (selectedTopic) params.topic = selectedTopic;
+    if (difficulty) params.difficulty = difficulty;
+    
+    api.get('/preparation/dsa', { params })
+      .then(res => {
+        const d = res.data;
         setQuestions(d.questions || []);
         setTotalPages(d.pages || 1);
         setPage(p);
       })
+      .catch(err => console.error(err))
       .finally(() => setLoading(false));
   };
 

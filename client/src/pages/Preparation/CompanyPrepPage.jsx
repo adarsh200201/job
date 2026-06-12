@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import AITutor from '../../components/Preparation/AITutor.jsx';
 import PrepLayout from '../../components/Preparation/PrepLayout.jsx';
+import api from '../../api/index.js';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 const DIFF_COLORS = { Easy: '#10b981', Medium: '#f59e0b', Hard: '#ef4444' };
@@ -41,20 +42,26 @@ export default function CompanyPrepPage() {
 
   useEffect(() => {
     document.title = 'Company Wise Prep | Preparation Hub';
-    fetch(`${API}/api/preparation/company/list`)
-      .then(r => r.json())
-      .then(d => setCompanies(d.companies || []));
+    api.get('/preparation/company/list')
+      .then(res => setCompanies(res.data.companies || []))
+      .catch(err => console.error(err));
   }, []);
 
   const loadQuestions = () => {
     setLoading(true);
-    const params = new URLSearchParams({ limit: 20 });
-    if (selectedCompany) params.set('company', selectedCompany);
-    if (category) params.set('category', category);
-    if (difficulty) params.set('difficulty', difficulty);
-    fetch(`${API}/api/preparation/company?${params}`)
-      .then(r => r.json())
-      .then(d => { setQuestions(d.questions || []); setSelected({}); setRevealed({}); setExpanded({}); })
+    const params = { limit: 20 };
+    if (selectedCompany) params.company = selectedCompany;
+    if (category) params.category = category;
+    if (difficulty) params.difficulty = difficulty;
+    
+    api.get('/preparation/company', { params })
+      .then(res => {
+        setQuestions(res.data.questions || []);
+        setSelected({});
+        setRevealed({});
+        setExpanded({});
+      })
+      .catch(err => console.error(err))
       .finally(() => setLoading(false));
   };
 
@@ -63,10 +70,10 @@ export default function CompanyPrepPage() {
   const markSolved = async (q) => {
     if (!token) return;
     try {
-      await fetch(`${API}/api/preparation/progress/solve`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ questionId: q._id, category: 'Company', topic: q.company }),
+      await api.post('/preparation/progress/solve', {
+        questionId: q._id,
+        category: 'Company',
+        topic: q.company
       });
     } catch {}
   };

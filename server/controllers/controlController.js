@@ -13,13 +13,13 @@ const { logAdminAction } = require('../utils/auditLogger');
 async function verifyTurnstile(token, ip) {
   const secretKey = process.env.TURNSTILE_SECRET_KEY || '1x0000000000000000000000000000000UNKNOWN';
   try {
-    const res = await axios.post('https://challenges.cloudflare.com/turnstile/v0/siteverify', null, {
-      params: {
-        secret: secretKey,
-        response: token,
-        remoteip: ip
-      }
-    });
+    const params = new URLSearchParams();
+    params.append('secret', secretKey);
+    params.append('response', token);
+    if (ip) {
+      params.append('remoteip', ip);
+    }
+    const res = await axios.post('https://challenges.cloudflare.com/turnstile/v0/siteverify', params);
     return res.data.success;
   } catch (err) {
     console.error('Turnstile verification failed:', err);

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PrepLayout from '../../components/Preparation/PrepLayout.jsx';
+import api from '../../api/index.js';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 const TYPE_COLORS = {
@@ -33,22 +34,26 @@ export default function MockTests() {
 
   useEffect(() => {
     document.title = 'Mock Tests | Preparation Hub';
-    fetch(`${API}/api/preparation/mock-tests`)
-      .then(r => r.json())
-      .then(d => setTests(d.tests || []))
+    api.get('/preparation/mock-tests')
+      .then(res => setTests(res.data.tests || []))
+      .catch(err => console.error(err))
       .finally(() => setLoading(false));
   }, []);
 
   const startTest = async (test) => {
-    const resp = await fetch(`${API}/api/preparation/mock-tests/${test._id}`);
-    const d = await resp.json();
-    setTestData(d.test);
-    setActiveTest(test);
-    setAnswers({});
-    setCurrentQ(0);
-    setTimeLeft(d.test.duration * 60);
-    setSubmitted(false);
-    setResult(null);
+    try {
+      const res = await api.get(`/preparation/mock-tests/${test._id}`);
+      const d = res.data;
+      setTestData(d.test);
+      setActiveTest(test);
+      setAnswers({});
+      setCurrentQ(0);
+      setTimeLeft(d.test.duration * 60);
+      setSubmitted(false);
+      setResult(null);
+    } catch (err) {
+      console.error('Failed to start test:', err);
+    }
   };
 
   // Timer countdown
@@ -78,15 +83,14 @@ export default function MockTests() {
 
     // Post progress if logged in
     if (token && testData) {
-      fetch(`${API}/api/preparation/progress/submit-test`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({
-          testId: testData._id,
-          testTitle: testData.title,
-          score, totalQuestions: qs.length,
-          correctAnswers: correct, wrongAnswers: wrong, durationTaken,
-        }),
+      api.post('/preparation/progress/submit-test', {
+        testId: testData._id,
+        testTitle: testData.title,
+        score,
+        totalQuestions: qs.length,
+        correctAnswers: correct,
+        wrongAnswers: wrong,
+        durationTaken,
       }).catch(() => {});
     }
   };

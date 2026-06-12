@@ -773,24 +773,39 @@ export default function AptitudePrep() {
 
   useEffect(() => {
     document.title = 'Aptitude & Reasoning | NextJobPost';
-    fetch(`${API}/api/preparation/aptitude/topics`)
-      .then(r => r.json())
-      .then(d => { setTopics(d.topics || []); setCategories(d.categories || []); });
+    api.get('/preparation/aptitude/topics')
+      .then(res => {
+        const d = res.data;
+        setTopics(d.topics || []);
+        setCategories(d.categories || []);
+      })
+      .catch(err => console.error(err));
 
-    fetch(`${API}/api/preparation/structure`)
-      .then(r => r.json())
-      .then(d => { if (d.success) setStructure(d.categories || []); });
+    api.get('/preparation/structure')
+      .then(res => {
+        const d = res.data;
+        if (d.success) setStructure(d.categories || []);
+      })
+      .catch(err => console.error(err));
   }, []);
 
   const loadQuestions = (p = 1) => {
     setLoading(true);
-    const params = new URLSearchParams({ page: p, limit: 8 });
-    if (selectedCat) params.set('category', selectedCat);
-    if (selectedTopic) params.set('topic', selectedTopic);
-    if (difficulty) params.set('difficulty', difficulty);
-    fetch(`${API}/api/preparation/aptitude?${params}`)
-      .then(r => r.json())
-      .then(d => { setQuestions(d.questions || []); setTotalPages(d.pages || 1); setPage(p); })
+    const params = {};
+    params.page = p;
+    params.limit = 8;
+    if (selectedCat) params.category = selectedCat;
+    if (selectedTopic) params.topic = selectedTopic;
+    if (difficulty) params.difficulty = difficulty;
+
+    api.get('/preparation/aptitude', { params })
+      .then(res => {
+        const d = res.data;
+        setQuestions(d.questions || []);
+        setTotalPages(d.pages || 1);
+        setPage(p);
+      })
+      .catch(err => console.error(err))
       .finally(() => setLoading(false));
   };
 
@@ -804,10 +819,10 @@ export default function AptitudePrep() {
   const markSolved = async (q) => {
     if (!token) return;
     try {
-      await fetch(`${API}/api/preparation/progress/solve`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ questionId: q._id, category: q.category, topic: q.topic }),
+      await api.post('/preparation/progress/solve', {
+        questionId: q._id,
+        category: q.category,
+        topic: q.topic
       });
     } catch {}
   };

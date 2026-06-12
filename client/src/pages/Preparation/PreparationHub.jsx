@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import PrepLayout from '../../components/Preparation/PrepLayout.jsx';
+import api from '../../api/index.js';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
@@ -125,9 +126,9 @@ export default function PreparationHub() {
   useEffect(() => {
     document.title = 'Placement Preparation Hub | NextJobPost';
 
-    fetch(`${API}/api/preparation/structure`)
-      .then(r => r.json())
-      .then(d => {
+    api.get('/preparation/structure')
+      .then(res => {
+        const d = res.data;
         if (d.success) {
           const mapped = mapCategoriesToSubjects(d.categories || []);
           setSubjects(mapped);
@@ -136,11 +137,8 @@ export default function PreparationHub() {
       .catch(() => {});
 
     if (token) {
-      fetch(`${API}/api/preparation/progress`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-        .then(r => r.json())
-        .then(d => setProgress(d))
+      api.get('/preparation/progress')
+        .then(res => setProgress(res.data))
         .catch(() => {});
     }
   }, [token]);

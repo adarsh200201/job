@@ -1,0 +1,1237 @@
+# Walkthrough — Preparation UI Layering, Layout Alignment & Horizontal Overflow Fixes
+3: Improve the layout density and content hierarchy on preparation pages by narrowing the left exercise selection column to give more room to the main practice viewport, simplifying the labels inside the exercise selection menu, and removing the duplicate Prep Academy logo from the desktop sticky sidebar.
+import AITutor from '../../components/Preparation/AITutor.jsx';
+- [x] Align container width of preparation pages (`/preparation` and `/preparation/aptitude`) to match the global header's content width (1200px)
+- [x] Remove the horizontal scrollbar at the bottom of the page (fixed range pin layout in SalarySearch.jsx)
+- [x] Fix page numbers overflow behind the sidebar by implementing ellipsis-based page ranges in `AptitudePrep.jsx`, `DSAPrep.jsx`, and `TechnicalPrep.jsx`
+The above content shows the entire, complete file contents of the requested file.
+> The default green explanation container under revealed questions will be replaced by the direct options highlight + a dedicated AI Tutor button + a clean correct answer indicator. This streamlines the interface, reduces layout clutter, and encourages AI Tutor engagement.
+const DIFF_COLORS = { Easy: '#10b981', Medium: '#f59e0b', Hard: '#ef4444' };
+- **Problem**: Solved questions were saved to the database upon clicking "Mark as Solved", but when refreshing the page or navigating back, the solved state (green border & "✓ Solved" label) was lost because the page never loaded the user's progress history.
+- **Root Cause**: The `.site-header` had `z-index: 40` but did not have a CSS position property set, meaning the `z-index` was ignored. The sticky sub-header `.sticky-prep-header` in [AptitudePrep.jsx](file:///d:/job/client/src/pages/Preparation/AptitudePrep.jsx) had `z-index: 80`, causing it to overlap the dropdowns.
+- **Fixed & Uniform Card Height**: Adjusted flex stretching rules so cards in the same row are guaranteed to have identical heights regardless of topic count variation.
+- Modified [global.css](file:///d:/job/client/src/styles/global.css): Added `position: relative` and raised `z-index` of `.site-header` to `150`.
+- **Generic "View More Topics" Toggle**: Added a custom toggle button to any subcategories exceeding 4 topics. The button's background and text utilize the parent subject's theme color, expanding the view to show all topics in a responsive 2-column grid.
+- Modified [preparationController.js](file:///D:/job/server/controllers/preparationController.js): Updated the `getUserProgress` handler to return the full `solvedQuestions` history.
+- Modified [DSAPrep.jsx](file:///D:/job/client/src/pages/Preparation/DSAPrep.jsx):
+- **Database Models**: Created Mongoose models `PrepCategory.js` (representing the Category -> Sub Category -> Topic tree) and `PrepCompany.js` (storing corporate recruiter tags).
+- **Problem**: Preparation layouts spanned the full 100% width of the screen, pushing the sidebar to the extreme left edge and misaligning the content body from the global site header (which is centered at `1200px` max-width).
+- **Dynamic API Route**: Added public `GET /api/preparation/structure` to fetch active categories, subcategories, topics, and companies for the student-facing dashboard.
+- Modified [PrepLayout.jsx](file:///d:/job/client/src/components/Preparation/PrepLayout.jsx): Added `max-width: 1200px` and `margin: 0 auto` to the `.hub-outer-container`.
+- Now, both the Preparation Hub landing page (`/preparation`) and all category-level pages (such as `/preparation/aptitude?category=Data%20Interpretation`) align perfectly with the centered `1200px` main site header.
+- Implemented full CRUD endpoints for Category Tree (add/edit/delete/reorder/toggle) and Company Mappings (add/edit/delete/reorder/toggle) in `preparationController.js` protected by `adminAuth` middleware.
+- **Excel Spreadsheet Parser**: Installed `xlsx` on the server to parse uploaded Excel sheets, validate columns, and bulk insert questions while preventing duplicates.
+- Modified [DSAQuestion.js](file:///D:/job/server/models/DSAQuestion.js): Added optional fields `solutionCodeCpp`, `solutionCodeJava`, and `solutionCodePython` to the schema.
+- **Root Cause**: The min/max distribution range pins inside the salary range bar in [SalarySearch.jsx](file:///d:/job/client/src/pages/SalarySearch.jsx) were absolute-positioned at `left: 0%` / `right: 0%` with negative/positive `50%` translations (`translateX(-50%)`/`translateX(50%)`). This shifted the text labels outside the container boundaries, overflowing the viewport and causing horizontal scroll.
+- **Tree-View Editor (`PrepTopicManager.jsx`)**: Designed a modern, interactive tree-view manager to administer Categories, Sub Categories, and Topics with smooth toggles and reordering support.
+- Adjusted the layout of the pins in [SalarySearch.jsx](file:///d:/job/client/src/pages/SalarySearch.jsx) to align left/right naturally (`textAlign: 'left'` and `textAlign: 'right'`) without translation.
+- Added `overflowX: 'hidden'` to the root container of [SalarySearch.jsx](file:///d:/job/client/src/pages/SalarySearch.jsx) as a secondary defense layer to ensure nothing on the page overflows horizontally.
+- Added fallback logic that renders the default JavaScript solution if a particular language's solution is missing from the database.
+const UserDashboard = React.lazy(() => import('./pages/UserDashboard.jsx'));
+- **Problem**: When a category contained many pages of questions (e.g., 57 pages), all page buttons were rendered side-by-side in a single flex row. This caused a massive horizontal overflow that spilled underneath/behind the left sticky sidebar, hiding pages 1 to 34.
+- **Layout Exclusion**: Configured `AppLayout` in [App.jsx](file:///d:/job/client/src/App.jsx) to bypass the site header, site footer, pre-footer, and container constraints for the `/admin` path.
+- Added a responsive `getPageRange` helper function in [AptitudePrep.jsx](file:///d:/job/client/src/pages/Preparation/AptitudePrep.jsx), [DSAPrep.jsx](file:///d:/job/client/src/pages/Preparation/DSAPrep.jsx), and [TechnicalPrep.jsx](file:///d:/job/client/src/pages/Preparation/TechnicalPrep.jsx).
+2. Categories like General Knowledge (which use the `AptitudePrep.jsx` handler) opened by default to a blank formulas tab and displayed an empty exercise selection sidebar (Formulas, DS1, DS2, DS3) that is only relevant for Arithmetic Aptitude.
+- Constrained the pagination bar to a clean, fixed width that fits comfortably on all device screens and wraps responsively if needed.
+- **Theme States**: Added a dark/light mode toggle with local storage persistence to the admin sidebar/topbar.
+- **CSS Variable Injection**: Standardized the admin panel style tokens to use CSS custom variables (`var(--page-bg)`, `var(--card-bg)`, etc.), which swap values automatically.
+- **Global Theme Overrides**: Wrote CSS overrides targeting bootstrap classes and inline styling structures to style all nested subcomponents correctly in dark mode.
+- Added checks to identify whether the current category is an Aptitude category (`Quantitative Aptitude` or `Aptitude`).
+- Non-Aptitude categories (e.g. General Knowledge, Current Affairs, Verbal, Reasoning, etc.) now default directly to the questions view (`'general'`) on mount.
+- Conditionally hide the Left Sidebar ("Exercise Selection") for non-Aptitude categories and span the questions grid to `100%` width, establishing visual parity with the other main preparation views.
+- Implemented conditional `sticky-prep-header` padding/width and body `maxWidth` constraints (limited to `860px` instead of `1200px` for non-Aptitude categories), giving them the exact same centered, premium, and readable look and feel as the other five preparation pages.
+- **Aptitude Category Mapping**: Mapped initial search query categories (`?category=Aptitude`, `?category=Verbal`, `?category=Reasoning`) in [AptitudePrep.jsx](file:///d:/job/client/src/pages/Preparation/AptitudePrep.jsx) to their respective display categories (`Quantitative Aptitude`, `Verbal Ability`, `Logical Reasoning`) so the filter dropdown is correctly selected on page load.
+- **Backend Category Filter Mapping**: Updated the `getAptitude` endpoint in [preparationController.js](file:///d:/job/server/controllers/preparationController.js) to query both seeded legacy values (`'Aptitude'`, `'Verbal'`, `'Reasoning'`) and display names (`'Quantitative Aptitude'`, `'Verbal Ability'`, `'Logical Reasoning'`) using a Mongoose `$in` filter.
+- **Trigger General Pool Loading**: Fixed a bug where questions were not loaded when a user navigated to `/preparation/aptitude` without a `selectedTopic` parameter. The page now automatically invokes `loadQuestions` and displays the general questions pool matching the query.
+- **Problem**: The Technical Preparation page (`/preparation/technical`) previously displayed all coding and interview questions in a single combined list directly on load, lacking a dedicated landing/selection view to browse subcategories (like Java, JavaScript, Python, SQL, etc.) as cards.
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981"
+- **MockTests Syntax Correction**: Resolved syntax compilation errors (unbalanced `div` and `PrepLayout` tags) in `MockTests.jsx` which was preventing the client application from compiling and loading updated scripts.
+- **PreparationHub Integration**: Integrated the unified `PrepLayout` component inside `PreparationHub.jsx` and removed duplicate styles and drawer markup, ensuring the left sticky navigation is consistently rendered across the home preparation dashboard.
+- **Robust Navigation Highlighting (`getLinkClass`)**: Rewrote active menu matching in `PrepLayout.jsx` to dynamically parse pathname and category/topic query parameters, including fallback mapping for legacy categories (e.g., mapping `Aptitude` to `Quantitative Aptitude`), so the active item is highlighted correctly.
+- **Updated & Aligned Category Links**: Migrated hardcoded topic-level links (like `topic=Interest` or `topic=Series`) in the sidebar to proper category-wide database targets (`category=Data Interpretation` and `category=Non Verbal Reasoning`), ensuring students view all questions under a subject.
+- `GET /api/preparation/structure` — Retrieve the active categories tree and active companies list. Used by the student preparation hub.
+- Logged in, opened `/preparation/dsa`, and clicked "Mark as Solved" on a question.
+- Logged in, opened `/preparation/dsa`, and clicked "Mark as Solved" on a question.
+- `GET /api/preparation/admin/categories` — Get all categories, subcategories, and topics.
+<div key={i} style={{ marginBottom: 24, background: '#fafbfd', borderRadius: 10, padding: '1.1rem', border: '1px solid #f1f5f9' }}>
+- **Clean Sidebar URL Route**: Updated the sidebar navigation link for **Arithmetic Aptitude** to use a clean route (`/preparation/aptitude`) instead of `/preparation/aptitude?category=Aptitude`.
+- **Dynamic Category Highlight**: Refactored the `getLinkClass` helper inside `PrepLayout.jsx` so that `/preparation/aptitude` remains active when the category query parameter is empty, `'Aptitude'`, or `'Quantitative Aptitude'`.
+- **Dynamic Topics Dashboard**: Refactored `AptitudePrep.jsx` to load the database category structure (`/api/preparation/structure`) and render a cards grid of all active topics grouped by subcategory when no topic is selected.
+<div key={j} style={{ background: '#fff', border: '1px solid #e2e8f0', borderLeft: '4px solid #10b981', borderRadius: '4px 8px 8px 4px', padding: '11px 15px', marginBottom: 10 }}>
+- **Direct Card Links**: Map topic cards to point directly to topic viewports, e.g., `/preparation/aptitude?category=Data%20Interpretation&topic=Table%20Charts`.
+- **General Practice Pool**: Kept the general questions list below the new topics grid when no specific topic is selected.
+- `POST /api/preparation/admin/questions/excel-import` — Upload Excel files (`.xlsx`), parse sheets using `xlsx` library, validate fields, check for duplicates (question + category + subCategory/topic), and bulk insert.
+- Navigated to `http://localhost:3000/preparation/aptitude?category=General%20Knowledge`.
+- **Removed Detailed Topic Lists**: Completely removed the busy and cluttered list of individual topics from the category cards on the main Preparation Hub (`/preparation`).
+- Confirmed that all pages (`PreparationHub.jsx`, `AptitudePrep.jsx`, `TechnicalPrep.jsx`, `DSAPrep.jsx`, `CompanyPrepPage.jsx`, `GovPrepPage.jsx`, `MockTests.jsx`) correctly import and render `PrepLayout`.
+- **Interactive Card Elements**: Designed custom interactive elements for each card, including themed border accents, hover state transformations, and card meta information (number of sections and total topics count).
+- **Correct Path Mapping**: Configured category cards to link directly to their exact clean routes or category filters (e.g. clicking Data Interpretation goes to `/preparation/aptitude?category=Data Interpretation`).
+- **Search Capability Maintained**: Kept the search suggestions index intact so users can still search for individual topics from the header bar.
+Quick reference of key formulas and shortcuts for <strong>{topic}</strong>.
+- A visual, responsive tree explorer for Categories, Sub Categories, and Topics.
+- **Removed Layout Gap**: Modified `PrepLayout.jsx` to hide the top header section on desktop viewports when `headerContent` is empty. Also updated `App.jsx` to strip the default `py-4` vertical padding from Bootstrap's main container on all `/preparation` paths, ensuring the prep workspace sits flush against the main site header.
+- **Full-Width Topic Pages**: Modified `AptitudePrep.jsx` to use a 100% max-width container for both the header banner and the practice body content, allowing the split exercise selector and question viewport to stretch and make full use of the screen width on desktop.
+- Clicked the categories select dropdown and verified the five new sections (**💻 Programming MCQs**, **🌲 DSA Challenges**, **🏢 Company Prep**, **🏛️ Govt Exams Prep**, and **📝 Mock Tests**) are present.
+- **Full Viewport Width Sidebar**: Added global CSS overrides to force Bootstrap's centered `.container` wrapper (`main.container.is-prep-page`) to stretch to 100% viewport width when on preparation routes. This places the sticky sidebar flush against the left viewport edge and lets the workspace span the entire screen.
+<div key={j} style={{ background: '#fff', border: '1px solid #e2e8f0', borderLeft: '4px solid #10b981', borderRadius: '4px 8px 8px 4px', padding: '11px 15px', marginBottom: 10 }}>
+<div key={j} style={{ background: '#fff', border: '1px solid #e2e8f0', borderLeft: '4px solid #10b981', borderRadius: '4px 8px 8px 4px', padding: '11px 15px', marginBottom: 10 }}>
+- Confirmed that all pages (`PreparationHub.jsx`, `AptitudePrep.jsx`, `TechnicalPrep.jsx`, `DSAPrep.jsx`, `CompanyPrepPage.jsx`, `GovPrepPage.jsx`, `MockTests.jsx`) correctly import and render `PrepLayout`.
+- Confirmed that all pages (`PreparationHub.jsx`, `AptitudePrep.jsx`, `TechnicalPrep.jsx`, `DSAPrep.jsx`, `CompanyPrepPage.jsx`, `GovPrepPage.jsx`, `MockTests.jsx`) correctly import and render `PrepLayout`.
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+<span style={{ background: isDs ? '#10b98112' : '#6366f112', color: isDs ? '#10b981' : '#6366f1', borderRadius: 8, padding: '3px 8px', fontWeight: 700, fontSize: '0.78rem', flexShrink: 0 }}>
+<span style={{ background: isDs ? '#10b98112' : '#6366f112', color: isDs ? '#10b981' : '#6366f1', borderRadius: 8, padding: '3px 8px', fontWeight: 700, fontSize: '0.78rem', flexShrink: 0 }}>
+<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
+<path d="M1 3l4 4 4-4" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+<p style={{ margin: '0 0 8px 0', fontWeight: 600, color: '#1e293b', fontSize: '0.95rem', lineHeight: 1.5 }}>
+88: We will replace the hardcoded `SUBJECTS` configuration in `client/src/pages/Preparation/PreparationHub.jsx` with a dynamic backend fetch from `GET /api/preparation/structure`, rendering categories, subcategories, and topics dynamically. We will also update selectors on `AptitudePrep.jsx` and other user prep pages to pull lists from this dynamic setup.
+89: // ─── Single MCQ Card (reused for general & DS) ──────────────────────
+90: // ─── IndiaBIX Icons ───────────────────────────────────────────────
+<div style={{ background: '#f8fafc', border: '1px dashed #cbd5e1', borderRadius: 8, padding: '10px 14px', marginBottom: 4 }}>
+<div style={{ background: '#f8fafc', border: '1px dashed #cbd5e1', borderRadius: 8, padding: '10px 14px', marginBottom: 4 }}>
+<svg width="16" height="16" viewBox="0 0 24 24" fill={active ? '#10b981' : 'none'} stroke={active ? '#10b981' : '#64748b'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+<div key={i} style={{ fontSize: '0.88rem', color: '#334155', marginBottom: i < statementBlock.length - 1 ? 6 : 0 }}>{s}</div>
+<path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+<div style={{ background: '#fff', borderRadius: 14, padding: '1.25rem', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0' }}>
+- Validate excel-import logic with sample spreadsheet rows containing valid/invalid/duplicate questions.
+<div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginBottom: 12 }}>
+<div style={{ display: 'flex', gap: 8, flex: 1 }}>
+<span style={{ background: `${DIFF_COLORS[difficulty] || '#64748b'}15`, color: DIFF_COLORS[difficulty] || '#64748b', borderRadius: 20, padding: '2px 9px', fontSize: '0.7rem', fontWeight: 700, flexShrink: 0, height: 'fit-content' }}>
+<span style={{ background: `${DIFF_COLORS[difficulty] || '#64748b'}15`, color: DIFF_COLORS[difficulty] || '#64748b', borderRadius: 20, padding: '2px 9px', fontSize: '0.7rem', fontWeight: 700, flexShrink: 0, height: 'fit-content' }}>
+style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '11px 16px', textDecoration: 'none', color: '#1e293b', fontSize: '0.9rem', fontWeight: 600, borderBottom: '1px solid #f1f5f9', transition: 'background 0.15s' }}
+The above content shows the entire, complete file contents of the requested file.
+<p style={{ margin: '0 0 8px 0', fontWeight: 600, color: '#1e293b', fontSize: '0.95rem', lineHeight: 1.5 }}>
+105:       {/* Options */}
+<svg width="16" height="16" viewBox="0 0 24 24" fill={active ? '#10b981' : 'none'} stroke={active ? '#10b981' : '#64748b'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+<div style={{ display: isDs ? 'flex' : 'grid', flexDirection: isDs ? 'column' : undefined, gridTemplateColumns: isDs ? undefined : 'repeat(auto-fill,minmax(200px,1fr))', gap: 8 }}>
+<div style={{ display: isDs ? 'flex' : 'grid', flexDirection: isDs ? 'column' : undefined, gridTemplateColumns: isDs ? undefined : 'repeat(auto-fill,minmax(200px,1fr))', gap: 8 }}>
+let bg = '#f8fafc', border = '#e2e8f0', color = '#1e293b';
+<div key={i} style={{ fontSize: '0.88rem', color: '#334155', marginBottom: i < statementBlock.length - 1 ? 6 : 0 }}>{s}</div>
+if (opt === answer) { bg = '#dcfce7'; border = '#10b981'; color = '#166534'; }
+else if (opt === choice) { bg = '#fee2e2'; border = '#ef4444'; color = '#991b1b'; }
+style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '11px 16px', textDecoration: 'none', color: '#1e293b', fontSize: '0.9rem', fontWeight: 600, borderBottom: '1px solid #f1f5f9', transition: 'background 0.15s' }}
+<svg width="16" height="16" viewBox="0 0 24 24" fill={active ? '#ef4444' : 'none'} stroke={active ? '#ef4444' : '#64748b'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+style={{ background: bg, border: `1.5px solid ${border}`, borderRadius: 10, padding: '9px 12px', textAlign: 'left', cursor: revealed ? 'default' : 'pointer', fontSize: '0.85rem', fontWeight: 500, color, transition: 'all 0.15s' }}
+<span style={{ background: `${DIFF_COLORS[difficulty] || '#64748b'}15`, color: DIFF_COLORS[difficulty] || '#64748b', borderRadius: 20, padding: '2px 9px', fontSize: '0.7rem', fontWeight: 700, flexShrink: 0, height: 'fit-content' }}>
+onMouseEnter={e => { if (!revealed) e.currentTarget.style.borderColor = '#6366f1'; }}
+<span style={{ fontWeight: 700, marginRight: 6, color: revealed && opt === answer ? '#166534' : revealed && opt === choice ? '#991b1b' : '#6366f1' }}>
+<span style={{ fontWeight: 700, marginRight: 6, color: revealed && opt === answer ? '#166534' : revealed && opt === choice ? '#991b1b' : '#6366f1' }}>
+{isDs ? opt.charAt(0) : String.fromCharCode(65 + oi)}.
+// ─── Discussion Comments Component ──────────────────────────────────
+const [isDrawing, setIsDrawing] = useState(false);
+style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '11px 16px', textDecoration: 'none', color: '#1e293b', fontSize: '0.9rem', fontWeight: 600, borderBottom: '1px solid #f1f5f9', transition: 'background 0.15s' }}
+onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
+onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+const [posting, setPosting] = useState(false);
+const [username, setUsername] = useState(() => localStorage.getItem('comment_username') || '');
+else if (opt === choice) { bg = '#fee2e2'; border = '#ef4444'; color = '#991b1b'; }
+<div style={{ marginTop: 12, background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 10, padding: '10px 14px' }}>
+<div style={{ marginTop: 12, background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 10, padding: '10px 14px' }}>
+<div style={{ fontWeight: 700, color: '#166534', fontSize: '0.82rem', marginBottom: 4 }}>✅ Explanation</div>
+<button onClick={onAiQ} style={{ marginTop: 10, background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', color: '#fff', border: 'none', borderRadius: 8, padding: '6px 14px', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}>
+style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '11px 16px', width: '100%', background: 'none', border: 'none', textAlign: 'left', color: '#dc2626', fontSize: '0.9rem', fontWeight: 700, cursor: 'pointer', transition: 'background 0.15s' }}
+onMouseLeave={e => { if (!revealed) e.currentTarget.style.borderColor = border; }}>
+<span style={{ fontWeight: 700, marginRight: 6, color: revealed && opt === answer ? '#166534' : revealed && opt === choice ? '#991b1b' : '#6366f1' }}>
+{isDs ? opt.charAt(0) : String.fromCharCode(65 + oi)}.
+clientY = e.touches[0].clientY;
+{isDs ? opt.substring(2).trim() : opt}
+clientX = e.clientX;
+141: // ─── Main Component ──────────────────────────────────────────────────
+142: const getMappedCategory = (cat) => {
+143:     if (clientX === undefined || clientY === undefined) return null;
+const [searchParams] = useSearchParams();
+145: /* ══════════════════════════════════════════════════════════
+const [categories, setCategories] = useState([]);
+<div style={{ marginTop: 12, background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 10, padding: '10px 14px' }}>
+<div style={{ fontWeight: 700, color: '#166534', fontSize: '0.82rem', marginBottom: 4 }}>✅ Explanation</div>
+<div style={{ color: '#14532d', fontSize: '0.85rem', lineHeight: 1.6 }}>{explanation}</div>
+<button onClick={onAiQ} style={{ marginTop: 10, background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', color: '#fff', border: 'none', borderRadius: 8, padding: '6px 14px', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}>
+const [loading, setLoading] = useState(false);
+export default function AptitudePrep() {
+const activeName = username.trim() || 'Anonymous';
+<ProfileDropdown username={username} isAdmin={isAdmin} logout={logout} />
+const [activeSection, setActiveSection] = useState('formulas');
+const [selectedCat, setSelectedCat] = useState(getMappedCategory(searchParams.get('category')) || '');
+const [selectedTopic, setSelectedTopic] = useState(searchParams.get('topic') || '');
+setSelectedCat(searchParams.get('category') || '');
+setSelectedTopic(searchParams.get('topic') || '');
+<Link to="/signup" className="btn-nav-signup">Sign up</Link>
+<Link to="/login" className="btn-nav-login">Log in</Link>
+const [totalPages, setTotalPages] = useState(1);
+if (cat === 'Reasoning') return 'Logical Reasoning';
+const [activeSection, setActiveSection] = useState('formulas');
+165: /* ══════════════════════════════════════════════════════════
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+setSelectedCat(getMappedCategory(searchParams.get('category')) || '');
+setSelectedCat(getMappedCategory(searchParams.get('category')));
+function NavDropdown({ label, items, to, showArrow = true, mega = false }) {
+170:   // Reset to Formulas tab when topic changes
+.then(d => { setTopics(d.topics || []); setCategories(d.categories || []); });
+const [selectedCat, setSelectedCat] = useState(getMappedCategory(searchParams.get('category')));
+<div style={{ fontWeight: 700, color: '#334155', fontSize: '0.85rem', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+const [difficulty, setDifficulty] = useState('');
+const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+176:       <div style={{ maxHeight: '180px', overflowY: 'auto', marginBottom: 12, display: 'flex', flexDirection: 'column', gap: 8, border: '1px solid #f1f5f9', borderRadius: 8, padding: 8, background: '#fafbfd' }}>
+return () => document.removeEventListener('mousedown', handler);
+if (selectedTopic) params.set('topic', selectedTopic);
+<div style={{ fontWeight: 700, color: '#334155', fontSize: '0.85rem', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+.then(d => { setTopics(d.topics || []); setCategories(d.categories || []); });
+<div style={{ fontSize: '0.75rem', color: '#94a3b8', textAlign: 'center', padding: 8 }}>No comments yet. Start the discussion below!</div>
+182:       <div style={{ maxHeight: '180px', overflowY: 'auto', marginBottom: 12, display: 'flex', flexDirection: 'column', gap: 8, border: '1px solid #f1f5f9', borderRadius: 8, padding: 8, background: '#fafbfd' }}>
+const col2 = mega ? items.slice(13, 26) : [];
+<div key={c._id} style={{ background: '#fff', padding: '8px 10px', borderRadius: 6, border: '1px solid #e2e8f0' }}>
+<div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', fontWeight: 700, color: '#6366f1', marginBottom: 2 }}>
+if (selectedCat) params.set('category', selectedCat);
+<div style={{ fontSize: '0.75rem', color: '#94a3b8', textAlign: 'center', padding: 8 }}>No comments yet. Start the discussion below!</div>
+<li ref={ref} style={{ position: 'relative', listStyle: 'none' }}
+<p style={{ margin: 0, fontSize: '0.78rem', color: '#334155', lineHeight: 1.4, wordBreak: 'break-word' }}>{c.comment}</p>
+<div key={c._id} style={{ background: '#fff', padding: '8px 10px', borderRadius: 6, border: '1px solid #e2e8f0' }}>
+<div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', fontWeight: 700, color: '#6366f1', marginBottom: 2 }}>
+if (selectedTopic) params.set('topic', selectedTopic);
+<span style={{ color: '#94a3b8', fontWeight: 400 }}>{new Date(c.createdAt).toLocaleDateString()}</span>
+194:       <form onSubmit={handlePostComment} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+<p style={{ margin: 0, fontSize: '0.78rem', color: '#334155', lineHeight: 1.4, wordBreak: 'break-word' }}>{c.comment}</p>
+.then(d => { setQuestions(d.questions || []); setTotalPages(d.pages || 1); setPage(p); })
+body: JSON.stringify({ questionId: q._id, category: q.category, topic: q.topic }),
+198:     fetch(`${API}/api/preparation/structure`)
+}, [selectedCat, selectedTopic, difficulty, activeSection]);
+200:       <form onSubmit={handlePostComment} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+201:   const dsQuestions = (activeSection === 'ds1' || activeSection === 'ds2' || activeSection === 'ds3')
+style={{ width: '30%', border: '1px solid #cbd5e1', borderRadius: 6, padding: '4px 8px', fontSize: '0.75rem', outline: 'none' }}
+? getDSQuestionsForTopic(selectedTopic, activeSection)
+<div style={{ marginTop: 12, border: '1px solid #cbd5e1', borderRadius: 10, overflow: 'hidden', background: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', opacity: 0.6 }}>
+<button type="button" onClick={() => setActiveTab('sketch')} style={{ background: 'none', border: 'none', borderBottom: activeTab === 'sketch' ? '2.5px solid #10b981' : '2.5px solid transparent', padding: '10px 16px', fontSize: '0.8rem', fontWeight: 700, color: activeTab === 'sketch' ? '#10b981' : '#64748b', cursor: 'pointer', transition: 'all 0.15s' }}>
+style={{ width: '30%', border: '1px solid #cbd5e1', borderRadius: 6, padding: '4px 8px', fontSize: '0.75rem', outline: 'none' }}
+style={{ width: '30%', border: '1px solid #cbd5e1', borderRadius: 6, padding: '4px 8px', fontSize: '0.75rem', outline: 'none' }}
+<button type="button" onClick={() => setActiveTab('note')} style={{ background: 'none', border: 'none', borderBottom: activeTab === 'note' ? '2.5px solid #10b981' : '2.5px solid transparent', padding: '10px 16px', fontSize: '0.8rem', fontWeight: 700, color: activeTab === 'note' ? '#10b981' : '#64748b', cursor: 'pointer', transition: 'all 0.15s' }}>
+style={{ flex: 1, border: '1px solid #cbd5e1', borderRadius: 6, padding: '4px 8px', fontSize: '0.75rem', outline: 'none' }}
+<div style={{ maxWidth: 1120, margin: '0 auto' }}>
+212:   const dsQuestions = (activeSection === 'ds1' || activeSection === 'ds2' || activeSection === 'ds3')
+body: JSON.stringify({ questionId: q._id, category: q.category, topic: q.topic }),
+? getDSQuestionsForTopic(selectedTopic, activeSection)
+style={{ background: '#10b981', color: '#fff', border: 'none', borderRadius: 6, padding: '4px 12px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}
+style={{ flex: 1, border: '1px solid #cbd5e1', borderRadius: 6, padding: '4px 8px', fontSize: '0.75rem', outline: 'none' }}
+217:   const dsQuestions = (activeSection === 'ds1' || activeSection === 'ds2' || activeSection === 'ds3')
+<p style={{ margin: '4px 0 0', color: 'rgba(255,255,255,0.8)', fontSize: '0.85rem' }}>
+<div style={{ minHeight: '100vh', background: '#f8faff', fontFamily: 'Inter,sans-serif' }}>
+style={{ background: '#10b981', color: '#fff', border: 'none', borderRadius: 6, padding: '4px 12px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}
+style={{ background: '#10b981', color: '#fff', border: 'none', borderRadius: 6, padding: '4px 12px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}
+<div style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', padding: '2rem 1.5rem 1.5rem' }}>
+<div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 16 }}>
+<select value={selectedCat} onChange={e => { setSelectedCat(e.target.value); setSelectedTopic(''); }} style={filterStyle}>
+<span style={{ fontSize: '2rem' }}>🧮</span>
+226:   const activeCategoryData = structure.find(cat => cat.name === selectedCat && cat.status === 'active');
+<h1 style={{ margin: 0, color: '#fff', fontWeight: 800, fontSize: 'clamp(1.3rem,3vw,1.8rem)' }}>
+<select value={selectedTopic} onChange={e => setSelectedTopic(e.target.value)} style={filterStyle}>
+<div style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', padding: '2rem 1.5rem 1.5rem' }}>
+<div key={cIdx} style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2px' }}>
+<div style={{ minHeight: '100vh', background: '#f8faff', fontFamily: 'Inter,sans-serif' }}>
+<select value={difficulty} onChange={e => setDifficulty(e.target.value)} style={filterStyle}>
+233:   const dsQuestions = (activeSection === 'ds1' || activeSection === 'ds2' || activeSection === 'ds3')
+<div style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', padding: '2rem 1.5rem 1.5rem' }}>
+<div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 16 }}>
+<select value={selectedCat} onChange={e => { setSelectedCat(e.target.value); setSelectedTopic(''); }} style={filterStyle}>
+237:   const activeCategoryData = structure.find(cat => cat.name === selectedCat && cat.status === 'active');
+{categories.map(c => <option key={c} value={c}>{c}</option>)}
+<h1 style={{ margin: 0, color: '#fff', fontWeight: 800, fontSize: 'clamp(1.3rem,3vw,1.8rem)' }}>
+<select value={selectedTopic} onChange={e => setSelectedTopic(e.target.value)} style={filterStyle}>
+onClick={() => setMode(mode === 'draw' ? 'erase' : 'draw')}
+<div style={{ minHeight: '100vh', background: '#f8faff', fontFamily: 'Inter,sans-serif' }}>
+<select value={selectedCat} onChange={e => { setSelectedCat(e.target.value); setSelectedTopic(''); }} style={filterStyle}>
+<select value={difficulty} onChange={e => setDifficulty(e.target.value)} style={filterStyle}>
+<div style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', padding: '2rem 1.5rem 1.5rem' }}>
+<div style={{ maxWidth: '100%', padding: '0 24px', margin: '0 auto' }}>
+<div style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: '0.85rem', color: '#64748b', marginBottom: 20, flexWrap: 'wrap' }}>
+<span style={{ fontSize: '2rem' }}>{selectedCat ? (CAT_ICONS[selectedCat] || '🧮') : '🧮'}</span>
+{topics.map(t => <option key={t} value={t}>{t}</option>)}
+<span onClick={() => { setSelectedTopic(''); setSelectedCat(''); }} style={{ color: '#6366f1', cursor: 'pointer', fontWeight: 500 }}>Aptitude</span>
+<select value={difficulty} onChange={e => setDifficulty(e.target.value)} style={filterStyle}>
+<span onClick={() => setActiveSection('formulas')} style={{ color: '#6366f1', cursor: 'pointer', fontWeight: 500 }}>{selectedTopic}</span>
+<p style={{ margin: '4px 0 0', color: 'rgba(255,255,255,0.8)', fontSize: '0.85rem' }}>
+<span style={{ fontWeight: 600, color: '#334155' }}>{SECTION_LABELS[activeSection]}</span>
+<div style={{ maxWidth: 1120, margin: '0 auto', padding: '1.5rem 1rem' }}>
+256:             <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+257:       {/* ── Header ── */}
+const coords = getCoordinates(e);
+<div style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: '0.85rem', color: '#64748b', marginBottom: 20, flexWrap: 'wrap' }}>
+<div style={{ background: '#fff', borderRadius: 12, padding: '1.25rem', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0' }}>
+<p style={{ margin: '0 0 10px 0', fontSize: '0.78rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+<span onClick={() => { setSelectedTopic(''); setSelectedCat(''); }} style={{ color: '#6366f1', cursor: 'pointer', fontWeight: 500 }}>Aptitude</span>
+{categories.map(c => <option key={c} value={c} style={optionStyle}>{c}</option>)}
+<span onClick={() => setActiveSection('formulas')} style={{ color: '#6366f1', cursor: 'pointer', fontWeight: 500 }}>{selectedTopic}</span>
+<select value={selectedTopic} onChange={e => setSelectedTopic(e.target.value)} style={filterStyle}>
+<div style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: '0.85rem', color: '#64748b', marginBottom: 20, flexWrap: 'wrap' }}>
+<Link to="/" style={{ color: '#6366f1', textDecoration: 'none', fontWeight: 500 }}>Home</Link>
+style={{ display: 'block', padding: '9px 18px', textDecoration: 'none', color: '#1e293b', fontSize: '0.88rem', fontWeight: 500, transition: 'all 0.15s', borderBottom: i < items.length - 1 ? '1px solid #f8fafc' : 'none' }}
+style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '11px 14px', background: active ? '#f0fdf4' : 'transparent', border: 'none', borderBottom: '1px solid #f1f5f9', textAlign: 'left', cursor: 'pointer', color: active ? '#10b981' : '#475569', fontWeight: active ? 700 : 500, fontSize: '0.83rem', transition: 'all 0.15s' }}
+onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#1e293b'; e.currentTarget.style.paddingLeft = '18px'; }}
+<span onClick={() => setActiveSection('formulas')} style={{ color: '#6366f1', cursor: 'pointer', fontWeight: 500 }}>{selectedTopic}</span>
+<div style={{ background: '#fff', borderRadius: 12, padding: '1.25rem', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0' }}>
+<p style={{ margin: '0 0 10px 0', fontSize: '0.78rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+<div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 16 }}>
+<select value={selectedCat} onChange={e => { setSelectedCat(e.target.value); setSelectedTopic(''); }} style={filterStyle}>
+<div style={{ border: '1px solid #e2e8f0', borderRadius: 8, overflow: 'hidden' }}>
+{categories.map(c => <option key={c} value={c} style={optionStyle}>{c}</option>)}
+<div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+<div style={{ background: '#fff', borderRadius: 12, padding: '1.25rem', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0' }}>
+<p style={{ margin: '0 0 10px 0', fontSize: '0.78rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '11px 14px', background: active ? '#f0fdf4' : 'transparent', border: 'none', borderBottom: '1px solid #f1f5f9', textAlign: 'left', cursor: 'pointer', color: active ? '#10b981' : '#475569', fontWeight: active ? 700 : 500, fontSize: '0.83rem', transition: 'all 0.15s' }}
+onMouseEnter={e => { if (!active) e.currentTarget.style.background = '#f8fafc'; }}
+<select value={selectedTopic} onChange={e => setSelectedTopic(e.target.value)} style={filterStyle}>
+{activeSection === 'formulas' && <FormulaSheet topic={selectedTopic} />}
+{topics.map(t => <option key={t} value={t} style={optionStyle}>{t}</option>)}
+<option value="Medium" style={optionStyle}>Medium</option>
+<select value={difficulty} onChange={e => setDifficulty(e.target.value)} style={filterStyle}>
+style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '11px 14px', background: active ? '#f0fdf4' : 'transparent', border: 'none', borderBottom: '1px solid #f1f5f9', textAlign: 'left', cursor: 'pointer', color: active ? '#10b981' : '#475569', fontWeight: active ? 700 : 500, fontSize: '0.83rem', transition: 'all 0.15s' }}
+onMouseEnter={e => { if (!active) e.currentTarget.style.background = '#f8fafc'; }}
+onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent'; }}>
+<option value="Hard" style={optionStyle}>Hard</option>
+if (!token) return <Navigate to="/login" replace />;
+return children;
+<div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+295: export default function App() {
+? <div style={{ textAlign: 'center', padding: '3rem', color: '#64748b', background: '#fff', borderRadius: 14, border: '1px solid #e2e8f0' }}>No questions found.</div>
+297:                 {/* General Questions */}
+if (!canvas) return;
+<div style={{ maxWidth: 1200, margin: '0 auto', padding: '1.5rem 1.5rem' }}>
+onChange={e => setNotes(e.target.value)}
+<div style={{ textAlign: 'center', padding: '3rem', color: '#6366f1' }}>
+<div style={{ fontSize: '2rem', marginBottom: 8 }}>⏳</div>Loading questions…
+{activeSection === 'formulas' && <FormulaSheet topic={selectedTopic} />}
+304:                 {/* General Questions */}
+localStorage.setItem(`scratchpad_sketch_${questionId}`, canvas.toDataURL());
+<div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+ctx.fillRect(0, 0, canvas.width, canvas.height);
+? <div style={{ textAlign: 'center', padding: '3rem', color: '#64748b', background: '#fff', borderRadius: 14, border: '1px solid #e2e8f0' }}>No questions found.</div>
+<div style={{ fontSize: '2rem', marginBottom: 8 }}>⏳</div>Loading questions…
+const location = useLocation();
+fontFamily: 'SFMono-Medium,Consolas,monospace',
+if (activeTab === 'sketch' && canvasRef.current) {
+<div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+<div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 24 }}>
+? <div style={{ textAlign: 'center', padding: '3rem', color: '#64748b', background: '#fff', borderRadius: 14, border: '1px solid #e2e8f0' }}>No questions found.</div>
+const [searchQuery, setSearchQuery] = React.useState('');
+style={{ width: 38, height: 38, borderRadius: 8, border: page === p ? 'none' : '1px solid #e2e8f0', background: page === p ? '#6366f1' : '#fff', color: page === p ? '#fff' : '#475569', fontWeight: 700, cursor: 'pointer' }}>
+<Link to="/" style={{ color: '#6366f1', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
+319:       const saved = localStorage.getItem(`scratchpad_sketch_${questionId}`);
+const [mobileMoreOpen, setMobileMoreOpen] = React.useState(false);
+321: // ─── Report Form ─────────────────────────────────────────────────────
+<span onClick={() => { setSelectedTopic(''); setSelectedCat(''); }} style={{ color: '#6366f1', cursor: 'pointer', fontWeight: 600 }}>Aptitude</span>
+<span style={{ color: '#cbd5e1' }}>/</span>
+<span onClick={() => setActiveSection('formulas')} style={{ color: '#6366f1', cursor: 'pointer', fontWeight: 600 }}>{selectedTopic}</span>
+325:       const saved = localStorage.getItem(`scratchpad_sketch_${questionId}`);
+<span style={{ fontWeight: 700, color: '#475569' }}>{SECTION_LABELS[activeSection]}</span>
+'/govt-jobs', '/exam-updates', '/upsc-jobs', '/ssc-jobs', '/railway-jobs', '/banking-jobs', '/defence-jobs', '/other-govt-jobs', '/teaching-jobs', '/psu-jobs',
+'/govt-jobs', '/exam-updates', '/upsc-jobs', '/ssc-jobs', '/railway-jobs', '/banking-jobs', '/defence-jobs', '/other-govt-jobs', '/teaching-jobs', '/psu-jobs',
+style={{ width: 38, height: 38, borderRadius: 8, border: page === p ? 'none' : '1px solid #e2e8f0', background: page === p ? '#6366f1' : '#fff', color: page === p ? '#fff' : '#475569', fontWeight: 700, cursor: 'pointer' }}>
+<div style={{ background: '#fff', borderRadius: 14, padding: '1.25rem', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0', marginBottom: 16 }}>
+<h2 style={{ margin: '0 0 6px 0', fontSize: '1.2rem', fontWeight: 800, color: '#1e293b' }}>
+<div style={{ marginTop: 12, border: '1px solid #cbd5e1', borderRadius: 10, overflow: 'hidden', background: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+<p style={{ margin: '0 0 10px 0', fontSize: '0.78rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+<button type="button" onClick={() => setActiveTab('sketch')} style={{ background: 'none', border: 'none', borderBottom: activeTab === 'sketch' ? '2.5px solid #10b981' : '2.5px solid transparent', padding: '10px 16px', fontSize: '0.8rem', fontWeight: 700, color: activeTab === 'sketch' ? '#10b981' : '#64748b', cursor: 'pointer', transition: 'all 0.15s' }}>
+Determine which statement(s) are sufficient to answer the question. ({dsQuestions.length} questions)
+style={{ width: 38, height: 38, borderRadius: 8, border: page === p ? 'none' : '1px solid #e2e8f0', background: page === p ? '#6366f1' : '#fff', color: page === p ? '#fff' : '#475569', fontWeight: 700, cursor: 'pointer' }}>
+<button type="button" onClick={() => setActiveTab('discuss')} style={{ background: 'none', border: 'none', borderBottom: activeTab === 'discuss' ? '2.5px solid #10b981' : '2.5px solid transparent', padding: '10px 16px', fontSize: '0.8rem', fontWeight: 700, color: activeTab === 'discuss' ? '#10b981' : '#64748b', cursor: 'pointer', transition: 'all 0.15s' }}>
+<div style={{ marginTop: 12, border: '1px solid #cbd5e1', borderRadius: 10, overflow: 'hidden', background: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+<div style={{ display: 'flex', background: '#f8fafc', borderBottom: '1px solid #cbd5e1', padding: '0 8px' }}>
+<button type="button" onClick={() => setActiveTab('discuss')} style={{ background: 'none', border: 'none', borderBottom: activeTab === 'discuss' ? '2.5px solid #10b981' : '2.5px solid transparent', padding: '10px 16px', fontSize: '0.8rem', fontWeight: 700, color: activeTab === 'discuss' ? '#10b981' : '#64748b', cursor: 'pointer', transition: 'all 0.15s' }}>
+style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '11px 14px', background: active ? '#f0fdf4' : 'transparent', border: 'none', borderBottom: '1px solid #f1f5f9', textAlign: 'left', cursor: 'pointer', color: active ? '#10b981' : '#475569', fontWeight: active ? 700 : 500, fontSize: '0.83rem', transition: 'all 0.15s' }}
+<div style={{ background: '#fff', borderRadius: 14, padding: '1.25rem', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0', marginBottom: 16 }}>
+<button type="button" onClick={() => setActiveTab('sketch')} style={{ background: 'none', border: 'none', borderBottom: activeTab === 'sketch' ? '2.5px solid #10b981' : '2.5px solid transparent', padding: '10px 16px', fontSize: '0.8rem', fontWeight: 700, color: activeTab === 'sketch' ? '#10b981' : '#64748b', cursor: 'pointer', transition: 'all 0.15s' }}>
+<div style={{ fontWeight: 700, color: '#b91c1c', fontSize: '0.82rem', marginBottom: 6 }}>⚠️ Report an Issue with this Question</div>
+345:   // ── Enterprise Analytics: auto page + session tracking ──
+<select value={type} onChange={e => setType(e.target.value)} style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid #fca5a5', fontSize: '0.8rem', background: '#fff', outline: 'none', color: '#1e293b' }}>
+Determine which statement(s) are sufficient to answer the question. ({dsQuestions.length} questions)
+<option value="Formatting / Typo Issue">Formatting / Typo Issue</option>
+<div style={{ background: '#fff', borderRadius: 14, padding: '1.25rem', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0', marginBottom: 16 }}>
+<h2 style={{ margin: '0 0 6px 0', fontSize: '1.2rem', fontWeight: 800, color: '#1e293b' }}>
+🧩 Data Sufficiency – {SECTION_LABELS[activeSection]}
+<div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 8, flexWrap: 'wrap' }}>
+<p style={{ color: '#64748b', fontSize: '0.85rem', margin: 0 }}>
+Determine which statement(s) are sufficient to answer the question. ({dsQuestions.length} questions)
+placeholder="Describe the issue briefly..."
+border: color === c && mode === 'draw' ? '2.5px solid #1e293b' : '1.5px solid #e2e8f0',
+style={{ width: '100%', height: 60, border: '1px solid #fca5a5', borderRadius: 6, padding: 8, fontSize: '0.8rem', outline: 'none', resize: 'vertical', color: '#1e293b' }}
+onClick={() => { setColor(c); if(mode === 'erase') setMode('draw'); }}
+<button type="submit" style={{ alignSelf: 'flex-end', background: '#ef4444', color: '#fff', border: 'none', borderRadius: 6, padding: '5px 12px', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}>
+transition: 'transform 0.1s'
+<div style={{ textAlign: 'center', padding: '3rem', color: '#6366f1' }}>
+<div style={{ fontSize: '2rem', marginBottom: 8 }}>⏳</div>Loading questions…
+onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+border: color === c && mode !== 'erase' ? '2.5px solid #1e293b' : '1.5px solid #e2e8f0',
+return () => { document.body.style.overflow = ''; };
+366: // ─── Single MCQ Card (reused for general & DS) ──────────────────────
+boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+? <div style={{ textAlign: 'center', padding: '3rem', color: '#64748b', background: '#fff', borderRadius: 14, border: '1px solid #e2e8f0' }}>No questions found.</div>
+<div style={{ background: 'linear-gradient(135deg,#eff6ff,#f5f3ff)', borderRadius: 16, padding: '2rem', textAlign: 'center', border: '1px dashed #c7d2fe', marginBottom: 24 }}>
+// Track Page View for core/static pages. JobDetails page view is tracked in its own component once loaded.
+<p style={{ margin: 0, color: '#4b5563', fontSize: '0.88rem', lineHeight: 1.6 }}>
+Select any <strong>topic</strong> from the filter above to access <strong>Formulas</strong>, <strong>General Questions</strong>, and <strong>Data Sufficiency</strong> exercises.
+const [btnHover, setBtnHover] = useState({ answer: false, ai: false, workspace: false, report: false });
+374:   const revealed = choice !== null || showAnswer;
+{/* General pool when no topic selected */}
+376:   const buttonStyle = {
+<div style={{ textAlign: 'center', padding: '3rem', color: '#6366f1' }}>⏳ Loading…</div>
+378:     // Prerender.io lifecycle signaling:
+<div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+if (!isJobDetail && location.pathname !== '/') {
+<div style={{ background: 'linear-gradient(135deg,#eff6ff,#f5f3ff)', borderRadius: 16, padding: '2rem', textAlign: 'center', border: '1px dashed #c7d2fe', marginBottom: 24 }}>
+<h3 style={{ margin: '0 0 8px 0', color: '#6366f1', fontWeight: 800 }}>💡 NextJobPost Practice Hub</h3>
+<p style={{ margin: 0, color: '#4b5563', fontSize: '0.88rem', lineHeight: 1.6 }}>
+Select any <strong>topic</strong> from the filter above to access <strong>Formulas</strong>, <strong>General Questions</strong>, and <strong>Data Sufficiency</strong> exercises.
+}, [location.pathname, location.search, isJobDetail]);
+<div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 24 }}>
+{Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+<button key={p} onClick={() => loadQuestions(p)}
+style={{ width: 38, height: 38, borderRadius: 8, border: page === p ? 'none' : '1px solid #e2e8f0', background: page === p ? '#6366f1' : '#fff', color: page === p ? '#fff' : '#475569', fontWeight: 700, cursor: 'pointer' }}>
+{ label: 'Latest Govt Jobs',     to: '/govt-jobs' },
+<div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+{ label: 'Railway Jobs',       to: '/railway-jobs' },
+<div style={{ background: '#fff', borderRadius: 14, padding: '1.25rem', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0' }}>
+{ label: 'Defence Jobs',       to: '/defence-jobs' },
+<div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginBottom: 12 }}>
+onClick={() => setMode(mode === 'text' ? 'draw' : 'text')}
+<span style={{ background: isDs ? '#10b98112' : '#6366f112', color: isDs ? '#10b981' : '#6366f1', borderRadius: 8, padding: '3px 8px', fontWeight: 700, fontSize: '0.78rem', flexShrink: 0 }}>
+{Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+<button key={p} onClick={() => loadQuestions(p)}
+style={{ width: 38, height: 38, borderRadius: 8, border: page === p ? 'none' : '1px solid #e2e8f0', background: page === p ? '#6366f1' : '#fff', color: page === p ? '#fff' : '#475569', fontWeight: 700, cursor: 'pointer' }}>
+<p style={{ margin: '0 0 8px 0', fontWeight: 600, color: '#1e293b', fontSize: '0.95rem', lineHeight: 1.5 }}>
+<div style={{ background: '#fff', borderRadius: 14, padding: '1.25rem', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0', marginBottom: 16 }}>
+<h2 style={{ margin: '0 0 6px 0', fontSize: '1.2rem', fontWeight: 800, color: '#1e293b' }}>
+🧩 Data Sufficiency – {SECTION_LABELS[activeSection]}
+<div style={{ background: '#f8fafc', border: '1px dashed #cbd5e1', borderRadius: 8, padding: '10px 14px', marginBottom: 4 }}>
+<p style={{ color: '#64748b', fontSize: '0.85rem', margin: 0 }}>
+<div key={i} style={{ fontSize: '0.88rem', color: '#334155', marginBottom: i < statementBlock.length - 1 ? 6 : 0 }}>{s}</div>
+{ label: '🧮 Aptitude & Reasoning', to: '/preparation/aptitude' },
+<div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 24 }}>
+<div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+{ label: '🏢 Company Wise',          to: '/preparation/company' },
+style={{ width: 38, height: 38, borderRadius: 8, border: page === p ? 'none' : '1px solid #e2e8f0', background: page === p ? '#6366f1' : '#fff', color: page === p ? '#fff' : '#475569', fontWeight: 700, cursor: 'pointer' }}>
+{ label: '📝 Mock Tests',            to: '/preparation/mock-tests' },
+<span style={{ background: `${DIFF_COLORS[difficulty] || '#64748b'}15`, color: DIFF_COLORS[difficulty] || '#64748b', borderRadius: 20, padding: '2px 9px', fontSize: '0.7rem', fontWeight: 700, flexShrink: 0, height: 'fit-content' }}>
+questionText={q.question}
+placeholder="Type text, then click canvas..."
+const moreItems = Object.entries(MEGA_CATEGORIES).map(([key, config]) => ({
+const moreItems = Object.entries(MEGA_CATEGORIES).map(([key, config]) => ({
+cursor: mode === 'erase' ? 'cell' : 'crosshair',
+difficulty={q.difficulty}
+<div style={{ display: isDs ? 'flex' : 'grid', flexDirection: isDs ? 'column' : undefined, gridTemplateColumns: isDs ? undefined : 'repeat(auto-fill,minmax(200px,1fr))', gap: 8 }}>
+422:   // Admin page: full-screen, no header/footer
+let bg = '#f8fafc', border = '#e2e8f0', color = '#1e293b';
+question: `${q.question}\n${q.statements.join('\n')}`,
+if (opt === answer) { bg = '#dcfce7'; border = '#10b981'; color = '#166534'; }
+else if (opt === choice) { bg = '#fee2e2'; border = '#ef4444'; color = '#991b1b'; }
+The above content shows the entire, complete file contents of the requested file.
+<Suspense fallback={<LoadingFallback />}>
+<button key={oi} onClick={() => !revealed && setChoice(opt)} disabled={revealed}
+style={{ background: bg, border: `1.5px solid ${border}`, borderRadius: 10, padding: '9px 12px', textAlign: 'left', cursor: revealed ? 'default' : 'pointer', fontSize: '0.85rem', fontWeight: 500, color, transition: 'all 0.15s' }}
+onMouseEnter={e => { if (!revealed) e.currentTarget.style.borderColor = '#6366f1'; }}
+onMouseLeave={e => { if (!revealed) e.currentTarget.style.borderColor = border; }}>
+<span style={{ fontWeight: 700, marginRight: 6, color: revealed && opt === answer ? '#166534' : revealed && opt === choice ? '#991b1b' : '#6366f1' }}>
+{isDs ? opt.charAt(0) : String.fromCharCode(65 + oi)}.
+const [submitted, setSubmitted] = useState(false);
+{isDs ? opt.substring(2).trim() : opt}
+borderRadius: 6,
+padding: '4px 10px',
+@keyframes dropdownFade {
+from { opacity: 0; transform: translateY(-6px); }
+from { opacity: 0; transform: translateY(-6px); }
+to   { opacity: 1; transform: translateY(0); }
+transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+444:       <ScrollToTop />
+<div style={{ marginTop: 12, padding: '12px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, color: '#166534', fontSize: '0.82rem', fontWeight: 600, textAlign: 'center' }}>
+🎉 Thank you! Your report has been submitted.
+<header className="site-header">
+box-shadow: 0 12px 24px rgba(99, 102, 241, 0.1) !important;
+{/* ── Row 1: Logo, Nav Links, and Auth ── */}
+<div className="nav-top-inner" style={{ gap: '1.5rem' }}>
+background: showAnswer ? '#e6fcf5' : (btnHover.answer ? '#f0fdf4' : '#ffffff'),
+<img src="/logo.png" alt="NextJobPost Logo" className="logo-img-nav" width="34" height="34" />
+<img src="/logo.png" alt="NextJobPost Logo" className="logo-img-nav" width="34" height="34" />
+<span className="nav-brand-next">Next</span>
+<span className="nav-brand-next">Next</span>
+<span className="nav-brand-post">Post</span>
+<span className="nav-brand-post">Post</span>
+border: '1px solid #e2e8f0', 
+459:               <ul className="nav-links" style={{ flex: 1, display: isMobile ? 'none' : 'flex', justifyContent: 'flex-end', flexWrap: 'nowrap', gap: '4px', overflow: 'visible' }}>
+460:               <ul className="nav-links" style={{ flex: 1, display: isMobile ? 'none' : 'flex', justifyContent: 'flex-end', flexWrap: 'nowrap', gap: '4px', overflow: 'visible' }}>
+<NavDropdown label="Govt Jobs" items={govtJobItems} to="/govt-jobs" />
+462:                 <NavDropdown label="Exam Updates" items={examUpdatesItems} to="/results" />
+463:                 <NavDropdown label="Exam Updates" items={examUpdatesItems} to="/results" />
+464:                 <NavDropdown label="Preparation" items={prepItems} to="/preparation" />
+465:                 <NavDropdown label="Preparation" items={prepItems} to="/preparation" />
+Master key concepts for <strong>{activeCategoryData.name}</strong>. Choose any topic below to access detailed formulas, solved questions, and Data Sufficiency tests.
+boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+<NavLink className="nav-link" to="/resume-builder">Resume Builder</NavLink>
+469:                 <NavDropdown label="More" items={moreItems} to="#" mega={true} />
+470:                 <NavDropdown label="More" items={moreItems} to="#" mega={true} />
+471:                 <li style={{ listStyle: 'none', display: 'flex', alignItems: 'center', position: 'relative', marginLeft: '6px' }}>
+472:                 <li style={{ listStyle: 'none', display: 'flex', alignItems: 'center', position: 'relative', marginLeft: '6px' }}>
+473: // ─── Report Form ─────────────────────────────────────────────────────
+{showSearch && (
+<div key={sc._id} style={{ marginBottom: 28 }}>
+<h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#4f46e5', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+onMouseEnter={() => setBtnHover(prev => ({ ...prev, workspace: true }))}
+onMouseLeave={() => setBtnHover(prev => ({ ...prev, workspace: false }))}
+navigate(`/?q=${encodeURIComponent(searchQuery.trim())}`);
+setShowSearch(false);
+background: showWorkspace ? '#e6fcf5' : (btnHover.workspace ? '#f0fdf4' : '#ffffff'),
+gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', 
+if (onSubmit) onSubmit({ type, comment });
+title="Workspace / Scratchpad"
+{activeTopics.map(topic => {
+const urlCat = searchParams.get('category') || 'Aptitude';
+animation: 'dropdownFade 0.2s ease',
+<div style={{ marginTop: 12, padding: '12px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, color: '#166534', fontSize: '0.82rem', fontWeight: 600, textAlign: 'center' }}>
+🎉 Thank you! Your report has been submitted.
+to={`/preparation/aptitude?category=${encodeURIComponent(urlCat)}&topic=${encodeURIComponent(topic.name)}`}
+onClick={() => setShowReport(!showReport)}
+onMouseEnter={() => setBtnHover(prev => ({ ...prev, report: true }))}
+onMouseLeave={() => setBtnHover(prev => ({ ...prev, report: false }))}
+onChange={(e) => setSearchQuery(e.target.value)}
+<form onSubmit={handleSubmit} style={{ marginTop: 12, padding: 12, border: '1px solid #fecaca', borderRadius: 8, background: '#fffafb' }}>
+<div style={{ fontWeight: 700, color: '#b91c1c', fontSize: '0.82rem', marginBottom: 6 }}>⚠️ Report an Issue with this Question</div>
+background: showReport ? '#fef2f2' : (btnHover.report ? '#fdf2f2' : '#ffffff'),
+<select value={type} onChange={e => setType(e.target.value)} style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid #fca5a5', fontSize: '0.8rem', background: '#fff', outline: 'none', color: '#1e293b' }}>
+<option value="Wrong Answer">Wrong Answer</option>
+<option value="Formatting / Typo Issue">Formatting / Typo Issue</option>
+<option value="Missing Explanation">Missing Explanation</option>
+<div style={{ background: '#fff', borderRadius: 14, padding: '1.25rem', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0' }}>
+transition: 'all 0.2s',
+<div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginBottom: 12 }}>
+<div style={{ display: 'flex', gap: 8, flex: 1 }}>
+<span style={{ background: isDs ? '#10b98112' : '#6366f112', color: isDs ? '#10b981' : '#6366f1', borderRadius: 8, padding: '3px 8px', fontWeight: 700, fontSize: '0.78rem', flexShrink: 0 }}>
+placeholder="Describe the issue briefly..."
+<div style={{ marginTop: 12, padding: '10px 14px', background: '#f0fdf4', border: '1.5px solid #10b981', borderRadius: 10, color: '#166534', fontWeight: 700, fontSize: '0.88rem' }}>
+style={{ width: '100%', height: 60, border: '1px solid #fca5a5', borderRadius: 6, padding: 8, fontSize: '0.8rem', outline: 'none', resize: 'vertical', color: '#1e293b' }}
+<p style={{ margin: '0 0 8px 0', fontWeight: 600, color: '#1e293b', fontSize: '0.95rem', lineHeight: 1.5 }}>
+<button type="submit" style={{ alignSelf: 'flex-end', background: '#ef4444', color: '#fff', border: 'none', borderRadius: 6, padding: '5px 12px', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}>
+512:       {/* Expanded Tools */}
+{statementBlock && (
+<div style={{ background: '#f8fafc', border: '1px dashed #cbd5e1', borderRadius: 8, padding: '10px 14px', marginBottom: 4 }}>
+onClick={() => setShowSearch(prev => !prev)}
+<div key={i} style={{ fontSize: '0.88rem', color: '#334155', marginBottom: i < statementBlock.length - 1 ? 6 : 0 }}>{s}</div>
+background: 'none',
+518: // ─── Single MCQ Card (reused for general & DS) ──────────────────────
+519: const getMappedCategory = (cat) => {
+function MCQCard({ questionId, category, qNum, questionText, statementBlock, options, answer, explanation, difficulty, topic, isDs, onAiQ }) {
+<div style={{ fontWeight: 700, color: '#1e293b', fontSize: '0.92rem' }}>
+const [showAnswer, setShowAnswer] = useState(false);
+<span style={{ background: `${DIFF_COLORS[difficulty] || '#64748b'}15`, color: DIFF_COLORS[difficulty] || '#64748b', borderRadius: 20, padding: '2px 9px', fontSize: '0.7rem', fontWeight: 700, flexShrink: 0, height: 'fit-content' }}>
+const [showReport, setShowReport] = useState(false);
+const [btnHover, setBtnHover] = useState({ answer: false, ai: false, workspace: false, report: false });
+backgroundColor: showSearch ? 'rgba(109, 40, 217, 0.08)' : 'transparent',
+backgroundColor: showSearch ? 'rgba(109, 40, 217, 0.08)' : 'transparent',
+528:   const buttonStyle = {
+onMouseEnter={e => {
+<div style={{ display: isDs ? 'flex' : 'grid', flexDirection: isDs ? 'column' : undefined, gridTemplateColumns: isDs ? undefined : 'repeat(auto-fill,minmax(200px,1fr))', gap: 8 }}>
+e.currentTarget.style.color = '#1A3A6B';
+e.currentTarget.style.background = 'rgba(26,58,107,0.08)';
+e.currentTarget.style.background = 'rgba(26,58,107,0.08)';
+if (opt === answer) { bg = '#dcfce7'; border = '#10b981'; color = '#166534'; }
+else if (opt === choice) { bg = '#fee2e2'; border = '#ef4444'; color = '#991b1b'; }
+<span>Start Practice</span>
+e.currentTarget.style.color = '#475569';
+e.currentTarget.style.background = 'none';
+e.currentTarget.style.background = 'none';
+padding: 0,
+boxShadow: '0 1px 3px rgba(16, 185, 129, 0.08)'
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+<line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+<div style={{ background: '#fff', borderRadius: 14, padding: '1.25rem', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0' }}>
+{/* Header */}
+<div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginBottom: 12 }}>
+<div style={{ display: 'flex', gap: 8, flex: 1 }}>
+<span style={{ background: isDs ? '#10b98112' : '#6366f112', color: isDs ? '#10b981' : '#6366f1', borderRadius: 8, padding: '3px 8px', fontWeight: 700, fontSize: '0.78rem', flexShrink: 0 }}>
+<h3 style={{ margin: '0 0 8px 0', color: '#6366f1', fontWeight: 800 }}>💡 NextJobPost Practice Hub</h3>
+<p style={{ margin: 0, color: '#4b5563', fontSize: '0.88rem', lineHeight: 1.6 }}>
+Select any <strong>topic</strong> from the filter above to access <strong>Formulas</strong>, <strong>General Questions</strong>, and <strong>Data Sufficiency</strong> exercises.
+<p style={{ margin: '0 0 8px 0', fontWeight: 600, color: '#1e293b', fontSize: '0.95rem', lineHeight: 1.5 }}>
+onClick={() => setMobileMenuOpen(prev => !prev)}
+style={{ display: isMobile ? 'flex' : 'none', alignItems: 'center', justifyContent: 'center' }}
+style={{ display: isMobile ? 'flex' : 'none', alignItems: 'center', justifyContent: 'center' }}
+<div style={{ background: '#f8fafc', border: '1px dashed #cbd5e1', borderRadius: 8, padding: '10px 14px', marginBottom: 4 }}>
+<span className={`hamburger-icon ${mobileMenuOpen ? 'open' : ''}`}>
+<div key={i} style={{ fontSize: '0.88rem', color: '#334155', marginBottom: i < statementBlock.length - 1 ? 6 : 0 }}>{s}</div>
+borderLeft: '4px solid #4f46e5', 
+paddingLeft: '12px', 
+marginBottom: 20 
+563:               <NavActions />
+<h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#1e293b' }}>
+🎯 General Practice Pool
+<span style={{ background: `${DIFF_COLORS[difficulty] || '#64748b'}15`, color: DIFF_COLORS[difficulty] || '#64748b', borderRadius: 20, padding: '2px 9px', fontSize: '0.7rem', fontWeight: 700, flexShrink: 0, height: 'fit-content' }}>
+<p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '0.82rem' }}>
+A pool of questions from all topics in <strong>{selectedCat}</strong>.
+<div className={`mobile-menu-overlay ${mobileMenuOpen ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)} />
+<div className={`mobile-menu-overlay ${mobileMenuOpen ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)} />
+<nav className={`mobile-menu-drawer ${mobileMenuOpen ? 'active' : ''}`}>
+<Link to="/" className="nav-logo-link" onClick={() => setMobileMenuOpen(false)}>
+<div style={{ display: isDs ? 'flex' : 'grid', flexDirection: isDs ? 'column' : undefined, gridTemplateColumns: isDs ? undefined : 'repeat(auto-fill,minmax(200px,1fr))', gap: 8 }}>
+<img src="/logo.png" alt="NextJobPost Logo" style={{ width: 28, height: 28, borderRadius: 5 }} width="28" height="28" />
+<span className="nav-brand" style={{ fontSize: '1.1rem' }}>
+<span className="nav-brand-next">Next</span>
+if (opt === answer) { bg = '#dcfce7'; border = '#10b981'; color = '#166534'; }
+else if (opt === choice) { bg = '#fee2e2'; border = '#ef4444'; color = '#991b1b'; }
+? <div style={{ textAlign: 'center', padding: '3rem', color: '#64748b', background: '#fff', borderRadius: 14, border: '1px solid #e2e8f0' }}>No questions found.</div>
+<button className="mobile-menu-close" onClick={() => setMobileMenuOpen(false)} aria-label="Close menu">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+style={{ background: bg, border: `1.5px solid ${border}`, borderRadius: 10, padding: '9px 12px', textAlign: 'left', cursor: revealed ? 'default' : 'pointer', fontSize: '0.85rem', fontWeight: 500, color, transition: 'all 0.15s' }}
+onMouseEnter={e => { if (!revealed) e.currentTarget.style.borderColor = '#6366f1'; }}
+onMouseLeave={e => { if (!revealed) e.currentTarget.style.borderColor = border; }}>
+<span style={{ fontWeight: 700, marginRight: 6, color: revealed && opt === answer ? '#166534' : revealed && opt === choice ? '#991b1b' : '#6366f1' }}>
+{isDs ? opt.charAt(0) : String.fromCharCode(65 + oi)}.
+587:             <div className="mobile-menu-body">
+588:             <div className="mobile-menu-body">
+{/* Govt Jobs Accordion */}
+<div className="mobile-menu-group">
+<button className="mobile-menu-accordion" onClick={() => setMobileGovtOpen(o => !o)}>
+<button className="mobile-menu-accordion" onClick={() => setMobileGovtOpen(o => !o)}>
+<svg width="14" height="14" viewBox="0 0 10 10" fill="currentColor" style={{ transform: mobileGovtOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.25s' }}>
+<svg width="14" height="14" viewBox="0 0 10 10" fill="currentColor" style={{ transform: mobileGovtOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.25s' }}>
+<div style={{ display: 'flex', gap: 10, marginTop: 16, borderTop: '1px solid #f1f5f9', paddingTop: 14 }}>
+{totalPages > 1 && (
+background: showWorkspace ? '#e6fcf5' : (btnHover.workspace ? '#f0fdf4' : '#ffffff'),
+<div className={`mobile-menu-sub ${mobileGovtOpen ? 'open' : ''}`}>
+<NavLink key={i} to={item.to} className={({ isActive }) => `mobile-menu-sublink ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+style={{ width: 38, height: 38, borderRadius: 8, border: page === p ? 'none' : '1px solid #e2e8f0', background: page === p ? '#6366f1' : '#fff', color: page === p ? '#fff' : '#475569', fontWeight: 700, cursor: 'pointer' }}>
+601:   const dsQuestions = (activeSection === 'ds1' || activeSection === 'ds2' || activeSection === 'ds3')
+<WorkspaceIcon active={showWorkspace} />
+background: showAnswer ? '#e6fcf5' : (btnHover.answer ? '#f0fdf4' : '#ffffff'),
+boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+605:   const activeCategoryData = structure.find(cat => cat.name === selectedCat && cat.status === 'active');
+606:               {/* Exam Updates Accordion */}
+onClick={() => setShowReport(!showReport)}
+<button className="mobile-menu-accordion" onClick={() => setMobileExamOpen(o => !o)}>
+<button className="mobile-menu-accordion" onClick={() => setMobileExamOpen(o => !o)}>
+<svg width="14" height="14" viewBox="0 0 10 10" fill="currentColor" style={{ transform: mobileExamOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.25s' }}>
+<svg width="14" height="14" viewBox="0 0 10 10" fill="currentColor" style={{ transform: mobileExamOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.25s' }}>
+<path d="M1 3l4 4 4-4" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+background: showReport ? '#fef2f2' : (btnHover.report ? '#fdf2f2' : '#ffffff'),
+<div className={`mobile-menu-sub ${mobileExamOpen ? 'open' : ''}`}>
+<div className={`mobile-menu-sub ${mobileExamOpen ? 'open' : ''}`}>
+<NavLink key={i} to={item.to} className={({ isActive }) => `mobile-menu-sublink ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+<NavLink key={i} to={item.to} className={({ isActive }) => `mobile-menu-sublink ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+@media (max-width: 991.98px) {
+.sticky-prep-header {
+background: btnHover.ai ? '#f0fdf4' : '#ffffff',
+622:               {/* More Categories Accordion */}
+623:               {/* More Categories Accordion */}
+<div style={{ marginTop: 12, padding: '10px 14px', background: '#f0fdf4', border: '1.5px solid #10b981', borderRadius: 10, color: '#166534', fontWeight: 700, fontSize: '0.88rem' }}>
+Answer: Option {isDs ? answer.charAt(0) : String.fromCharCode(65 + options.indexOf(answer))}
+<button className="mobile-menu-accordion" onClick={() => setMobileMoreOpen(o => !o)}>
+<svg width="14" height="14" viewBox="0 0 10 10" fill="currentColor" style={{ transform: mobileMoreOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.25s' }}>
+<svg width="14" height="14" viewBox="0 0 10 10" fill="currentColor" style={{ transform: mobileMoreOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.25s' }}>
+<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
+{/* Left side: Icon + Title & Description */}
+<div className={`mobile-menu-sub ${mobileMoreOpen ? 'open' : ''}`}>
+<span style={{ fontSize: '1.8rem', lineHeight: 1 }}>{selectedCat ? (CAT_ICONS[selectedCat] || '🎓') : '🎓'}</span>
+<NavLink key={i} to={item.to} className={({ isActive }) => `mobile-menu-sublink ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+<NavLink key={i} to={item.to} className={({ isActive }) => `mobile-menu-sublink ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+{selectedCat ? selectedCat : 'NextJobPost Practice Hub'}
+onMouseEnter={() => setBtnHover(prev => ({ ...prev, workspace: true }))}
+<p style={{ margin: '2px 0 0', color: 'rgba(255,255,255,0.85)', fontSize: '0.78rem', lineHeight: 1.2 }}>
+if (cat === 'Aptitude') return 'Quantitative Aptitude';
+? `Practice questions, concepts and formulas for ${selectedCat}` 
+background: showWorkspace ? '#e6fcf5' : (btnHover.workspace ? '#f0fdf4' : '#ffffff'),
+641:               <NavLink to="/student-career-center" className={({ isActive }) => `mobile-menu-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+642:               <NavLink to="/student-career-center" className={({ isActive }) => `mobile-menu-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+title="Workspace / Scratchpad"
+644:             {/* Right side: Dropdown Filters */}
+<NavLink to="/preparation" className={({ isActive }) => `mobile-menu-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+<NavLink to="/preparation" className={({ isActive }) => `mobile-menu-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+<select value={selectedCat} onChange={e => { setSelectedCat(e.target.value); setSelectedTopic(''); }} style={filterStyle}>
+648:               <NavLink to="/about" className={({ isActive }) => `mobile-menu-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+<NavLink to="/resume-builder" className={({ isActive }) => `mobile-menu-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+onClick={() => setShowReport(!showReport)}
+<select value={selectedTopic} onChange={e => setSelectedTopic(e.target.value)} style={filterStyle}>
+<NavLink to="/contact" className={({ isActive }) => `mobile-menu-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+{topics.map(t => <option key={t} value={t} style={optionStyle}>{t}</option>)}
+...buttonStyle,
+<NavLink to="/contact" className={({ isActive }) => `mobile-menu-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+background: showReport ? '#fef2f2' : (btnHover.report ? '#fdf2f2' : '#ffffff'),
+<option value="Easy" style={optionStyle}>Easy</option>
+<option value="Medium" style={optionStyle}>Medium</option>
+<option value="Hard" style={optionStyle}>Hard</option>
+660:           {isHome && <HeroSearch />}
+661:       <main className={isMobile && isJobDetail ? "container p-0" : isPrepPage ? "container p-0 is-prep-page" : "container py-4"}>
+</header>
+<Suspense fallback={<LoadingFallback />}>
+664:       <main className={isMobile && isJobDetail ? "container p-0" : "container py-4"}>
+665:       {/* ── Body ── */}
+<Suspense fallback={<LoadingFallback />}>
+<div style={{ marginTop: 12, padding: '10px 14px', background: '#f0fdf4', border: '1.5px solid #10b981', borderRadius: 10, color: '#166534', fontWeight: 700, fontSize: '0.88rem' }}>
+Answer: Option {isDs ? answer.charAt(0) : String.fromCharCode(65 + options.indexOf(answer))}
+<Route path="/preparation" element={<PreparationHub />} />
+<Route path="/preparation/aptitude" element={<AptitudePrep />} />
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+<Route path="/preparation" element={<PreparationHub />} />
+<Route path="/preparation/company" element={<CompanyPrepPage />} />
+<Route path="/preparation/technical" element={<TechnicalPrep />} />
+<Route path="/preparation/mock-tests" element={<MockTests />} />
+<Route path="/preparation/company" element={<CompanyPrepPage />} />
+<Route path="/student-career-center" element={<StudentCareerCenter />} />
+<Route path="/preparation/mock-tests" element={<MockTests />} />
+<Route path="/resume-builder" element={<ResumeBuilder />} />
+<Route path="/student-career-center" element={<StudentCareerCenter />} />
+<Route path="/salaries" element={<SalarySearch />} />
+<Route path="/about" element={<About />} />
+<Route path="/contact" element={<Contact />} />
+<Route path="/disclaimer" element={<Disclaimer />} />
+<Route path="/privacy" element={<PrivacyPolicy />} />
+<Link to="/" style={{ color: '#6366f1', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
+<Route path="/disclaimer" element={<Disclaimer />} />
+<Route path="/auth/callback" element={<AuthCallback />} />
+<Route path="/admin/login" element={<AdminLogin />} />
+<span onClick={() => { setSelectedTopic(''); setSelectedCat(''); }} style={{ color: '#6366f1', cursor: 'pointer', fontWeight: 600 }}>Aptitude</span>
+<Route path="/auth/callback" element={<AuthCallback />} />
+<span onClick={() => setActiveSection('formulas')} style={{ color: '#6366f1', cursor: 'pointer', fontWeight: 600 }}>{selectedTopic}</span>
+693:             {/* Admin only — handled above in isAdminPage branch, kept here as fallback */}
+<span style={{ fontWeight: 700, color: '#475569' }}>{SECTION_LABELS[activeSection]}</span>
+<Route path="/dashboard" element={<UserRoute><UserDashboard /></UserRoute>} />
+696:             <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+697:             {/* Job detail or category page catch-all */}
+<Route path="/dashboard" element={<UserRoute><UserDashboard /></UserRoute>} />
+<Route path="/onboarding" element={<UserRoute><Onboarding /></UserRoute>} />
+<div style={{ background: '#fff', borderRadius: 12, padding: '1.25rem', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0' }}>
+<p style={{ margin: '0 0 10px 0', fontSize: '0.78rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+<Route path="/:slug" element={<RootSlugHandler />} />
+703: // ─── Main Component ──────────────────────────────────────────────────
+<div style={{ border: '1px solid #e2e8f0', borderRadius: 8, overflow: 'hidden' }}>
+{Object.entries(SECTION_LABELS).map(([id, label]) => {
+const [searchParams] = useSearchParams();
+const [topics, setTopics] = useState([]);
+The above content shows the entire, complete file contents of the requested file.
+style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '11px 14px', background: active ? '#f0fdf4' : 'transparent', border: 'none', borderBottom: '1px solid #f1f5f9', textAlign: 'left', cursor: 'pointer', color: active ? '#10b981' : '#475569', fontWeight: active ? 700 : 500, fontSize: '0.83rem', transition: 'all 0.15s' }}
+const [selectedTopic, setSelectedTopic] = useState(searchParams.get('topic') || '');
+onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent'; }}>
+const [questions, setQuestions] = useState([]);
+const [loading, setLoading] = useState(false);
+const [page, setPage] = useState(1);
+const [totalPages, setTotalPages] = useState(1);
+const [aiQ, setAiQ] = useState(null);
+const [activeSection, setActiveSection] = useState('formulas');
+const [structure, setStructure] = useState([]);
+719:   useEffect(() => {
+720:               {/* ── Right Content ── */}
+setSelectedCat(getMappedCategory(searchParams.get('category')));
+<div style={{ flex: '1 1 500px', minWidth: 280 }}>
+}, [searchParams]);
+{activeSection === 'formulas' && <FormulaSheet topic={selectedTopic} />}
+725:                 {/* General Questions */}
+useEffect(() => {
+727: // ─── Main Component ──────────────────────────────────────────────────
+}, [selectedTopic]);
+<div style={{ textAlign: 'center', padding: '3rem', color: '#6366f1' }}>
+<div style={{ fontSize: '2rem', marginBottom: 8 }}>⏳</div>Loading questions…
+document.title = 'Aptitude & Reasoning | NextJobPost';
+const [categories, setCategories] = useState([]);
+const [selectedCat, setSelectedCat] = useState(getMappedCategory(searchParams.get('category')));
+const [selectedCat, setSelectedCat] = useState(getMappedCategory(searchParams.get('category')));
+const [selectedTopic, setSelectedTopic] = useState(searchParams.get('topic') || '');
+? <div style={{ textAlign: 'center', padding: '3rem', color: '#64748b', background: '#fff', borderRadius: 14, border: '1px solid #e2e8f0' }}>No questions found.</div>
+const [loading, setLoading] = useState(false);
+.then(d => { if (d.success) setStructure(d.categories || []); });
+const [totalPages, setTotalPages] = useState(1);
+740:   const loadQuestions = (p = 1) => {
+const [activeSection, setActiveSection] = useState('formulas');
+const [structure, setStructure] = useState([]);
+const params = new URLSearchParams({ page: p, limit: 8 });
+if (selectedCat) params.set('category', selectedCat);
+setSelectedCat(getMappedCategory(searchParams.get('category')));
+if (difficulty) params.set('difficulty', difficulty);
+fetch(`${API}/api/preparation/aptitude?${params}`)
+748:   // Reset to Formulas tab when topic changes
+.then(d => { setQuestions(d.questions || []); setTotalPages(d.pages || 1); setPage(p); })
+const [page, setPage] = useState(1);
+const [totalPages, setTotalPages] = useState(1);
+const [aiQ, setAiQ] = useState(null);
+const [activeSection, setActiveSection] = useState('formulas');
+<div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 24 }}>
+{Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+<button key={p} onClick={() => loadQuestions(p)}
+style={{ width: 38, height: 38, borderRadius: 8, border: page === p ? 'none' : '1px solid #e2e8f0', background: page === p ? '#6366f1' : '#fff', color: page === p ? '#fff' : '#475569', fontWeight: 700, cursor: 'pointer' }}>
+.then(d => { setTopics(d.topics || []); setCategories(d.categories || []); });
+759:     fetch(`${API}/api/preparation/structure`)
+760:   // Reset to appropriate tab when topic changes
+.then(r => r.json())
+.then(d => { if (d.success) setStructure(d.categories || []); });
+setActiveSection(isAptitudeCat ? 'formulas' : 'general');
+764:   const loadQuestions = (p = 1) => {
+headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+body: JSON.stringify({ questionId: q._id, category: q.category, topic: q.topic }),
+const params = new URLSearchParams({ page: p, limit: 8 });
+{(activeSection === 'ds1' || activeSection === 'ds2' || activeSection === 'ds3') && (
+if (selectedTopic) params.set('topic', selectedTopic);
+<div style={{ background: '#fff', borderRadius: 14, padding: '1.25rem', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0', marginBottom: 16 }}>
+<h2 style={{ margin: '0 0 6px 0', fontSize: '1.2rem', fontWeight: 800, color: '#1e293b' }}>
+? getDSQuestionsForTopic(selectedTopic, activeSection)
+.then(d => { setQuestions(d.questions || []); setTotalPages(d.pages || 1); setPage(p); })
+774:   const activeCategoryData = structure.find(cat => cat.name === selectedCat && cat.status === 'active');
+Determine which statement(s) are sufficient to answer the question. ({dsQuestions.length} questions)
+776:   const loadQuestions = (p = 1) => {
+</div>
+<div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+<div style={{ minHeight: '100vh', background: '#f8faff', fontFamily: 'Inter,sans-serif' }}>
+if (selectedCat) params.set('category', selectedCat);
+}, [selectedCat, selectedTopic, difficulty, activeSection]);
+if (difficulty) params.set('difficulty', difficulty);
+fetch(`${API}/api/preparation/aptitude?${params}`)
+const markSolved = async (q) => {
+.then(d => { setQuestions(d.questions || []); setTotalPages(d.pages || 1); setPage(p); })
+.finally(() => setLoading(false));
+await fetch(`${API}/api/preparation/progress/solve`, {
+@media (max-width: 991.98px) {
+headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+body: JSON.stringify({ questionId: q._id, category: q.category, topic: q.topic }),
+onAiQ={() => setAiQ({
+question: `${q.question}\n${q.statements.join('\n')}`,
+}, [selectedCat, selectedTopic, difficulty, activeSection]);
+794:   const dsQuestions = (activeSection === 'ds1' || activeSection === 'ds2' || activeSection === 'ds3')
+explanation: q.explanation,
+<div className="sticky-prep-header" style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', padding: '0.65rem 1.5rem' }}>
+<div style={{ maxWidth: 1200, padding: '0 1.5rem', margin: '0 auto' }}>
+<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
+await fetch(`${API}/api/preparation/progress/solve`, {
+<div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+<span style={{ fontSize: '1.8rem', lineHeight: 1 }}>{selectedCat ? (CAT_ICONS[selectedCat] || '🎓') : '🎓'}</span>
+body: JSON.stringify({ questionId: q._id, category: q.category, topic: q.topic }),
+<h1 style={{ margin: 0, color: '#fff', fontWeight: 800, fontSize: '1.25rem', lineHeight: 1.2 }}>
+{selectedCat ? selectedCat : 'NextJobPost Practice Hub'}
+.sticky-prep-header {
+806:   const dsQuestions = (activeSection === 'ds1' || activeSection === 'ds2' || activeSection === 'ds3')
+{selectedCat 
+? `Practice questions, concepts and formulas for ${selectedCat}` 
+: 'Quantitative aptitude, logical reasoning & verbal ability'}
+810:   const activeCategoryData = structure.find(cat => cat.name === selectedCat && cat.status === 'active');
+transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+@media (max-width: 991.98px) {
+813:             {/* Right side: Dropdown Filters */}
+transform: translateY(-4px);
+<div style={{ minHeight: '100vh', background: '#f8faff', fontFamily: 'Inter,sans-serif' }}>
+<select value={selectedCat} onChange={e => { setSelectedCat(e.target.value); setSelectedTopic(''); }} style={filterStyle}>
+<option value="" style={optionStyle}>All Categories</option>
+{categories.map(c => <option key={c} value={c} style={optionStyle}>{c}</option>)}
+819:             {activeCategoryData ? (
+<div className="sticky-prep-header" style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', padding: '0.65rem 1.5rem' }}>
+<div style={{ maxWidth: 1200, padding: '0 1.5rem', margin: '0 auto' }}>
+<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
+{/* Left side: Icon + Title & Description */}
+<select value={difficulty} onChange={e => setDifficulty(e.target.value)} style={filterStyle}>
+<span style={{ fontSize: '1.8rem', lineHeight: 1 }}>{selectedCat ? (CAT_ICONS[selectedCat] || '🎓') : '🎓'}</span>
+<option value="Easy" style={optionStyle}>Easy</option>
+<h1 style={{ margin: 0, color: '#fff', fontWeight: 800, fontSize: '1.25rem', lineHeight: 1.2 }}>
+{selectedCat ? selectedCat : 'NextJobPost Practice Hub'}
+`}</style>
+<p style={{ margin: '2px 0 0', color: 'rgba(255,255,255,0.85)', fontSize: '0.78rem', lineHeight: 1.2 }}>
+<p style={{ margin: '0 0 10px 0', fontSize: '0.78rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+<div className="sticky-prep-header" style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', padding: '0.65rem 1.5rem' }}>
+<p style={{ margin: '6px 0 0 0', color: '#64748b', fontSize: '0.85rem', lineHeight: 1.5 }}>
+Master key concepts for <strong>{activeCategoryData.name}</strong>. Choose any topic below to access detailed formulas, solved questions, and Data Sufficiency tests.
+{Object.entries(SECTION_LABELS).map(([id, label]) => {
+<div style={{ maxWidth: isAptitudeCat ? 1200 : 860, padding: '0 1.5rem', margin: '0 auto' }}>
+<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
+<button key={id} onClick={() => setActiveSection(id)}
+style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '11px 14px', background: active ? '#f0fdf4' : 'transparent', border: 'none', borderBottom: '1px solid #f1f5f9', textAlign: 'left', cursor: 'pointer', color: active ? '#10b981' : '#475569', fontWeight: active ? 700 : 500, fontSize: '0.83rem', transition: 'all 0.15s' }}
+<select value={selectedCat} onChange={e => { setSelectedCat(e.target.value); setSelectedTopic(''); }} style={filterStyle}>
+onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent'; }}>
+<p style={{ margin: '2px 0 0', color: 'rgba(255,255,255,0.85)', fontSize: '0.78rem', lineHeight: 1.2 }}>
+{selectedCat ? selectedCat : 'NextJobPost Practice Hub'}
+<h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#4f46e5', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+<p style={{ margin: '2px 0 0', color: 'rgba(255,255,255,0.85)', fontSize: '0.78rem', lineHeight: 1.2 }}>
+{topics.map(t => <option key={t} value={t} style={optionStyle}>{t}</option>)}
+? `Practice questions, concepts and formulas for ${selectedCat}` 
+<select value={difficulty} onChange={e => setDifficulty(e.target.value)} style={filterStyle}>
+<option value="" style={optionStyle}>All Levels</option>
+gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', 
+<div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+<select value={selectedCat} onChange={handleCatChange} style={filterStyle}>
+<option value="" style={optionStyle}>All Categories</option>
+{categories.map(c => <option key={c} value={c} style={optionStyle}>{c}</option>)}
+<Link to="/" style={{ color: '#6366f1', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
+<option value="/preparation/technical" style={optionStyle}>💻 Programming MCQs</option>
+{categories.map(c => <option key={c} value={c} style={optionStyle}>{c}</option>)}
+to={`/preparation/aptitude?category=${encodeURIComponent(urlCat)}&topic=${encodeURIComponent(topic.name)}`}
+<span onClick={() => { setSelectedTopic(''); setSelectedCat(''); }} style={{ color: '#6366f1', cursor: 'pointer', fontWeight: 600 }}>Aptitude</span>
+<option value="/preparation/mock-tests" style={optionStyle}>📝 Mock Tests</option>
+<span onClick={() => setActiveSection('formulas')} style={{ color: '#6366f1', cursor: 'pointer', fontWeight: 600 }}>{selectedTopic}</span>
+<select value={selectedTopic} onChange={e => setSelectedTopic(e.target.value)} style={filterStyle}>
+<span style={{ fontWeight: 700, color: '#475569' }}>{SECTION_LABELS[activeSection]}</span>
+{topics.map(t => <option key={t} value={t} style={optionStyle}>{t}</option>)}
+865:             <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+? <div style={{ textAlign: 'center', padding: '3rem', color: '#64748b', background: '#fff', borderRadius: 14, border: '1px solid #e2e8f0' }}>No questions found.</div>
+{topics.map(t => <option key={t} value={t} style={optionStyle}>{t}</option>)}
+<option value="Easy" style={optionStyle}>Easy</option>
+<div style={{ background: '#fff', borderRadius: 12, padding: '1.25rem', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0' }}>
+<p style={{ margin: '0 0 10px 0', fontSize: '0.78rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+<option value="Easy" style={optionStyle}>Easy</option>
+<option value="Medium" style={optionStyle}>Medium</option>
+<div style={{ border: '1px solid #e2e8f0', borderRadius: 8, overflow: 'hidden' }}>
+{Object.entries(SECTION_LABELS).map(([id, label]) => {
+const active = activeSection === id;
+876:       {/* ── Body ── */}
+<button key={id} onClick={() => setActiveSection(id)}
+style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '11px 14px', background: active ? '#f0fdf4' : 'transparent', border: 'none', borderBottom: '1px solid #f1f5f9', textAlign: 'left', cursor: 'pointer', color: active ? '#10b981' : '#475569', fontWeight: active ? 700 : 500, fontSize: '0.83rem', transition: 'all 0.15s' }}
+<Link to="/" style={{ color: '#6366f1', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
+onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent'; }}>
+<div style={{ maxWidth: isAptitudeCat ? 1200 : 860, margin: '0 auto', padding: '1.5rem 1.5rem' }}>
+<option value="Medium" style={optionStyle}>Medium</option>
+<span onClick={() => { setSelectedTopic(''); setSelectedCat(''); }} style={{ color: '#6366f1', cursor: 'pointer', fontWeight: 600 }}>Aptitude</span>
+<div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 24 }}>
+<span onClick={() => setActiveSection('formulas')} style={{ color: '#6366f1', cursor: 'pointer', fontWeight: 600 }}>{selectedTopic}</span>
+<button key={p} onClick={() => loadQuestions(p)}
+style={{ width: 38, height: 38, borderRadius: 8, border: page === p ? 'none' : '1px solid #e2e8f0', background: page === p ? '#6366f1' : '#fff', color: page === p ? '#fff' : '#475569', fontWeight: 700, cursor: 'pointer' }}>
+alignItems: 'center', 
+889:             <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+color: '#64748b', 
+<div style={{ maxWidth: selectedTopic ? 1200 : 860, margin: '0 auto', padding: '1.5rem 1.5rem' }}>
+<div style={{ flex: '0 0 220px', minWidth: 200 }}>
+<div style={{ background: '#fff', borderRadius: 12, padding: '1.25rem', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0' }}>
+<p style={{ margin: '0 0 10px 0', fontSize: '0.78rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+borderRadius: '8px',
+{activeSection === 'general' && (
+<div style={{ border: '1px solid #e2e8f0', borderRadius: 8, overflow: 'hidden' }}>
+<div style={{ textAlign: 'center', padding: '3rem', color: '#6366f1' }}>
+<div style={{ fontSize: '2rem', marginBottom: 8 }}>⏳</div>Loading questions…
+<Link to="/" style={{ color: '#6366f1', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
+<button key={id} onClick={() => setActiveSection(id)}
+style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '11px 14px', background: active ? '#f0fdf4' : 'transparent', border: 'none', borderBottom: '1px solid #f1f5f9', textAlign: 'left', cursor: 'pointer', color: active ? '#10b981' : '#475569', fontWeight: active ? 700 : 500, fontSize: '0.83rem', transition: 'all 0.15s' }}
+<h2 style={{ margin: '0 0 6px 0', fontSize: '1.2rem', fontWeight: 800, color: '#1e293b' }}>
+<span onClick={() => { setSelectedTopic(''); }} style={{ color: '#6366f1', cursor: 'pointer', fontWeight: 600 }}>{selectedCat || 'Aptitude'}</span>
+? <div style={{ textAlign: 'center', padding: '3rem', color: '#64748b', background: '#fff', borderRadius: 14, border: '1px solid #e2e8f0' }}>No questions found.</div>
+<span onClick={() => setActiveSection(isAptitudeCat ? 'formulas' : 'general')} style={{ color: '#6366f1', cursor: 'pointer', fontWeight: 600 }}>{selectedTopic}</span>
+Determine which statement(s) are sufficient to answer the question. ({dsQuestions.length} questions)
+{/* ── Left Sidebar ── */}
+<div style={{ flex: '0 0 220px', minWidth: 200 }}>
+<div style={{ background: '#fff', borderRadius: 12, padding: '1.25rem', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0' }}>
+<p style={{ margin: '0 0 10px 0', fontSize: '0.78rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+questionText={q.question}
+913:               {/* ── Right Content ── */}
+914:             <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+{Object.entries(sectionLabels).map(([id, label]) => {
+const active = activeSection === id;
+{activeSection === 'formulas' && <FormulaSheet topic={selectedTopic} />}
+<button key={id} onClick={() => setActiveSection(id)}
+style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '11px 14px', background: active ? '#f0fdf4' : 'transparent', border: 'none', borderBottom: '1px solid #f1f5f9', textAlign: 'left', cursor: 'pointer', color: active ? '#10b981' : '#475569', fontWeight: active ? 700 : 500, fontSize: '0.83rem', transition: 'all 0.15s' }}
+<p style={{ margin: '0 0 10px 0', fontSize: '0.78rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent'; }}>
+<div style={{ textAlign: 'center', padding: '3rem', color: '#6366f1' }}>
+<div style={{ border: '1px solid #e2e8f0', borderRadius: 8, overflow: 'hidden' }}>
+question: `${q.question}\n${q.statements.join('\n')}`,
+<div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 24 }}>
+{Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+<div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '11px 14px', background: active ? '#f0fdf4' : 'transparent', border: 'none', borderBottom: '1px solid #f1f5f9', textAlign: 'left', cursor: 'pointer', color: active ? '#10b981' : '#475569', fontWeight: active ? 700 : 500, fontSize: '0.83rem', transition: 'all 0.15s' }}
+? <div style={{ textAlign: 'center', padding: '3rem', color: '#64748b', background: '#fff', borderRadius: 14, border: '1px solid #e2e8f0' }}>No questions found.</div>
+style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '11px 14px', background: active ? '#f0fdf4' : 'transparent', border: 'none', borderBottom: '1px solid #f1f5f9', textAlign: 'left', cursor: 'pointer', color: active ? '#10b981' : '#475569', fontWeight: active ? 700 : 500, fontSize: '0.83rem', transition: 'all 0.15s' }}
+onMouseEnter={e => { if (!active) e.currentTarget.style.background = '#f8fafc'; }}
+onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent'; }}>
+{active ? <CheckedIcon /> : <UncheckedIcon />}
+category={q.category || selectedCat}
+qNum={(page - 1) * 8 + idx + 1}
+questionText={q.question}
+937:                 {/* Data Sufficiency */}
+answer={q.answer}
+{(activeSection === 'ds1' || activeSection === 'ds2' || activeSection === 'ds3') && (
+940:               {/* ── Right Content ── */}
+<div style={{ background: '#fff', borderRadius: 14, padding: '1.25rem', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0', marginBottom: 16 }}>
+<h2 style={{ margin: '0 0 6px 0', fontSize: '1.2rem', fontWeight: 800, color: '#1e293b' }}>
+🧩 Data Sufficiency – {SECTION_LABELS[activeSection]}
+{activeSection === 'formulas' && <FormulaSheet topic={selectedTopic} />}
+<p style={{ color: '#64748b', fontSize: '0.85rem', margin: 0 }}>
+Determine which statement(s) are sufficient to answer the question. ({dsQuestions.length} questions)
+947:                 {/* General Questions */}
+{totalPages > 1 && (
+<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: 24, flexWrap: 'wrap' }}>
+<div style={{ fontSize: '2rem', marginBottom: 8 }}>⏳</div>Loading questions…
+style={{ height: 38, padding: '0 12px', borderRadius: 8, border: '1px solid #e2e8f0', background: '#fff', color: page === 1 ? '#cbd5e1' : '#475569', fontWeight: 700, cursor: page === 1 ? 'default' : 'pointer' }}>
+style={{ width: 38, height: 38, borderRadius: 8, border: page === p ? 'none' : '1px solid #e2e8f0', background: page === p ? '#6366f1' : '#fff', color: page === p ? '#fff' : '#475569', fontWeight: 700, cursor: 'pointer' }}>
+questionId={q.id}
+<div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+{questions.length === 0
+? <div style={{ textAlign: 'center', padding: '3rem', color: '#64748b', background: '#fff', borderRadius: 14, border: '1px solid #e2e8f0' }}>No questions found.</div>
+statementBlock={q.statements}
+options={q.options}
+answer={q.answer}
+explanation={q.explanation}
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+qNum={(page - 1) * 8 + idx + 1}
+questionText={q.question}
+onAiQ={() => setAiQ({
+question: `${q.question}\n${q.statements.join('\n')}`,
+options: q.options.map(o => o.substring(3).trim()),
+answer: q.answer.substring(3).trim(),
+explanation: q.explanation,
+topic: q.topic,
+onAiQ={() => setAiQ(q)}
+})}
+/>
+))}
+</div>
+{totalPages > 1 && (
+<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: 24, flexWrap: 'wrap' }}>
+<button disabled={page === 1} onClick={() => loadQuestions(page - 1)}
+style={{ height: 38, padding: '0 12px', borderRadius: 8, border: '1px solid #e2e8f0', background: '#fff', color: page === 1 ? '#cbd5e1' : '#475569', fontWeight: 700, cursor: page === 1 ? 'default' : 'pointer' }}>
+‹ Prev
+</button>
+{getPageRange(page, totalPages).map((p, idx) => {
+if (p === '...') {
+return <span key={`ell1-${idx}`} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 38, height: 38, color: '#94a3b8', fontWeight: 700 }}>...</span>;
+transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+return (
+<button key={p} onClick={() => loadQuestions(p)}
+style={{ width: 38, height: 38, borderRadius: 8, border: page === p ? 'none' : '1px solid #e2e8f0', background: page === p ? '#6366f1' : '#fff', color: page === p ? '#fff' : '#475569', fontWeight: 700, cursor: 'pointer' }}>
+border-color: #6366f1 !important;
+box-shadow: 0 12px 24px rgba(99, 102, 241, 0.1) !important;
+);
+`}</style>
+<button disabled={page === totalPages} onClick={() => loadQuestions(page + 1)}
+style={{ height: 38, padding: '0 12px', borderRadius: 8, border: '1px solid #e2e8f0', background: '#fff', color: page === totalPages ? '#cbd5e1' : '#475569', fontWeight: 700, cursor: page === totalPages ? 'default' : 'pointer' }}>
+<div style={{ marginBottom: 36 }}>
+<div style={{ 
+background: '#ffffff', 
+borderRadius: 16, 
+998:                 {/* Data Sufficiency */}
+border: '1px solid #e2e8f0', 
+{(activeSection === 'ds1' || activeSection === 'ds2' || activeSection === 'ds3') && (
+1001:                 {/* Data Sufficiency */}
+<div style={{ background: '#fff', borderRadius: 14, padding: '1.25rem', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0', marginBottom: 16 }}>
+<h2 style={{ margin: '0 0 6px 0', fontSize: '1.2rem', fontWeight: 800, color: '#1e293b' }}>
+🧩 Data Sufficiency – {SECTION_LABELS[activeSection]}
+<div style={{ background: '#fff', borderRadius: 14, padding: '1.25rem', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0', marginBottom: 16 }}>
+<p style={{ margin: '6px 0 0 0', color: '#64748b', fontSize: '0.85rem', lineHeight: 1.5 }}>
+Master key concepts for <strong>{activeCategoryData.name}</strong>. Choose any topic below to access detailed formulas, solved questions, and Data Sufficiency tests.
+</h2>
+<p style={{ color: '#64748b', fontSize: '0.85rem', margin: 0 }}>
+Determine which statement(s) are sufficient to answer the question. ({dsQuestions.length} questions)
+{dsQuestions.map((q, idx) => (
+const activeTopics = sc.topics.filter(t => t.status === 'active');
+<div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+1014:                   return (
+category={q.category || selectedCat || 'Data Sufficiency'}
+<div key={sc._id} style={{ marginBottom: 28 }}>
+<h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#4f46e5', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+category={q.category || selectedCat || 'Data Sufficiency'}
+options={q.options}
+1020:                       <div style={{ 
+statementBlock={q.statements}
+difficulty={q.difficulty}
+gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', 
+explanation={q.explanation}
+difficulty={q.difficulty}
+question: `${q.question}\n${q.statements.join('\n')}`,
+const urlCat = searchParams.get('category') || 'Aptitude';
+answer: q.answer.substring(3).trim(),
+question: `${q.question}\n${q.statements.join('\n')}`,
+options: q.options.map(o => o.substring(3).trim()),
+to={`/preparation/aptitude?category=${encodeURIComponent(urlCat)}&topic=${encodeURIComponent(topic.name)}`}
+style={{ textDecoration: 'none' }}
+background: '#ffffff', 
+category: q.category
+background: '#ffffff',
+border: '1px solid #e2e8f0', 
+boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
+marginBottom: 28 
+display: 'flex',
+<h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800, color: '#1e293b' }}>
+📖 Select a Topic to Practice
+cursor: 'pointer',
+<p style={{ margin: '6px 0 0 0', color: '#64748b', fontSize: '0.85rem', lineHeight: 1.5 }}>
+Master key concepts for <strong>{activeCategoryData.name}</strong>. Choose any topic below to access detailed formulas, solved questions, and Data Sufficiency tests.
+className="topic-card-hover"
+<style>{`
+<div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+const activeTopics = sc.topics.filter(t => t.status === 'active');
+if (activeTopics.length === 0) return null;
+<div style={{ background: 'linear-gradient(135deg,#eff6ff,#f5f3ff)', borderRadius: 16, padding: '2rem', textAlign: 'center', border: '1px dashed #c7d2fe', marginBottom: 24 }}>
+<h3 style={{ margin: '0 0 8px 0', color: '#6366f1', fontWeight: 800 }}>💡 NextJobPost Practice Hub</h3>
+<p style={{ margin: 0, color: '#4b5563', fontSize: '0.88rem', lineHeight: 1.6 }}>
+<h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#4f46e5', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+<span style={{ fontSize: '1.1rem' }}>📁</span> {sc.name}
+1056:             {activeCategoryData ? (
+1057:                       <div style={{ 
+1058:             {/* General Practice Pool */}
+display: 'grid', 
+gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', 
+borderRadius: 16, 
+<div style={{ fontWeight: 700, color: '#1e293b', fontSize: '0.92rem' }}>
+border: '1px solid #e2e8f0', 
+const urlCat = searchParams.get('category') || 'Aptitude';
+marginBottom: 28 
+<div style={{ color: '#64748b', fontSize: '0.8rem', lineHeight: 1.4, flex: 1, marginBottom: 12 }}>
+<h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800, color: '#1e293b' }}>
+to={`/preparation/aptitude?category=${encodeURIComponent(urlCat)}&topic=${encodeURIComponent(topic.name)}`}
+<p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '0.82rem' }}>
+<p style={{ margin: '6px 0 0 0', color: '#64748b', fontSize: '0.85rem', lineHeight: 1.5 }}>
+Master key concepts for <strong>{activeCategoryData.name}</strong>. Choose any topic below to access detailed formulas, solved questions, and Data Sufficiency tests.
+justifyContent: 'space-between',
+border: '1px solid #e2e8f0',
+<div style={{ textAlign: 'center', padding: '3rem', color: '#6366f1' }}>
+<div style={{ fontSize: '2rem', marginBottom: 8 }}>⏳</div>Loading questions…
+const activeTopics = sc.topics.filter(t => t.status === 'active');
+if (activeTopics.length === 0) return null;
+1078:                   return (
+<div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+<div key={sc._id} style={{ marginBottom: 28 }}>
+<h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#4f46e5', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+<span style={{ fontSize: '1.1rem' }}>📁</span> {sc.name}
+<MCQCard
+<div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+qNum={(page - 1) * 8 + idx + 1}
+questionText={q.question}
+gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', 
+answer={q.answer}
+explanation={q.explanation}
+<div style={{ background: 'linear-gradient(135deg,#eff6ff,#f5f3ff)', borderRadius: 16, padding: '2rem', textAlign: 'center', border: '1px dashed #c7d2fe', marginBottom: 24 }}>
+<h3 style={{ margin: '0 0 8px 0', color: '#6366f1', fontWeight: 800 }}>💡 NextJobPost Practice Hub</h3>
+<p style={{ margin: 0, color: '#4b5563', fontSize: '0.88rem', lineHeight: 1.6 }}>
+Select any <strong>topic</strong> from the filter above to access <strong>Formulas</strong>, <strong>General Questions</strong>, and <strong>Data Sufficiency</strong> exercises.
+fontSize: '1rem',
+to={`/preparation/aptitude?category=${encodeURIComponent(urlCat)}&topic=${encodeURIComponent(topic.name)}`}
+style={{ textDecoration: 'none' }}
+1097:             {/* General Practice Pool */}
+{totalPages > 1 && (
+<div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 24 }}>
+{Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+<button key={p} onClick={() => loadQuestions(p)}
+paddingLeft: '12px', 
+cursor: 'pointer',
+boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
+<h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#1e293b' }}>
+className="topic-card-hover"
+boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
+<div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+A pool of questions from all topics in <strong>{selectedCat}</strong>.
+width: 32,
+<div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+borderRadius: 6,
+<div style={{ textAlign: 'center', padding: '3rem', color: '#6366f1' }}>
+<div style={{ fontSize: '2rem', marginBottom: 8 }}>⏳</div>Loading questions…
+display: 'flex',
+background: '#f0f2ff',
+justifyContent: 'center',
+<div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+{questions.length === 0
+? <div style={{ textAlign: 'center', padding: '3rem', color: '#64748b', background: '#fff', borderRadius: 14, border: '1px solid #e2e8f0' }}>No questions found.</div>
+: questions.map((q, idx) => (
+fontWeight: 700
+<div style={{ fontWeight: 700, color: '#1e293b', fontSize: '0.92rem' }}>
+questionId={q._id}
+category={q.category || selectedCat}
+<div style={{ fontWeight: 700, color: '#1e293b', fontSize: '0.92rem' }}>
+<div style={{ color: '#64748b', fontSize: '0.8rem', lineHeight: 1.4, flex: 1, marginBottom: 12 }}>
+Practice formulas and multiple choice questions on {topic.name}.
+answer={q.answer}
+<div style={{ color: '#64748b', fontSize: '0.8rem', lineHeight: 1.4, flex: 1, marginBottom: 12 }}>
+Practice formulas and multiple choice questions on {topic.name}.
+alignItems: 'center', 
+justifyContent: 'space-between',
+onAiQ={() => setAiQ(q)}
+alignItems: 'center', 
+justifyContent: 'space-between',
+fontSize: '0.8rem',
+<span>Start Practice</span>
+{totalPages > 1 && (
+<div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 24 }}>
+{Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+<button key={p} onClick={() => loadQuestions(p)}
+style={{ width: 38, height: 38, borderRadius: 8, border: page === p ? 'none' : '1px solid #e2e8f0', background: page === p ? '#6366f1' : '#fff', color: page === p ? '#fff' : '#475569', fontWeight: 700, cursor: 'pointer' }}>
+</div>
+</button>
+</div>
+</div>
+</div>
+</div>
+) : (
+<div style={{ background: 'linear-gradient(135deg,#eff6ff,#f5f3ff)', borderRadius: 16, padding: '2rem', textAlign: 'center', border: '1px dashed #c7d2fe', marginBottom: 24 }}>
+<h3 style={{ margin: '0 0 8px 0', color: '#6366f1', fontWeight: 800 }}>💡 NextJobPost Practice Hub</h3>
+<p style={{ margin: 0, color: '#4b5563', fontSize: '0.88rem', lineHeight: 1.6 }}>
+Select any <strong>topic</strong> from the filter above to access <strong>Formulas</strong>, <strong>General Questions</strong>, and <strong>Data Sufficiency</strong> exercises.
+<h3 style={{ margin: '0 0 8px 0', color: '#6366f1', fontWeight: 800 }}>💡 NextJobPost Practice Hub</h3>
+<p style={{ margin: 0, color: '#4b5563', fontSize: '0.88rem', lineHeight: 1.6 }}>
+Select any <strong>topic</strong> from the filter above to access <strong>Formulas</strong>, <strong>General Questions</strong>, and <strong>Data Sufficiency</strong> exercises.
+1158:             {/* General Practice Pool */}
+</div>
+<div style={{ marginTop: 32 }}>
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+borderLeft: '4px solid #4f46e5', 
+<div style={{ marginTop: 32 }}>
+<div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 24 }}>
+{Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+<h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#1e293b' }}>
+style={{ width: 38, height: 38, borderRadius: 8, border: page === p ? 'none' : '1px solid #e2e8f0', background: page === p ? '#6366f1' : '#fff', color: page === p ? '#fff' : '#475569', fontWeight: 700, cursor: 'pointer' }}>
+</h3>
+<h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#1e293b' }}>
+A pool of questions from all topics in <strong>{selectedCat}</strong>.
+</div>
+<p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '0.82rem' }}>
+A pool of questions from all topics in <strong>{selectedCat}</strong>.
+<div style={{ textAlign: 'center', padding: '3rem', color: '#6366f1' }}>
+<div style={{ fontSize: '2rem', marginBottom: 8 }}>⏳</div>Loading questions…
+{loading ? (
+<div style={{ textAlign: 'center', padding: '3rem', color: '#6366f1' }}>
+<div style={{ fontSize: '2rem', marginBottom: 8 }}>⏳</div>Loading questions…
+1179:       {aiQ && <AITutor question={aiQ} onClose={() => setAiQ(null)} />}
+{questions.length === 0
+? <div style={{ textAlign: 'center', padding: '3rem', color: '#64748b', background: '#fff', borderRadius: 14, border: '1px solid #e2e8f0' }}>No questions found.</div>
+<div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+{questions.length === 0
+? <div style={{ textAlign: 'center', padding: '3rem', color: '#64748b', background: '#fff', borderRadius: 14, border: '1px solid #e2e8f0' }}>No questions found.</div>
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+category={q.category || selectedCat}
+qNum={(page - 1) * 8 + idx + 1}
+questionText={q.question}
+category={q.category || selectedCat}
+qNum={(page - 1) * 8 + idx + 1}
+explanation={q.explanation}
+difficulty={q.difficulty}
+answer={q.answer}
+explanation={q.explanation}
+difficulty={q.difficulty}
+topic={q.topic}
+isDs={false}
+onAiQ={() => setAiQ(q)}
+</div>
+{totalPages > 1 && (
+<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: 24, flexWrap: 'wrap' }}>
+<button disabled={page === 1} onClick={() => loadQuestions(page - 1)}
+style={{ height: 38, padding: '0 12px', borderRadius: 8, border: '1px solid #e2e8f0', background: '#fff', color: page === 1 ? '#cbd5e1' : '#475569', fontWeight: 700, cursor: page === 1 ? 'default' : 'pointer' }}>
+<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: 24, flexWrap: 'wrap' }}>
+<button disabled={page === 1} onClick={() => loadQuestions(page - 1)}
+style={{ height: 38, padding: '0 12px', borderRadius: 8, border: '1px solid #e2e8f0', background: '#fff', color: page === 1 ? '#cbd5e1' : '#475569', fontWeight: 700, cursor: page === 1 ? 'default' : 'pointer' }}>
+if (p === '...') {
+return <span key={`ell2-${idx}`} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 38, height: 38, color: '#94a3b8', fontWeight: 700 }}>...</span>;
+{getPageRange(page, totalPages).map((p, idx) => {
+if (p === '...') {
+return <span key={`ell2-${idx}`} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 38, height: 38, color: '#94a3b8', fontWeight: 700 }}>...</span>;
+style={{ width: 38, height: 38, borderRadius: 8, border: page === p ? 'none' : '1px solid #e2e8f0', background: page === p ? '#6366f1' : '#fff', color: page === p ? '#fff' : '#475569', fontWeight: 700, cursor: 'pointer' }}>
+return (
+<button key={p} onClick={() => loadQuestions(p)}
+style={{ width: 38, height: 38, borderRadius: 8, border: page === p ? 'none' : '1px solid #e2e8f0', background: page === p ? '#6366f1' : '#fff', color: page === p ? '#fff' : '#475569', fontWeight: 700, cursor: 'pointer' }}>
+})}
+<button disabled={page === totalPages} onClick={() => loadQuestions(page + 1)}
+style={{ height: 38, padding: '0 12px', borderRadius: 8, border: '1px solid #e2e8f0', background: '#fff', color: page === totalPages ? '#cbd5e1' : '#475569', fontWeight: 700, cursor: page === totalPages ? 'default' : 'pointer' }}>
+Next ›
+<button disabled={page === totalPages} onClick={() => loadQuestions(page + 1)}
+style={{ height: 38, padding: '0 12px', borderRadius: 8, border: '1px solid #e2e8f0', background: '#fff', color: page === totalPages ? '#cbd5e1' : '#475569', fontWeight: 700, cursor: page === totalPages ? 'default' : 'pointer' }}>
+Next ›
+</button>
+</div>
+</div>
+</>
+)}
+</div>
+1229:       {aiQ && <AITutor question={aiQ} onClose={() => setAiQ(null)} />}
+)}
+</div>
+1232:       {aiQ && <AITutor question={aiQ} onClose={() => setAiQ(null)} />}
+);
+</div>
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+);
+}
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

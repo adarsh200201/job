@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import AITutor from '../../components/Preparation/AITutor.jsx';
 import PrepLayout from '../../components/Preparation/PrepLayout.jsx';
+import api from '../../api/index.js';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 const DIFF_COLORS = { Easy: '#10b981', Medium: '#f59e0b', Hard: '#ef4444' };
@@ -95,24 +96,25 @@ export default function TechnicalPrep() {
 
   useEffect(() => {
     document.title = 'Technical MCQ | Preparation Hub';
-    fetch(`${API}/api/preparation/technical/topics`)
-      .then(r => r.json())
-      .then(d => setTopics(d.topics || []));
+    api.get('/preparation/technical/topics')
+      .then(res => setTopics(res.data.topics || []))
+      .catch(err => console.error(err));
   }, []);
 
   const loadQuestions = (p = 1) => {
     setLoading(true);
-    const params = new URLSearchParams({ page: p, limit: 8 });
+    const params = { page: p, limit: 8 };
     if (selectedTopic) {
-      params.set('topic', selectedTopic);
-      params.set('type', activeSection === 'mcq' ? 'MCQ' : 'Interview');
+      params.topic = selectedTopic;
+      params.type = activeSection === 'mcq' ? 'MCQ' : 'Interview';
     } else {
-      if (type) params.set('type', type);
+      if (type) params.type = type;
     }
-    if (difficulty) params.set('difficulty', difficulty);
-    fetch(`${API}/api/preparation/technical?${params}`)
-      .then(r => r.json())
-      .then(d => {
+    if (difficulty) params.difficulty = difficulty;
+
+    api.get('/preparation/technical', { params })
+      .then(res => {
+        const d = res.data;
         setQuestions(d.questions || []);
         setTotalPages(d.pages || 1);
         setPage(p);
@@ -120,6 +122,7 @@ export default function TechnicalPrep() {
         setRevealed({});
         setExpanded({});
       })
+      .catch(err => console.error(err))
       .finally(() => setLoading(false));
   };
 
@@ -128,10 +131,10 @@ export default function TechnicalPrep() {
   const markSolved = async (q) => {
     if (!token) return;
     try {
-      await fetch(`${API}/api/preparation/progress/solve`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ questionId: q._id, category: 'Technical', topic: q.topic }),
+      await api.post('/preparation/progress/solve', {
+        questionId: q._id,
+        category: 'Technical',
+        topic: q.topic
       });
     } catch {}
   };
