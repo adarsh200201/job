@@ -20,6 +20,9 @@ async function verifyTurnstile(token, ip) {
       params.append('remoteip', ip);
     }
     const res = await axios.post('https://challenges.cloudflare.com/turnstile/v0/siteverify', params);
+    if (!res.data.success) {
+      console.warn('[Turnstile] Verification failed. Response:', res.data);
+    }
     return res.data.success;
   } catch (err) {
     console.error('Turnstile verification failed:', err);
