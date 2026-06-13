@@ -11,7 +11,9 @@ const UserSchema = new mongoose.Schema(
     // Onboarding details
     phone: { type: String, trim: true },
     location: { type: String, trim: true },
+    locations: [{ type: String, trim: true }],
     preferredRole: { type: String, trim: true },
+    preferredRoles: [{ type: String, trim: true }],
     skills: [{ type: String, trim: true }],
     experienceLevel: { type: String, trim: true },
     education: {

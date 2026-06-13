@@ -2,6 +2,8 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const passport = require('../config/passport');
 const User = require('../models/User');
+const UserPreferences = require('../models/UserPreferences');
+const GovernmentJobPreferences = require('../models/GovernmentJobPreferences');
 const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
@@ -82,7 +84,18 @@ router.get('/profile', authMiddleware, async (req, res) => {
 // ── Update User Profile / Onboarding ──────────────────────────────────────
 router.put('/profile', authMiddleware, async (req, res) => {
   try {
-    const { name, phone, location, preferredRole, skills, experienceLevel, education } = req.body;
+    const {
+      name,
+      phone,
+      location,
+      locations,
+      preferredRole,
+      preferredRoles,
+      govPreferences,
+      skills,
+      experienceLevel,
+      education
+    } = req.body;
     
     let processedSkills = [];
     if (Array.isArray(skills)) {
@@ -91,13 +104,23 @@ router.put('/profile', authMiddleware, async (req, res) => {
       processedSkills = skills.split(',').map(s => s.trim()).filter(Boolean);
     }
 
+    // Process locations and preferredRoles arrays
+    const processedLocations = Array.isArray(locations) ? locations.map(l => l.trim()).filter(Boolean) : [];
+    const processedPreferredRoles = Array.isArray(preferredRoles) ? preferredRoles.map(r => r.trim()).filter(Boolean) : [];
+
+    // Fallbacks for backward compatibility
+    const fallbackLocation = location || processedLocations[0] || '';
+    const fallbackPreferredRole = preferredRole || processedPreferredRoles[0] || '';
+
     const updatedUser = await User.findByIdAndUpdate(
       req.user.id,
       {
         name,
         phone,
-        location,
-        preferredRole,
+        location: fallbackLocation,
+        locations: processedLocations,
+        preferredRole: fallbackPreferredRole,
+        preferredRoles: processedPreferredRoles,
         skills: processedSkills,
         experienceLevel,
         education,
@@ -107,8 +130,40 @@ router.put('/profile', authMiddleware, async (req, res) => {
     );
 
     if (!updatedUser) return res.status(404).json({ message: 'User not found' });
+
+    // Update UserPreferences for recommendations
+    await UserPreferences.findOneAndUpdate(
+      { userId: req.user.id },
+      {
+        preferredRoles: processedPreferredRoles,
+        preferredLocations: processedLocations,
+        skills: processedSkills,
+        experienceLevel,
+        education: {
+          degree: education?.degree || '',
+          branch: education?.branch || ''
+        }
+      },
+      { upsert: true, new: true }
+    );
+
+    // Update GovernmentJobPreferences
+    if (Array.isArray(govPreferences)) {
+      await GovernmentJobPreferences.findOneAndUpdate(
+        { userId: req.user.id },
+        {
+          scoreSSC: govPreferences.includes('SSC') ? 10 : 0,
+          scoreRailway: govPreferences.includes('Railway') ? 10 : 0,
+          scoreBanking: govPreferences.includes('Banking') ? 10 : 0,
+          scoreCivilServices: govPreferences.includes('CivilServices') ? 10 : 0
+        },
+        { upsert: true, new: true }
+      );
+    }
+
     res.json({ ok: true, user: updatedUser });
   } catch (error) {
+    console.error('Error in profile update:', error);
     res.status(500).json({ message: 'Failed to update profile' });
   }
 });

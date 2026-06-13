@@ -29,6 +29,13 @@ const LOCATIONS = [
   'Chennai', 'Kolkata', 'Ahmedabad', 'Jaipur', 'Any Location',
 ];
 
+const GOV_PREFS = [
+  { id: 'SSC', label: 'Staff Selection Commission (SSC)' },
+  { id: 'Railway', label: 'Indian Railways (RRB)' },
+  { id: 'Banking', label: 'Banking Exams (IBPS, SBI, RBI)' },
+  { id: 'CivilServices', label: 'Civil Services (UPSC, State PSC)' }
+];
+
 const STEPS = ['Basic Info', 'Career Goals', 'Skills', 'Education', 'Done'];
 
 export default function Onboarding() {
@@ -41,8 +48,9 @@ export default function Onboarding() {
   const [form, setForm] = useState({
     name: username || '',
     phone: '',
-    location: '',
-    preferredRole: '',
+    locations: [],
+    preferredRoles: [],
+    govPreferences: [],
     skills: [],
     experienceLevel: '',
     education: {
@@ -55,6 +63,39 @@ export default function Onboarding() {
 
   const setField = (key, val) => setForm(f => ({ ...f, [key]: val }));
   const setEdu = (key, val) => setForm(f => ({ ...f, education: { ...f.education, [key]: val } }));
+
+  const toggleLocation = (loc) => {
+    setForm(f => {
+      let nextLocs;
+      if (loc === 'Any Location') {
+        nextLocs = f.locations.includes(loc) ? [] : [loc];
+      } else {
+        const filtered = f.locations.filter(l => l !== 'Any Location');
+        nextLocs = filtered.includes(loc)
+          ? filtered.filter(l => l !== loc)
+          : [...filtered, loc];
+      }
+      return { ...f, locations: nextLocs };
+    });
+  };
+
+  const togglePreferredRole = (role) => {
+    setForm(f => ({
+      ...f,
+      preferredRoles: f.preferredRoles.includes(role)
+        ? f.preferredRoles.filter(r => r !== role)
+        : [...f.preferredRoles, role],
+    }));
+  };
+
+  const toggleGovPref = (prefId) => {
+    setForm(f => ({
+      ...f,
+      govPreferences: f.govPreferences.includes(prefId)
+        ? f.govPreferences.filter(p => p !== prefId)
+        : [...f.govPreferences, prefId],
+    }));
+  };
 
   const toggleSkill = (skill) => {
     setForm(f => ({
@@ -79,11 +120,17 @@ export default function Onboarding() {
     setSaving(true);
     setError('');
     try {
-      await api.put('/auth/profile', form, {
+      const payload = {
+        ...form,
+        location: form.locations.join(', '),
+        preferredRole: form.preferredRoles.join(', ')
+      };
+      await api.put('/auth/profile', payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
       trackEvent('Onboarding Completed', {
-        preferredRole: form.preferredRole,
+        preferredRoles: form.preferredRoles,
+        govPreferences: form.govPreferences,
         experienceLevel: form.experienceLevel,
         skillsCount: form.skills.length,
         degree: form.education.degree,
@@ -153,12 +200,12 @@ export default function Onboarding() {
               <input style={input} value={form.phone} onChange={e => setField('phone', e.target.value)} placeholder="+91 98765 43210" type="tel" />
             </div>
             <div style={fieldGroup}>
-              <label style={label}>Preferred Job Location</label>
+              <label style={label}>Preferred Job Location (Select multiple)</label>
               <div style={pillGrid}>
                 {LOCATIONS.map(loc => (
                   <button key={loc} type="button"
-                    onClick={() => setField('location', loc)}
-                    style={form.location === loc ? pillActive : pill}
+                    onClick={() => toggleLocation(loc)}
+                    style={form.locations.includes(loc) ? pillActive : pill}
                   >{loc}</button>
                 ))}
               </div>
@@ -172,12 +219,12 @@ export default function Onboarding() {
             <h2 style={sectionTitle}>💼 Career Goals</h2>
             <p style={sectionDesc}>What role are you looking for? This powers your job recommendations.</p>
             <div style={fieldGroup}>
-              <label style={label}>Preferred Role</label>
+              <label style={label}>Preferred Role (Select multiple)</label>
               <div style={pillGrid}>
                 {ROLES.map(role => (
                   <button key={role} type="button"
-                    onClick={() => setField('preferredRole', role)}
-                    style={form.preferredRole === role ? pillActive : pill}
+                    onClick={() => togglePreferredRole(role)}
+                    style={form.preferredRoles.includes(role) ? pillActive : pill}
                   >{role}</button>
                 ))}
               </div>
@@ -190,6 +237,20 @@ export default function Onboarding() {
                     onClick={() => setField('experienceLevel', exp)}
                     style={form.experienceLevel === exp ? pillActive : pill}
                   >{exp}</button>
+                ))}
+              </div>
+            </div>
+            <div style={{ ...fieldGroup, marginTop: '1.5rem' }}>
+              <label style={label}>🏛️ Government Job Preferences (Optional)</label>
+              <p style={{ fontSize: '0.82rem', color: '#64748b', margin: '-0.25rem 0 0.75rem 0' }}>
+                Select government exam sectors you are preparing for or interested in.
+              </p>
+              <div style={pillGrid}>
+                {GOV_PREFS.map(pref => (
+                  <button key={pref.id} type="button"
+                    onClick={() => toggleGovPref(pref.id)}
+                    style={form.govPreferences.includes(pref.id) ? pillActive : pill}
+                  >{pref.label}</button>
                 ))}
               </div>
             </div>
@@ -267,9 +328,10 @@ export default function Onboarding() {
                 📋 Profile Summary
               </p>
               <ul style={{ margin: '0.75rem 0 0', padding: '0 0 0 1.25rem', color: '#5b21b6', fontSize: '0.88rem', lineHeight: 2 }}>
-                {form.preferredRole && <li>Role: <strong>{form.preferredRole}</strong></li>}
+                {form.preferredRoles.length > 0 && <li>Roles: <strong>{form.preferredRoles.join(', ')}</strong></li>}
                 {form.experienceLevel && <li>Experience: <strong>{form.experienceLevel}</strong></li>}
-                {form.location && <li>Location: <strong>{form.location}</strong></li>}
+                {form.locations.length > 0 && <li>Locations: <strong>{form.locations.join(', ')}</strong></li>}
+                {form.govPreferences.length > 0 && <li>Government Interests: <strong>{form.govPreferences.map(p => GOV_PREFS.find(gp => gp.id === p)?.label || p).join(', ')}</strong></li>}
                 {form.skills.length > 0 && <li>Skills: <strong>{form.skills.slice(0, 5).join(', ')}{form.skills.length > 5 ? ` +${form.skills.length - 5} more` : ''}</strong></li>}
                 {form.education.degree && <li>Education: <strong>{form.education.degree}{form.education.branch ? ` – ${form.education.branch}` : ''}</strong></li>}
               </ul>

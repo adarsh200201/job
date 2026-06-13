@@ -20,6 +20,14 @@ function bustPrepStructureCache() {
   cachedStructureExpiry = 0;
 }
 
+let cachedCategories = null;
+let cachedSubCategories = null;
+
+function bustPrepCategoriesCache() {
+  cachedCategories = null;
+  cachedSubCategories = null;
+}
+
 /* ──────────────────────────────────────────────────────────────
    HELPERS
 ────────────────────────────────────────────────────────────── */
@@ -489,6 +497,7 @@ exports.adminCreateQuestion = async (req, res) => {
   try {
     const q = new AptitudeQuestion(req.body);
     await q.save();
+    bustPrepCategoriesCache();
     res.json({ success: true, question: q });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -499,6 +508,7 @@ exports.adminUpdateQuestion = async (req, res) => {
   try {
     const q = await AptitudeQuestion.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!q) return res.status(404).json({ message: 'Question not found' });
+    bustPrepCategoriesCache();
     res.json({ success: true, question: q });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -509,6 +519,7 @@ exports.adminDeleteQuestion = async (req, res) => {
   try {
     const q = await AptitudeQuestion.findByIdAndDelete(req.params.id);
     if (!q) return res.status(404).json({ message: 'Question not found' });
+    bustPrepCategoriesCache();
     res.json({ success: true, message: 'Question deleted successfully' });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -519,6 +530,7 @@ exports.adminBulkUpdateQuestions = async (req, res) => {
   try {
     const { ids, update } = req.body;
     const result = await AptitudeQuestion.updateMany({ _id: { $in: ids } }, { $set: update });
+    bustPrepCategoriesCache();
     res.json({ success: true, modifiedCount: result.modifiedCount });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -529,6 +541,7 @@ exports.adminBulkDeleteQuestions = async (req, res) => {
   try {
     const { ids } = req.body;
     const result = await AptitudeQuestion.deleteMany({ _id: { $in: ids } });
+    bustPrepCategoriesCache();
     res.json({ success: true, deletedCount: result.deletedCount });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -583,12 +596,17 @@ exports.adminDeleteMockTest = async (req, res) => {
 
 exports.adminGetCategories = async (req, res) => {
   try {
+    if (cachedCategories) {
+      return res.json(cachedCategories);
+    }
     const results = await AptitudeQuestion.aggregate([
       { $group: { _id: '$category', count: { $sum: 1 } } },
       { $sort: { count: -1 } }
     ]);
     const categories = results.map(r => ({ name: r._id || 'Uncategorized', count: r.count }));
-    res.json({ success: true, categories });
+    const payload = { success: true, categories };
+    cachedCategories = payload;
+    res.json(payload);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -596,6 +614,9 @@ exports.adminGetCategories = async (req, res) => {
 
 exports.adminGetSubCategories = async (req, res) => {
   try {
+    if (cachedSubCategories) {
+      return res.json(cachedSubCategories);
+    }
     const results = await AptitudeQuestion.aggregate([
       { $group: { _id: { category: '$category', subCategory: '$subCategory' }, count: { $sum: 1 } } },
       { $sort: { count: -1 } }
@@ -605,7 +626,9 @@ exports.adminGetSubCategories = async (req, res) => {
       name: r._id.subCategory || 'General',
       count: r.count
     }));
-    res.json({ success: true, subcategories });
+    const payload = { success: true, subcategories };
+    cachedSubCategories = payload;
+    res.json(payload);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -702,6 +725,9 @@ exports.adminBulkImportQuestions = async (req, res) => {
         errors.push(`Error saving "${qText}": ${err.message}`);
       }
     }
+    if (imported > 0) {
+      bustPrepCategoriesCache();
+    }
     res.json({
       success: true,
       summary: { total: questions.length, imported, skipped, failed },
@@ -714,33 +740,41 @@ exports.adminBulkImportQuestions = async (req, res) => {
 
 exports.adminGetAnalytics = async (req, res) => {
   try {
-    const totalQuestions = await AptitudeQuestion.countDocuments();
-    const totalTests = await MockTest.countDocuments();
-    const allProgress = await UserProgress.find({});
+    const [totalQuestions, totalTests, testStats] = await Promise.all([
+      AptitudeQuestion.countDocuments(),
+      MockTest.countDocuments(),
+      UserProgress.aggregate([
+        { $unwind: "$testHistory" },
+        {
+          $group: {
+            _id: null,
+            totalAttempts: { $sum: 1 },
+            totalScoreSum: { $sum: "$testHistory.score" },
+            maxScore: { $max: "$testHistory.score" }
+          }
+        }
+      ])
+    ]);
     
-    let totalAttempts = 0;
-    let totalScoreSum = 0;
-    let maxScore = 0;
+    const stats = {
+      totalQuestions,
+      totalTests,
+      totalAttempts: 0,
+      avgScore: 0,
+      maxScore: 0
+    };
     
-    allProgress.forEach(p => {
-      totalAttempts += p.testHistory.length;
-      p.testHistory.forEach(t => {
-        totalScoreSum += t.score;
-        if (t.score > maxScore) maxScore = t.score;
-      });
-    });
-    
-    const avgScore = totalAttempts > 0 ? Math.round(totalScoreSum / totalAttempts) : 0;
+    if (testStats && testStats.length > 0) {
+      stats.totalAttempts = testStats[0].totalAttempts || 0;
+      stats.maxScore = testStats[0].maxScore || 0;
+      stats.avgScore = stats.totalAttempts > 0 
+        ? Math.round((testStats[0].totalScoreSum || 0) / stats.totalAttempts) 
+        : 0;
+    }
     
     res.json({
       success: true,
-      stats: {
-        totalQuestions,
-        totalTests,
-        totalAttempts,
-        avgScore,
-        maxScore
-      }
+      stats
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -980,6 +1014,9 @@ exports.adminExcelImportQuestions = async (req, res) => {
       }
     }
 
+    if (imported > 0) {
+      bustPrepCategoriesCache();
+    }
     res.json({
       success: true,
       summary: { total: rawRows.length, imported, skipped, failed },

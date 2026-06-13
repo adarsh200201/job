@@ -191,7 +191,7 @@ exports.getJobs = async (req, res) => {
     // Skip ALL profile/activity DB lookups for unauthenticated visitors.
     // This removes 1-2 MongoDB round-trips from the critical path for ~90%
     // of traffic and cuts server response time by 500ms–1.5s.
-    const isAnonymous = !userId;
+    const isAnonymous = !userId || req.user?.role === 'admin' || req.query.status === 'all';
 
     if (isAnonymous) {
       const cacheKey = getCacheKey(req.query);

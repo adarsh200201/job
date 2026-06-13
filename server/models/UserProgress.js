@@ -49,4 +49,6 @@ const userProgressSchema = new mongoose.Schema({
   timestamps: true
 });
 
+userProgressSchema.index({ xp: -1 });
+
 module.exports = mongoose.model('UserProgress', userProgressSchema);
