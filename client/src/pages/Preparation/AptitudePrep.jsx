@@ -133,6 +133,15 @@ function DiscussionSection({ questionId }) {
   
   const commentInputRef = useRef(null);
 
+  const getGuestToken = () => {
+    let gToken = localStorage.getItem('guest_token');
+    if (!gToken) {
+      gToken = Array.from({ length: 16 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
+      localStorage.setItem('guest_token', gToken);
+    }
+    return gToken;
+  };
+
   // Auth decoding
   const token = localStorage.getItem('token');
   const isAdmin = localStorage.getItem('isAdmin') === 'true';
@@ -175,13 +184,18 @@ function DiscussionSection({ questionId }) {
     if (!newComment.trim()) return;
     setPosting(true);
     try {
-      const activeName = username.trim() || 'Anonymous';
-      localStorage.setItem('comment_username', activeName);
+      const activeName = username.trim();
+      if (activeName) {
+        localStorage.setItem('comment_username', activeName);
+      } else {
+        localStorage.removeItem('comment_username');
+      }
       
       const payload = {
         questionId,
         comment: newComment,
-        username: activeName
+        username: activeName || 'Anonymous',
+        guestToken: getGuestToken()
       };
       if (replyingTo) {
         payload.parentId = replyingTo.commentId;
@@ -206,16 +220,18 @@ function DiscussionSection({ questionId }) {
     }
   };
 
-  const handleDeleteComment = async (commentId, commentUsername) => {
+  const handleDeleteComment = async (commentId) => {
     if (!window.confirm("Are you sure you want to delete this comment?")) return;
     try {
       const headers = {};
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
+      } else {
+        headers['x-guest-token'] = getGuestToken();
       }
       const res = await api.delete(`/preparation/comments/${commentId}`, {
         headers,
-        data: { username: commentUsername }
+        data: { guestToken: getGuestToken() }
       });
       if (res.data.success) {
         loadComments();
@@ -244,8 +260,6 @@ function DiscussionSection({ questionId }) {
     if (!c.userId) {
       const myComments = JSON.parse(localStorage.getItem('my_comments') || '[]');
       if (myComments.includes(c._id)) return true;
-      const activeName = username.trim() || localStorage.getItem('username') || '';
-      if (activeName && c.username === activeName) return true;
     }
     return false;
   };
@@ -302,7 +316,7 @@ function DiscussionSection({ questionId }) {
                     {canDelete(c) && (
                       <button
                         type="button"
-                        onClick={() => handleDeleteComment(c._id, c.username)}
+                        onClick={() => handleDeleteComment(c._id)}
                         style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: '0.68rem', fontWeight: 700, cursor: 'pointer', padding: 0 }}
                       >
                         Delete
@@ -336,7 +350,7 @@ function DiscussionSection({ questionId }) {
                           {canDelete(r) && (
                             <button
                               type="button"
-                              onClick={() => handleDeleteComment(r._id, r.username)}
+                              onClick={() => handleDeleteComment(r._id)}
                               style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: '0.65rem', fontWeight: 700, cursor: 'pointer', padding: 0 }}
                             >
                               Delete

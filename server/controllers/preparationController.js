@@ -1011,13 +1011,14 @@ exports.getQuestionComments = async (req, res) => {
 
 exports.createQuestionComment = async (req, res) => {
   try {
-    const { questionId, comment, username, parentId } = req.body;
+    const { questionId, comment, username, parentId, guestToken } = req.body;
     const newComment = new QuestionComment({
       questionId,
       comment,
       username: username || (req.user ? req.user.username : 'Anonymous'),
       userId: req.user ? req.user.id : undefined,
-      parentId: parentId || null
+      parentId: parentId || null,
+      guestToken: guestToken || null
     });
     await newComment.save();
     res.json({ success: true, comment: newComment });
@@ -1041,10 +1042,10 @@ exports.deleteQuestionComment = async (req, res) => {
     else if (comment.userId && req.user && req.user.id === comment.userId.toString()) {
       authorized = true;
     }
-    // 3. Guest user who matches the username of the comment
+    // 3. Guest user who created the comment (authenticated via guestToken)
     else if (!comment.userId) {
-      const requestUsername = req.body.username || req.query.username;
-      if (requestUsername && requestUsername === comment.username) {
+      const requestGuestToken = req.headers['x-guest-token'] || req.body.guestToken || req.query.guestToken;
+      if (comment.guestToken && requestGuestToken && comment.guestToken === requestGuestToken) {
         authorized = true;
       }
     }

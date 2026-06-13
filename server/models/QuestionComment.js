@@ -6,6 +6,7 @@ const questionCommentSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   comment: { type: String, required: true },
   parentId: { type: mongoose.Schema.Types.ObjectId, ref: 'QuestionComment', default: null },
+  guestToken: { type: String, default: null },
   createdAt: { type: Date, default: Date.now }
 });
 
