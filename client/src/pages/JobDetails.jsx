@@ -202,6 +202,17 @@ const TelegramJobInfoGrid = ({ fields, themeColor = '#7c3aed' }) => {
   );
 };
 
+// Helper to strip HTML tags and decode basic entities from text
+const stripHtml = (html) => {
+  if (!html) return '';
+  return html
+    .replace(/<[^>]*>/g, '') // remove HTML tags
+    .replace(/&nbsp;/g, ' ') // replace non-breaking spaces
+    .replace(/&amp;/g, '&')  // replace amp
+    .replace(/\s+/g, ' ')    // normalize whitespace
+    .trim();
+};
+
 // Parse inline Telegram key:value pattern: "emoji Key: Value emoji Key: Value"
 // Used for lines where multiple fields are packed on a single line
 const parseInlineFields = (line, knownKeys) => {
@@ -217,7 +228,12 @@ const parseInlineFields = (line, knownKeys) => {
   const pairRe = new RegExp(`^[\\p{Emoji_Presentation}\\p{Extended_Pictographic}\\s]*(${keyAlt})\\s*:\\s*(.+)`, 'iu');
   segments.forEach(seg => {
     const m = seg.match(pairRe);
-    if (m) results.push({ key: m[1].trim(), value: stripUnicodeBold(m[2].trim()) });
+    if (m) {
+      results.push({ 
+        key: stripHtml(m[1].trim()), 
+        value: stripHtml(stripUnicodeBold(m[2].trim())) 
+      });
+    }
   });
   return results;
 };
@@ -265,11 +281,11 @@ const getEnrichedJob = (originalJob) => {
 
     // Remove lines that are now empty after URL stripping, or are well-known label-only lines
     const linesToStrip = [
-      /^[•\-\*]?\s*[\p{Emoji_Presentation}\p{Extended_Pictographic}]?\s*Apply\s*Link\s*:?\s*$/u,
-      /^[•\-\*]?\s*[\p{Emoji_Presentation}\p{Extended_Pictographic}]?\s*How\s*to\s*[Aa]pply\s*:?\s*$/u,
-      /^[•\-\*]?\s*[\p{Emoji_Presentation}\p{Extended_Pictographic}]?\s*Join\s*(Our\s*)?WhatsApp\s*:?\s*$/ui,
-      /^[•\-\*]?\s*[\p{Emoji_Presentation}\p{Extended_Pictographic}]?\s*Join\s*(Our\s*)?Telegram\s*:?\s*$/ui,
-      /^[•\-\*]?\s*[\p{Emoji_Presentation}\p{Extended_Pictographic}]?\s*Last\s*Date\s*:?\s*(Apply\s*ASAP)?\s*$/ui,
+      /^[•\-\*]?\s*[\p{Emoji_Presentation}\p{Extended_Pictographic}\s]*Apply\s*Link\s*:?\s*$/u,
+      /^[•\-\*]?\s*[\p{Emoji_Presentation}\p{Extended_Pictographic}\s]*How\s*to\s*[Aa]pply\s*:?\s*$/u,
+      /^[•\-\*]?\s*[\p{Emoji_Presentation}\p{Extended_Pictographic}\s]*Join\s*(Our\s*)?WhatsApp\s*:?\s*$/ui,
+      /^[•\-\*]?\s*[\p{Emoji_Presentation}\p{Extended_Pictographic}\s]*Join\s*(Our\s*)?Telegram\s*:?\s*$/ui,
+      /^[•\-\*]?\s*[\p{Emoji_Presentation}\p{Extended_Pictographic}\s]*Last\s*Date\s*:?\s*(Apply\s*ASAP)?\s*$/ui,
       /^[⸻\-—_=]{2,}\s*$/u,   // divider lines like ⸻, ---, ===
     ];
 
@@ -315,11 +331,12 @@ const getEnrichedJob = (originalJob) => {
     ];
     const telegramFields = [];
     const bodyLines = [];
+
     descLines.forEach(line => {
       const m = line.match(keyPattern);
       if (m) {
-        const key = m[1].trim();
-        const val = stripUnicodeBold(m[2].trim());
+        const key = stripHtml(m[1].trim());
+        const val = stripHtml(stripUnicodeBold(m[2].trim()));
         if (val) telegramFields.push({ key, value: val });
       } else if (!line.match(/^[•\-\*]/)) {
         // Non-bullet line — check if it's an inline "emoji Key: Value emoji Key: Value" pattern
@@ -331,9 +348,19 @@ const getEnrichedJob = (originalJob) => {
               telegramFields.push(f);
             }
           });
+          // Also extract and add the leading intro text segment
+          const keyAlt = KNOWN_KEYS.join('|');
+          const splitRe = new RegExp(`(?=[\\p{Emoji_Presentation}\\p{Extended_Pictographic}]?\\s*(?:${keyAlt})\\s*:)`, 'iu');
+          const firstSegment = line.split(splitRe)[0];
+          if (firstSegment) {
+            const cleanedIntro = stripHtml(stripUnicodeBold(firstSegment)).trim();
+            if (cleanedIntro.length > 5) {
+              bodyLines.push(cleanedIntro);
+            }
+          }
         } else {
           // Keep as intro/title body text if it's not noisy
-          const cleaned = stripUnicodeBold(line).trim();
+          const cleaned = stripHtml(stripUnicodeBold(line)).trim();
           const isNoisy = NOISY_LINE_PATTERNS.some(re => re.test(cleaned));
           const isEmojiOnly = /^[\p{Emoji_Presentation}\p{Extended_Pictographic}\s]+$/u.test(cleaned);
           if (!isNoisy && !isEmojiOnly && cleaned.length > 3) {
@@ -691,7 +718,7 @@ export default function JobDetails() {
     return list.slice(0, 3);
   }, [recommendations, recent, job?._id]);
 
-  if (loading) return <JobDetailsSkeleton />;
+  if (loading) return <JobDetailsSkeleton isMobile={isMobile} />;
   if (!job) return <p className="text-center text-muted">Job not found.</p>;
 
   // Get up to 3 related jobs for interspersion
@@ -1012,7 +1039,7 @@ export default function JobDetails() {
               </svg>
               <span>{job.createdAt ? new Date(job.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Recently Posted'}</span>
               <span>•</span>
-              <span>Posted by <strong style={{ color: '#0d6efd' }}>NextJobPost</strong></span>
+              <span>Posted by <a href="https://www.linkedin.com/in/next-job-post-199b5b371/" target="_blank" rel="noopener noreferrer" style={{ color: '#0d6efd', fontWeight: '700', textDecoration: 'none' }} onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'} onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>NextJobPost</a></span>
             </div>
 
             {/* Share and Follow Bar */}
@@ -1577,7 +1604,16 @@ export default function JobDetails() {
               </span>
               <span style={{ color: '#cbd5e1', fontSize: '0.8rem' }}>•</span>
               <span style={{ fontSize: '0.88rem', color: '#64748b' }}>Posted by</span>
-              <span style={{ fontWeight: '700', color: themeColor, fontSize: '0.88rem' }}>NextJobPost</span>
+              <a 
+                href="https://www.linkedin.com/in/next-job-post-199b5b371/" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                style={{ fontWeight: '700', color: themeColor, fontSize: '0.88rem', textDecoration: 'none' }}
+                onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
+                onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}
+              >
+                NextJobPost
+              </a>
             </div>
 
             {/* Share and Follow Bar */}

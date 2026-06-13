@@ -12,6 +12,21 @@ import { useSessionTracking } from './hooks/useSessionTracking.js';
 import ScrollToTop from './components/ScrollToTop.jsx';
 import { MEGA_CATEGORIES } from './utils/categoryConfig.js';
 
+const BASIC_CATEGORIES = [
+  'govt-jobs',
+  'upsc-jobs',
+  'ssc-jobs',
+  'railway-jobs',
+  'banking-jobs',
+  'defence-jobs',
+  'other-govt-jobs',
+  'teaching-jobs',
+  'psu-jobs',
+  'results',
+  'admit-cards',
+  'answer-keys'
+];
+
 // Lazy load page components for code splitting
 const Home = React.lazy(() => import('./pages/Home.jsx'));
 const JobDetails = React.lazy(() => import('./pages/JobDetails.jsx'));
@@ -32,7 +47,6 @@ const UserDashboard = React.lazy(() => import('./pages/UserDashboard.jsx'));
 const Onboarding = React.lazy(() => import('./pages/Onboarding.jsx'));
 const PrivacyPolicy = React.lazy(() => import('./pages/PrivacyPolicy.jsx'));
 const GovtJobsCategory = React.lazy(() => import('./pages/GovtJobsCategory.jsx'));
-const RootSlugHandler = React.lazy(() => import('./pages/RootSlugHandler.jsx'));
 const PreparationHub = React.lazy(() => import('./pages/Preparation/PreparationHub.jsx'));
 const AptitudePrep = React.lazy(() => import('./pages/Preparation/AptitudePrep.jsx'));
 const TechnicalPrep = React.lazy(() => import('./pages/Preparation/TechnicalPrep.jsx'));
@@ -731,8 +745,16 @@ function AppLayout() {
             <Route path="/dashboard" element={<UserRoute><UserDashboard /></UserRoute>} />
             <Route path="/onboarding" element={<UserRoute><Onboarding /></UserRoute>} />
 
-            {/* Job detail or category page catch-all */}
-            <Route path="/:slug" element={<RootSlugHandler />} />
+            {/* Govt category routes */}
+            {BASIC_CATEGORIES.map((cat) => (
+              <Route key={cat} path={`/${cat}`} element={<GovtJobsCategory categoryKey={cat} />} />
+            ))}
+            {Object.keys(MEGA_CATEGORIES).map((cat) => (
+              <Route key={cat} path={`/${cat}`} element={<GovtJobsCategory categoryKey={cat} />} />
+            ))}
+
+            {/* Job detail catch-all */}
+            <Route path="/:slug" element={<JobDetails />} />
           </Routes>
         </Suspense>
       </main>
