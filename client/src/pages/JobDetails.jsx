@@ -244,6 +244,12 @@ const getEnrichedJob = (originalJob) => {
   if (!originalJob) return null;
   const cleaned = cleanJobBranding(originalJob);
   const enriched = { ...cleaned };
+
+  // Sanitize any mobile LinkedIn URLs in the main apply link
+  if (enriched.applyLink && enriched.applyLink.includes('linkedin.com/m/')) {
+    enriched.applyLink = enriched.applyLink.replace('linkedin.com/m/', 'linkedin.com/');
+  }
+
   if (!enriched.isGovernment) {
     const rawDesc = enriched.jobDescription || enriched.description || '';
     
@@ -264,10 +270,15 @@ const getEnrichedJob = (originalJob) => {
       ];
       enriched.extractedLinks = extractedUrls.map(url => {
         const match = labelMap.find(l => url.includes(l.key));
-        // Redirect WhatsApp/Telegram to official channels
+        // Redirect WhatsApp/Telegram to official channels, clean mobile LinkedIn links
         let finalUrl = url;
-        if (url.includes('whatsapp.com') || url.includes('wa.me')) finalUrl = 'https://chat.whatsapp.com/LVpuUJluTpUEdIc4daAemQ';
-        if (url.includes('t.me') || url.includes('telegram.me')) finalUrl = 'https://t.me/nextjobpost';
+        if (url.includes('whatsapp.com') || url.includes('wa.me')) {
+          finalUrl = 'https://chat.whatsapp.com/LVpuUJluTpUEdIc4daAemQ';
+        } else if (url.includes('t.me') || url.includes('telegram.me')) {
+          finalUrl = 'https://t.me/nextjobpost';
+        } else if (url.includes('linkedin.com/m/')) {
+          finalUrl = url.replace('linkedin.com/m/', 'linkedin.com/');
+        }
         return { url: finalUrl, label: match ? match.label : 'Apply / Visit Link' };
       });
       // Deduplicate by URL
