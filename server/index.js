@@ -79,6 +79,7 @@ const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5173',
   'http://127.0.0.1:3000',
+  'https://job-peach-three.vercel.app',
 ];
 
 app.use(
@@ -91,7 +92,7 @@ app.use(
       // Check explicit list
       if (allowedOrigins.includes(origin)) return callback(null, true);
       // Allow any Vercel / Netlify / Render preview URLs for this project
-      if (/nextjobpost/i.test(origin)) return callback(null, true);
+      if (/nextjobpost|job-peach-three/i.test(origin)) return callback(null, true);
       return callback(new Error(`CORS blocked for origin: ${origin}`));
     },
     credentials: true,

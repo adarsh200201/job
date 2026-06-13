@@ -84,5 +84,6 @@ router.get('/admin/reports', adminAuth, ctrl.adminGetReports);
 router.put('/admin/reports/:id', adminAuth, ctrl.adminUpdateReportStatus);
 router.get('/comments/:questionId', ctrl.getQuestionComments);
 router.post('/comments', optionalAuth, ctrl.createQuestionComment);
+router.delete('/comments/:id', optionalAuth, ctrl.deleteQuestionComment);
 
 module.exports = router;

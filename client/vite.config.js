@@ -1,9 +1,3 @@
-// Polyfill globalThis.crypto for Node < 19 (needed by serialize-javascript / rollup-plugin-terser on Netlify)
-import { webcrypto } from 'crypto';
-if (typeof globalThis.crypto === 'undefined') {
-  globalThis.crypto = webcrypto;
-}
-
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';

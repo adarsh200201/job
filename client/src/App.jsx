@@ -204,12 +204,11 @@ function NavDropdown({ label, items, to, showArrow = true, mega = false }) {
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '4px',
+          gap: '2px',
           cursor: 'pointer'
         }}
       >
-        {label}
-        {showArrow && (
+        {label}{showArrow && (
           <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', opacity: 0.6 }}>
             <path d="M1 3l4 4 4-4" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
           </svg>

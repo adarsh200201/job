@@ -1011,15 +1011,54 @@ exports.getQuestionComments = async (req, res) => {
 
 exports.createQuestionComment = async (req, res) => {
   try {
-    const { questionId, comment, username } = req.body;
+    const { questionId, comment, username, parentId } = req.body;
     const newComment = new QuestionComment({
       questionId,
       comment,
       username: username || (req.user ? req.user.username : 'Anonymous'),
-      userId: req.user ? req.user.id : undefined
+      userId: req.user ? req.user.id : undefined,
+      parentId: parentId || null
     });
     await newComment.save();
     res.json({ success: true, comment: newComment });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.deleteQuestionComment = async (req, res) => {
+  try {
+    const comment = await QuestionComment.findById(req.params.id);
+    if (!comment) return res.status(404).json({ message: 'Comment not found' });
+
+    let authorized = false;
+    
+    // 1. Admin authorization
+    if (req.user && req.user.role === 'admin') {
+      authorized = true;
+    }
+    // 2. Logged-in user who created the comment
+    else if (comment.userId && req.user && req.user.id === comment.userId.toString()) {
+      authorized = true;
+    }
+    // 3. Guest user who matches the username of the comment
+    else if (!comment.userId) {
+      const requestUsername = req.body.username || req.query.username;
+      if (requestUsername && requestUsername === comment.username) {
+        authorized = true;
+      }
+    }
+
+    if (!authorized) {
+      return res.status(403).json({ message: 'Not authorized to delete this comment' });
+    }
+
+    // Delete the comment itself and any child replies
+    await QuestionComment.deleteMany({
+      $or: [{ _id: comment._id }, { parentId: comment._id }]
+    });
+
+    res.json({ success: true, message: 'Comment deleted successfully' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

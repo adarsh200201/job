@@ -13,7 +13,7 @@ function optionalAuth(req, res, next) {
   
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'dev_secret_change_me');
-    req.user = { id: decoded.id, username: decoded.username };
+    req.user = { id: decoded.id, username: decoded.username, role: decoded.role || 'user' };
   } catch (e) {
     // Ignore invalid token and continue as guest
   }

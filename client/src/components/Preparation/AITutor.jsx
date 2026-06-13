@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-
-const API = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+import api from '../../api/index.js';
 
 export default function AITutor({ question, onClose }) {
   const [explanation, setExplanation] = useState('');
@@ -12,21 +11,16 @@ export default function AITutor({ question, onClose }) {
     if (!question) return;
     setLoading(true);
     setExplanation('');
-    fetch(`${API}/api/preparation/ai-tutor`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        question: question.question || question.title || question.problemStatement,
-        options: question.options || [],
-        answer: question.answer || question.explanation,
-        explanation: question.explanation,
-        topic: question.topic,
-      }),
+    api.post('/preparation/ai-tutor', {
+      question: question.question || question.title || question.problemStatement,
+      options: question.options || [],
+      answer: question.answer || question.explanation,
+      explanation: question.explanation,
+      topic: question.topic,
     })
-      .then(r => r.json())
-      .then(d => {
-        setExplanation(d.explanation || '');
-        setSource(d.source || 'rule-based');
+      .then(res => {
+        setExplanation(res.data.explanation || '');
+        setSource(res.data.source || 'rule-based');
       })
       .catch(() => setExplanation('Failed to load explanation. Please try again.'))
       .finally(() => setLoading(false));
@@ -56,10 +50,10 @@ export default function AITutor({ question, onClose }) {
         onClick={onClose}
         style={{
           position: 'fixed', inset: 0,
-          background: 'rgba(0,0,0,0.5)',
+          background: 'rgba(15, 23, 42, 0.45)',
           zIndex: 10000,
-          backdropFilter: 'blur(4px)',
           animation: 'fadeIn 0.2s ease',
+          willChange: 'opacity',
         }}
       />
 
@@ -79,6 +73,7 @@ export default function AITutor({ question, onClose }) {
           flexDirection: 'column',
           overflow: 'hidden',
           animation: 'slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1)',
+          willChange: 'transform',
           fontFamily: 'Inter, sans-serif',
         }}
       >

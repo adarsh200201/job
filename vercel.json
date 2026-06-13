@@ -19,15 +19,11 @@
     },
     {
       "src": "/api/(.*)",
-      "dest": "server/index.js"
+      "dest": "https://nextjobpost-backend.onrender.com/api/$1"
     },
     {
       "src": "/sitemap.xml",
-      "dest": "server/index.js"
-    },
-    {
-      "src": "/robots.txt",
-      "dest": "server/index.js"
+      "dest": "https://nextjobpost-backend.onrender.com/sitemap.xml"
     },
     {
       "src": "/(.*)",

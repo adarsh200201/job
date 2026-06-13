@@ -124,7 +124,29 @@ function DiscussionSection({ questionId }) {
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(false);
   const [posting, setPosting] = useState(false);
-  const [username, setUsername] = useState(() => localStorage.getItem('comment_username') || '');
+  const [username, setUsername] = useState(() => {
+    const saved = localStorage.getItem('comment_username');
+    if (saved) return saved;
+    return localStorage.getItem('username') || '';
+  });
+  const [replyingTo, setReplyingTo] = useState(null);
+  
+  const commentInputRef = useRef(null);
+
+  // Auth decoding
+  const token = localStorage.getItem('token');
+  const isAdmin = localStorage.getItem('isAdmin') === 'true';
+  let currentUserId = null;
+  if (token) {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const decoded = JSON.parse(atob(base64));
+      currentUserId = decoded.id || decoded.sub || null;
+    } catch (e) {
+      console.error(e);
+    }
+  }
 
   const loadComments = async () => {
     setLoading(true);
@@ -141,7 +163,11 @@ function DiscussionSection({ questionId }) {
   };
 
   useEffect(() => {
-    if (questionId) loadComments();
+    if (questionId) {
+      loadComments();
+      setReplyingTo(null);
+      setNewComment('');
+    }
   }, [questionId]);
 
   const handlePostComment = async (e) => {
@@ -151,13 +177,26 @@ function DiscussionSection({ questionId }) {
     try {
       const activeName = username.trim() || 'Anonymous';
       localStorage.setItem('comment_username', activeName);
-      const res = await api.post('/preparation/comments', {
+      
+      const payload = {
         questionId,
         comment: newComment,
         username: activeName
-      });
+      };
+      if (replyingTo) {
+        payload.parentId = replyingTo.commentId;
+      }
+
+      const res = await api.post('/preparation/comments', payload);
       if (res.data.success) {
         setNewComment('');
+        setReplyingTo(null);
+        
+        // Save comment ID to local storage so author can delete it later
+        const myComments = JSON.parse(localStorage.getItem('my_comments') || '[]');
+        myComments.push(res.data.comment._id);
+        localStorage.setItem('my_comments', JSON.stringify(myComments));
+        
         loadComments();
       }
     } catch (err) {
@@ -167,29 +206,165 @@ function DiscussionSection({ questionId }) {
     }
   };
 
+  const handleDeleteComment = async (commentId, commentUsername) => {
+    if (!window.confirm("Are you sure you want to delete this comment?")) return;
+    try {
+      const headers = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      const res = await api.delete(`/preparation/comments/${commentId}`, {
+        headers,
+        data: { username: commentUsername }
+      });
+      if (res.data.success) {
+        loadComments();
+      }
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || "Failed to delete comment");
+    }
+  };
+
+  const handleStartReply = (c) => {
+    const parentId = c.parentId || c._id;
+    setReplyingTo({
+      commentId: parentId,
+      username: c.username
+    });
+    setNewComment(`@${c.username.replace(/\s+/g, '_')} `);
+    if (commentInputRef.current) {
+      commentInputRef.current.focus();
+    }
+  };
+
+  const canDelete = (c) => {
+    if (isAdmin) return true;
+    if (c.userId && currentUserId && c.userId === currentUserId) return true;
+    if (!c.userId) {
+      const myComments = JSON.parse(localStorage.getItem('my_comments') || '[]');
+      if (myComments.includes(c._id)) return true;
+      const activeName = username.trim() || localStorage.getItem('username') || '';
+      if (activeName && c.username === activeName) return true;
+    }
+    return false;
+  };
+
+  const renderCommentText = (text) => {
+    const parts = text.split(/(@[a-zA-Z0-9_\-\.]+)/g);
+    return parts.map((part, idx) => {
+      if (part.startsWith('@')) {
+        return <strong key={idx} style={{ color: '#4f46e5', fontWeight: 600 }}>{part}</strong>;
+      }
+      return part;
+    });
+  };
+
+  // Group comments into top level and replies
+  const topLevel = comments.filter(c => !c.parentId);
+  const replies = comments.filter(c => c.parentId);
+
   return (
     <div style={{ padding: 12 }}>
       <div style={{ fontWeight: 700, color: '#334155', fontSize: '0.85rem', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
         💬 Discussion Forum ({comments.length})
       </div>
 
-      <div style={{ maxHeight: '180px', overflowY: 'auto', marginBottom: 12, display: 'flex', flexDirection: 'column', gap: 8, border: '1px solid #f1f5f9', borderRadius: 8, padding: 8, background: '#fafbfd' }}>
+      <div style={{ maxHeight: '240px', overflowY: 'auto', marginBottom: 12, display: 'flex', flexDirection: 'column', gap: 8, border: '1px solid #f1f5f9', borderRadius: 8, padding: 8, background: '#fafbfd' }}>
         {loading && comments.length === 0 ? (
           <div style={{ fontSize: '0.75rem', color: '#94a3b8', textAlign: 'center', padding: 8 }}>Loading discussion...</div>
         ) : comments.length === 0 ? (
           <div style={{ fontSize: '0.75rem', color: '#94a3b8', textAlign: 'center', padding: 8 }}>No comments yet. Start the discussion below!</div>
         ) : (
-          comments.map(c => (
-            <div key={c._id} style={{ background: '#fff', padding: '8px 10px', borderRadius: 6, border: '1px solid #e2e8f0' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', fontWeight: 700, color: '#6366f1', marginBottom: 2 }}>
-                <span>👤 {c.username}</span>
-                <span style={{ color: '#94a3b8', fontWeight: 400 }}>{new Date(c.createdAt).toLocaleDateString()}</span>
+          topLevel.map(c => {
+            const commentReplies = replies.filter(r => r.parentId === c._id);
+            return (
+              <div key={c._id} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {/* Top Level Comment */}
+                <div style={{ background: '#fff', padding: '8px 10px', borderRadius: 6, border: '1px solid #e2e8f0' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', fontWeight: 700, color: '#6366f1', marginBottom: 2 }}>
+                    <span>👤 {c.username}</span>
+                    <span style={{ color: '#94a3b8', fontWeight: 400 }}>{new Date(c.createdAt).toLocaleDateString()}</span>
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.78rem', color: '#334155', lineHeight: 1.4, wordBreak: 'break-word' }}>
+                    {renderCommentText(c.comment)}
+                  </p>
+                  
+                  {/* Actions Row */}
+                  <div style={{ display: 'flex', gap: 12, marginTop: 6, alignItems: 'center' }}>
+                    <button
+                      type="button"
+                      onClick={() => handleStartReply(c)}
+                      style={{ background: 'none', border: 'none', color: '#6366f1', fontSize: '0.68rem', fontWeight: 700, cursor: 'pointer', padding: 0 }}
+                    >
+                      Reply
+                    </button>
+                    {canDelete(c) && (
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteComment(c._id, c.username)}
+                        style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: '0.68rem', fontWeight: 700, cursor: 'pointer', padding: 0 }}
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Nested Replies */}
+                {commentReplies.length > 0 && (
+                  <div style={{ marginLeft: 16, paddingLeft: 10, borderLeft: '2px solid #cbd5e1', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {commentReplies.map(r => (
+                      <div key={r._id} style={{ background: '#f8fafc', padding: '6px 8px', borderRadius: 6, border: '1px solid #e2e8f0' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', fontWeight: 700, color: '#6366f1', marginBottom: 2 }}>
+                          <span>👤 {r.username}</span>
+                          <span style={{ color: '#94a3b8', fontWeight: 400 }}>{new Date(r.createdAt).toLocaleDateString()}</span>
+                        </div>
+                        <p style={{ margin: 0, fontSize: '0.75rem', color: '#334155', lineHeight: 1.4, wordBreak: 'break-word' }}>
+                          {renderCommentText(r.comment)}
+                        </p>
+                        
+                        {/* Reply Actions */}
+                        <div style={{ display: 'flex', gap: 12, marginTop: 4, alignItems: 'center' }}>
+                          <button
+                            type="button"
+                            onClick={() => handleStartReply(r)}
+                            style={{ background: 'none', border: 'none', color: '#6366f1', fontSize: '0.65rem', fontWeight: 700, cursor: 'pointer', padding: 0 }}
+                          >
+                            Reply
+                          </button>
+                          {canDelete(r) && (
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteComment(r._id, r.username)}
+                              style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: '0.65rem', fontWeight: 700, cursor: 'pointer', padding: 0 }}
+                            >
+                              Delete
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-              <p style={{ margin: 0, fontSize: '0.78rem', color: '#334155', lineHeight: 1.4, wordBreak: 'break-word' }}>{c.comment}</p>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
+
+      {replyingTo && (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#e0e7ff', padding: '6px 10px', borderRadius: 6, fontSize: '0.72rem', marginBottom: 6, color: '#4338ca', fontWeight: 600 }}>
+          <span>Replying to @{replyingTo.username}</span>
+          <button
+            type="button"
+            onClick={() => setReplyingTo(null)}
+            style={{ border: 'none', background: 'none', color: '#ef4444', cursor: 'pointer', fontWeight: 700, fontSize: '0.72rem' }}
+          >
+            Cancel
+          </button>
+        </div>
+      )}
 
       <form onSubmit={handlePostComment} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         <div style={{ display: 'flex', gap: 8 }}>
@@ -201,8 +376,9 @@ function DiscussionSection({ questionId }) {
             style={{ width: '30%', border: '1px solid #cbd5e1', borderRadius: 6, padding: '4px 8px', fontSize: '0.75rem', outline: 'none' }}
           />
           <input
+            ref={commentInputRef}
             type="text"
-            placeholder="Add a comment to this question..."
+            placeholder={replyingTo ? "Write a reply..." : "Add a comment to this question..."}
             value={newComment}
             onChange={e => setNewComment(e.target.value)}
             required
@@ -213,7 +389,7 @@ function DiscussionSection({ questionId }) {
             disabled={posting}
             style={{ background: '#10b981', color: '#fff', border: 'none', borderRadius: 6, padding: '4px 12px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}
           >
-            {posting ? '...' : 'Post'}
+            {posting ? '...' : (replyingTo ? 'Reply' : 'Post')}
           </button>
         </div>
       </form>
@@ -631,7 +807,11 @@ function MCQCard({ questionId, category, qNum, questionText, statementBlock, opt
 
         <button
           type="button"
-          onClick={() => setShowWorkspace(!showWorkspace)}
+          onClick={() => {
+            const nextVal = !showWorkspace;
+            setShowWorkspace(nextVal);
+            if (nextVal) setShowReport(false);
+          }}
           onMouseEnter={() => setBtnHover(prev => ({ ...prev, workspace: true }))}
           onMouseLeave={() => setBtnHover(prev => ({ ...prev, workspace: false }))}
           style={{
@@ -639,14 +819,18 @@ function MCQCard({ questionId, category, qNum, questionText, statementBlock, opt
             background: showWorkspace ? '#e6fcf5' : (btnHover.workspace ? '#f0fdf4' : '#ffffff'),
             boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
           }}
-          title="Workspace / Scratchpad"
+          title="Comment"
         >
           <WorkspaceIcon active={showWorkspace} />
         </button>
 
         <button
           type="button"
-          onClick={() => setShowReport(!showReport)}
+          onClick={() => {
+            const nextVal = !showReport;
+            setShowReport(nextVal);
+            if (nextVal) setShowWorkspace(false);
+          }}
           onMouseEnter={() => setBtnHover(prev => ({ ...prev, report: true }))}
           onMouseLeave={() => setBtnHover(prev => ({ ...prev, report: false }))}
           style={{
