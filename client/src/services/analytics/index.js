@@ -9,7 +9,7 @@
  * IMPORTANT: All existing imports from utils/analytics.js still work.
  * This file is the NEW service layer — import from here in new code.
  */
-import mixpanel from 'mixpanel-browser';
+import mixpanel from './mixpanel.js';
 import { buildGlobalProps, isSearchEngineReferrer, getPageType } from './globalProps.js';
 import { isDuplicate } from './deduplication.js';
 import { EVENTS } from './events.js';

@@ -3,7 +3,7 @@
  * Manages session lifecycle: session_id, started/ended, time-on-page,
  * returning user detection, and lifecycle stage.
  */
-import mixpanel from 'mixpanel-browser';
+import mixpanel from './mixpanel.js';
 import { getSessionId } from './globalProps.js';
 import { EVENTS } from './events.js';
 
