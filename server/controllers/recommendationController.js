@@ -580,11 +580,45 @@ exports.getNotifications = async (req, res) => {
   }
 };
 
+const similarJobsCache = new Map();
+const SIMILAR_CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+
+function getFromSimilarCache(key) {
+  const entry = similarJobsCache.get(key);
+  if (!entry) return null;
+  if (Date.now() - entry.ts > SIMILAR_CACHE_TTL) {
+    similarJobsCache.delete(key);
+    return null;
+  }
+  return entry.data;
+}
+
+function setSimilarCache(key, data) {
+  if (similarJobsCache.size >= 200) {
+    similarJobsCache.delete(similarJobsCache.keys().next().value);
+  }
+  similarJobsCache.set(key, { ts: Date.now(), data });
+}
+
+exports.bustSimilarJobsCache = function() {
+  similarJobsCache.clear();
+};
+
 // ── GET /api/jobs/:id/related (Overhauled Similar Jobs Engine) ────────────────
 exports.getSimilarJobs = async (req, res) => {
   try {
     const { id } = req.params;
     const limit = parseInt(req.query.limit, 10) || 5;
+    
+    const cacheKey = `${id}::${limit}`;
+    const cached = getFromSimilarCache(cacheKey);
+    if (cached) {
+      return res.json({
+        success: true,
+        count: cached.length,
+        data: cached
+      });
+    }
     
     const currentJob = await Job.findById(id);
     if (!currentJob) {
@@ -657,6 +691,9 @@ exports.getSimilarJobs = async (req, res) => {
     // Sort descending similarity and slice limit
     rankedCandidates.sort((a, b) => b.similarityScore - a.similarityScore);
     const results = rankedCandidates.slice(0, limit);
+    
+    // Store in cache
+    setSimilarCache(cacheKey, results);
     
     res.json({
       success: true,

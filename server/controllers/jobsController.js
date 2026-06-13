@@ -1,6 +1,6 @@
 const Job = require('../models/Job');
 const slugify = require('slugify');
-const { getProfileAndActivityData, calculateJobMatchScore } = require('./recommendationController');
+const { getProfileAndActivityData, calculateJobMatchScore, bustSimilarJobsCache } = require('./recommendationController');
 const GovernmentJobPreferences = require('../models/GovernmentJobPreferences');
 
 // Helper function to build filters for job search
@@ -117,6 +117,7 @@ function buildFilters(query) {
 // Avoids hitting MongoDB on every page load for the same query.
 // TTL: 5 minutes. Max 200 entries (auto-evicts oldest on overflow).
 const jobsCache = new Map();
+const singleJobCache = new Map();
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 const CACHE_MAX_SIZE = 200;
 
@@ -148,9 +149,30 @@ function setCache(key, data) {
   jobsCache.set(key, { ts: Date.now(), data });
 }
 
+function getFromSingleCache(key) {
+  const entry = singleJobCache.get(key);
+  if (!entry) return null;
+  if (Date.now() - entry.ts > CACHE_TTL_MS) {
+    singleJobCache.delete(key);
+    return null;
+  }
+  return entry.data;
+}
+
+function setSingleCache(key, data) {
+  if (singleJobCache.size >= CACHE_MAX_SIZE) {
+    singleJobCache.delete(singleJobCache.keys().next().value);
+  }
+  singleJobCache.set(key, { ts: Date.now(), data });
+}
+
 /** Call this whenever a job is created/updated/deleted to bust stale cache */
 exports.bustJobsCache = function() {
   jobsCache.clear();
+  singleJobCache.clear();
+  if (typeof bustSimilarJobsCache === 'function') {
+    bustSimilarJobsCache();
+  }
 };
 
 
@@ -299,6 +321,19 @@ exports.getJobById = async (req, res) => {
     // Check if the parameter is a valid MongoDB ObjectId (24 char hex string)
     const isObjectId = /^[0-9a-fA-F]{24}$/.test(idOrSlug);
     
+    // Check single job cache first
+    const cachedJob = getFromSingleCache(idOrSlug);
+    if (cachedJob) {
+      // Increment views asynchronously in the background
+      Job.updateOne({ _id: cachedJob._id }, { $inc: { views: 1 } }).catch(err => {
+        console.error('Error incrementing views in background (cached):', err);
+      });
+      return res.json({
+        success: true,
+        data: cachedJob
+      });
+    }
+
     let job;
     
     if (isObjectId) {
@@ -316,9 +351,21 @@ exports.getJobById = async (req, res) => {
       });
     }
     
-    // Increment view count
-    job.views += 1;
-    await job.save();
+    // Convert to plain object to store in cache
+    const jobObj = job.toObject();
+    
+    // Cache it by slug/id
+    setSingleCache(idOrSlug, jobObj);
+    if (!isObjectId && job._id) {
+      setSingleCache(job._id.toString(), jobObj);
+    } else if (isObjectId && job.slug) {
+      setSingleCache(job.slug, jobObj);
+    }
+    
+    // Increment view count in the background (asynchronously) to keep response instant
+    Job.updateOne({ _id: job._id }, { $inc: { views: 1 } }).catch(err => {
+      console.error('Error incrementing views in background:', err);
+    });
     
     res.json({
       success: true,

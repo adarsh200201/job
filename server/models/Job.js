@@ -93,7 +93,8 @@ JobSchema.pre('save', function(next) {
 });
 
 // Add indexes for faster queries
-// Note: slug index is already created via 'unique: true' in the schema
+// Note: slug index is already created via 'unique: true' in the schema, but adding an explicit index provides a safe fallback
+JobSchema.index({ slug: 1 });
 JobSchema.index({ isActive: 1, createdAt: -1 });
 JobSchema.index({ company: 1 });
 JobSchema.index({ location: 1 });
