@@ -1,0 +1,16 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://nextjobpost-backend.onrender.com/api/:path*"
+    },
+    {
+      "source": "/sitemap.xml",
+      "destination": "https://nextjobpost-backend.onrender.com/sitemap.xml"
+    },
+    {
+      "source": "/:path*",
+      "destination": "/index.html"
+    }
+  ]
+}
