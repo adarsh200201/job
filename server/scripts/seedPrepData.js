@@ -1243,61 +1243,65 @@ async function seedPrepData() {
       console.log(`ℹ   PrepCategory: ${catCount} docs already exist, skipping.`);
     }
 
-    // Drop old Aptitude Questions and re-generate 20 questions for each topic
-    console.log('🧹 Clearing old Aptitude questions...');
-    await AptitudeQuestion.deleteMany({});
-    
-    const generatedAptitudeQuestions = [];
-    const generatedKeys = new Set();
+    // Seed Aptitude Questions if empty to avoid changing question ObjectIds and losing associated comments
+    const aptCount = await AptitudeQuestion.countDocuments();
+    if (aptCount === 0) {
+      console.log('🧹 Database empty. Generating Aptitude questions...');
+      
+      const generatedAptitudeQuestions = [];
+      const generatedKeys = new Set();
 
-    // 1. First generate the standard 36 aptitude topics under category "Aptitude"
-    for (const topic of ALL_TOPICS) {
-      const qs = generateQuestionsForTopicAndCategory("Aptitude", topic);
-      generatedAptitudeQuestions.push(...qs);
-      generatedKeys.add(`aptitude::${topic.toLowerCase()}`);
-    }
-
-    // 2. Next, generate questions for all active topics in PrepCategory that are not yet covered
-    const mappings = {
-      "HCF and LCM": "Problems on H.C.F and L.C.M",
-      "Averages": "Average",
-      "Alligation and Mixture": "Alligation or Mixture",
-      "Percentages": "Percentage",
-      "Time Speed Distance": "Time and Distance",
-      "Logarithms": "Logarithm",
-      "Mensuration": "Area"
-    };
-
-    for (const cat of defaultCategories) {
-      const catName = cat.name;
-      if (catName === "Company Wise Preparation") continue;
-
-      // Map category name to backend expectations
-      let backendCat = catName;
-      if (catName === "Quantitative Aptitude") {
-        backendCat = "Aptitude";
+      // 1. First generate the standard 36 aptitude topics under category "Aptitude"
+      for (const topic of ALL_TOPICS) {
+        const qs = generateQuestionsForTopicAndCategory("Aptitude", topic);
+        generatedAptitudeQuestions.push(...qs);
+        generatedKeys.add(`aptitude::${topic.toLowerCase()}`);
       }
 
-      for (const sub of cat.subCategories) {
-        if (sub.status !== 'active') continue;
-        for (const top of sub.topics) {
-          if (top.status !== 'active') continue;
+      // 2. Next, generate questions for all active topics in PrepCategory that are not yet covered
+      const mappings = {
+        "HCF and LCM": "Problems on H.C.F and L.C.M",
+        "Averages": "Average",
+        "Alligation and Mixture": "Alligation or Mixture",
+        "Percentages": "Percentage",
+        "Time Speed Distance": "Time and Distance",
+        "Logarithms": "Logarithm",
+        "Mensuration": "Area"
+      };
 
-          const topicName = top.name;
-          const mappedName = mappings[topicName] || topicName;
+      for (const cat of defaultCategories) {
+        const catName = cat.name;
+        if (catName === "Company Wise Preparation") continue;
 
-          const key = `${backendCat.toLowerCase()}::${mappedName.toLowerCase()}`;
-          if (!generatedKeys.has(key)) {
-            const qs = generateQuestionsForTopicAndCategory(backendCat, mappedName);
-            generatedAptitudeQuestions.push(...qs);
-            generatedKeys.add(key);
+        // Map category name to backend expectations
+        let backendCat = catName;
+        if (catName === "Quantitative Aptitude") {
+          backendCat = "Aptitude";
+        }
+
+        for (const sub of cat.subCategories) {
+          if (sub.status !== 'active') continue;
+          for (const top of sub.topics) {
+            if (top.status !== 'active') continue;
+
+            const topicName = top.name;
+            const mappedName = mappings[topicName] || topicName;
+
+            const key = `${backendCat.toLowerCase()}::${mappedName.toLowerCase()}`;
+            if (!generatedKeys.has(key)) {
+              const qs = generateQuestionsForTopicAndCategory(backendCat, mappedName);
+              generatedAptitudeQuestions.push(...qs);
+              generatedKeys.add(key);
+            }
           }
         }
       }
+      
+      await AptitudeQuestion.insertMany(generatedAptitudeQuestions);
+      console.log(`✅ Seeded ${generatedAptitudeQuestions.length} Aptitude questions across all categories and topics`);
+    } else {
+      console.log(`ℹ   AptitudeQuestion: ${aptCount} docs already exist, skipping.`);
     }
-    
-    await AptitudeQuestion.insertMany(generatedAptitudeQuestions);
-    console.log(`✅ Seeded ${generatedAptitudeQuestions.length} Aptitude questions across all categories and topics`);
 
     if (techCount === 0) {
       await TechnicalQuestion.insertMany(technicalQuestions);
