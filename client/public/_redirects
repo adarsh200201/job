@@ -1,9 +1,8 @@
-# Redirect sitemap and robots.txt to backend
-/sitemap.xml    https://next-job-cfbh.onrender.com/sitemap.xml    200!
-/robots.txt     https://next-job-cfbh.onrender.com/robots.txt     200!
+# Redirect sitemap to backend
+/sitemap.xml    https://nextjobpost-backend.onrender.com/sitemap.xml    200!
 
 # API Proxy to backend
-/api/*          https://next-job-cfbh.onrender.com/api/:splat     200!
+/api/*          https://nextjobpost-backend.onrender.com/api/:splat     200!
 
 # Redirect all routes to index.html for React Router
 /*              /index.html                                       200

@@ -105,7 +105,8 @@ app.use(helmet({
 }));
 app.use(cookieParser());
 app.use(mongoSanitize());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(inputSanitizer);
 
 // Prerender middleware for SEO crawler bots (Option 1)

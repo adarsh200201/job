@@ -322,7 +322,7 @@ main.container {
 
 .nav-link {
   color: #475569 !important; /* Modern Slate-600 */
-  padding: 0.45rem 1.1rem;
+  padding: 0.5rem 1.25rem !important;
   font-size: 0.92rem;
   font-weight: 600;
   border-radius: 9999px; /* Seamless round pills */
@@ -378,7 +378,7 @@ main.container {
   }
 
   .nav-link {
-    padding: 0.4rem 0.6rem;
+    padding: 0.4rem 0.6rem !important;
     font-size: 0.85rem;
   }
 
@@ -1356,13 +1356,39 @@ main.container {
   }
 }
 
+/* GPU-accelerated skeleton pulse — avoids layout recalc, prevents CLS */
 @keyframes pulse {
   0%, 100% {
     opacity: 1;
+    transform: translateZ(0);
   }
   50% {
-    opacity: 0.5;
+    opacity: 0.45;
+    transform: translateZ(0);
   }
+}
+
+/* ── AdSense wrapper: reserve space before ad loads to prevent CLS ─────── */
+/* These sizes match the reserved heights in GoogleAd.jsx                   */
+.google-ad-wrapper {
+  display: block;
+  text-align: center;
+  overflow: hidden;
+  will-change: contents;
+  /* default min-height for auto-format ads */
+  min-height: 90px;
+  background: transparent;
+  border-radius: 8px;
+}
+
+/* Larger reserved space for rectangle ads */
+.google-ad-wrapper[data-format="rectangle"] {
+  min-height: 250px;
+}
+
+/* Sidebar/vertical reserved space */
+.google-ad-wrapper[data-format="vertical"] {
+  min-height: 600px;
 }
 
 /* Rich Text Editor Styles */

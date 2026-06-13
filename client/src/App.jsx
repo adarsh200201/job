@@ -193,8 +193,14 @@ function NavDropdown({ label, items, to, showArrow = true, mega = false }) {
     >
       <NavLink
         to={to}
-        className={({ isActive }) => `nav-link ${(isActive || isChildActive) ? 'active' : ''}`}
-        onClick={() => setOpen(o => !o)}
+        className={({ isActive }) => {
+          const isReallyActive = (to && to !== '#' && to !== '') ? (isActive || isChildActive) : isChildActive;
+          return `nav-link ${isReallyActive ? 'active' : ''}`;
+        }}
+        onClick={(e) => {
+          if (to === '#') e.preventDefault();
+          setOpen(o => !o);
+        }}
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -471,7 +477,10 @@ function AppLayout() {
           <div className="nav-top-bar">
             <div className="nav-top-inner" style={{ gap: '1.5rem' }}>
               <Link to="/" className="nav-logo-link">
-                <img src="/logo.png" alt="NextJobPost Logo" className="logo-img-nav" width="34" height="34" />
+                <picture>
+                  <source srcSet="/logo.webp" type="image/webp" />
+                  <img src="/logo.png" alt="NextJobPost Logo" className="logo-img-nav" width="34" height="34" />
+                </picture>
                 <span className="nav-brand">
                   <span className="nav-brand-next">Next</span>
                   <span className="nav-brand-job">Job</span>
@@ -591,7 +600,10 @@ function AppLayout() {
           <nav className={`mobile-menu-drawer ${mobileMenuOpen ? 'active' : ''}`}>
             <div className="mobile-menu-header">
               <Link to="/" className="nav-logo-link" onClick={() => setMobileMenuOpen(false)}>
-                <img src="/logo.png" alt="NextJobPost Logo" style={{ width: 28, height: 28, borderRadius: 5 }} width="28" height="28" />
+                <picture>
+                  <source srcSet="/logo.webp" type="image/webp" />
+                  <img src="/logo.png" alt="NextJobPost Logo" style={{ width: 28, height: 28, borderRadius: 5 }} width="28" height="28" />
+                </picture>
                 <span className="nav-brand" style={{ fontSize: '1.1rem' }}>
                   <span className="nav-brand-next">Next</span>
                   <span className="nav-brand-job">Job</span>

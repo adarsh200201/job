@@ -7,6 +7,7 @@ if (typeof globalThis.crypto === 'undefined') {
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
+import { visualizer } from 'rollup-plugin-visualizer';
 
 export default defineConfig({
   plugins: [
@@ -15,7 +16,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       injectRegister: 'inline',
       workbox: {
-        globPatterns: ['**/*.{js,css,html,png,svg,ico,json}'],
+        globPatterns: ['**/*.{js,css,html,png,svg,ico,json,webp}'],
       },
       manifest: {
         name: 'NextJobPost',
@@ -39,6 +40,13 @@ export default defineConfig({
           }
         ]
       }
+    }),
+    visualizer({
+      filename: 'bundle-stats.html',
+      title: 'NextJobPost Bundle Analysis',
+      template: 'treemap',
+      gzipSize: true,
+      brotliSize: true
     })
   ],
   server: {
