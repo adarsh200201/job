@@ -11,6 +11,15 @@ const QuestionReport = require('../models/QuestionReport');
 const QuestionComment = require('../models/QuestionComment');
 const xlsx = require('xlsx');
 
+let cachedStructure = null;
+let cachedStructureExpiry = 0;
+const STRUCTURE_TTL_MS = 10 * 60 * 1000; // 10 minutes
+
+function bustPrepStructureCache() {
+  cachedStructure = null;
+  cachedStructureExpiry = 0;
+}
+
 /* ──────────────────────────────────────────────────────────────
    HELPERS
 ────────────────────────────────────────────────────────────── */
@@ -461,12 +470,14 @@ exports.adminGetQuestions = async (req, res) => {
     if (company && company !== 'all') filter.company = company;
     if (q) filter.question = { $regex: q, $options: 'i' };
 
-    const total = await AptitudeQuestion.countDocuments(filter);
-    const questions = await AptitudeQuestion.find(filter)
-      .sort({ createdAt: -1 })
-      .skip((Number(page) - 1) * Number(limit))
-      .limit(Number(limit))
-      .select('-__v');
+    const [total, questions] = await Promise.all([
+      AptitudeQuestion.countDocuments(filter),
+      AptitudeQuestion.find(filter)
+        .sort({ createdAt: -1 })
+        .skip((Number(page) - 1) * Number(limit))
+        .limit(Number(limit))
+        .select('-__v')
+    ]);
 
     res.json({ success: true, questions, total, page: Number(page), pages: Math.ceil(total / Number(limit)) });
   } catch (err) {
@@ -527,11 +538,13 @@ exports.adminBulkDeleteQuestions = async (req, res) => {
 exports.adminGetMockTests = async (req, res) => {
   try {
     const { page = 1, limit = 10 } = req.query;
-    const total = await MockTest.countDocuments();
-    const tests = await MockTest.find()
-      .sort({ createdAt: -1 })
-      .skip((Number(page) - 1) * Number(limit))
-      .limit(Number(limit));
+    const [total, tests] = await Promise.all([
+      MockTest.countDocuments(),
+      MockTest.find()
+        .sort({ createdAt: -1 })
+        .skip((Number(page) - 1) * Number(limit))
+        .limit(Number(limit))
+    ]);
     res.json({ success: true, tests, total, page: Number(page), pages: Math.ceil(total / Number(limit)) });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -762,9 +775,20 @@ exports.adminGetLeaderboard = async (req, res) => {
 
 exports.getStructure = async (req, res) => {
   try {
-    const categories = await PrepCategory.find({ status: 'active' }).sort({ order: 1 });
-    const companies = await PrepCompany.find({ status: 'active' }).sort({ order: 1 });
-    res.json({ success: true, categories, companies });
+    if (cachedStructure && Date.now() < cachedStructureExpiry) {
+      return res.json(cachedStructure);
+    }
+
+    const [categories, companies] = await Promise.all([
+      PrepCategory.find({ status: 'active' }).sort({ order: 1 }),
+      PrepCompany.find({ status: 'active' }).sort({ order: 1 })
+    ]);
+
+    const payload = { success: true, categories, companies };
+    cachedStructure = payload;
+    cachedStructureExpiry = Date.now() + STRUCTURE_TTL_MS;
+
+    res.json(payload);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -783,6 +807,7 @@ exports.adminCreateCategory = async (req, res) => {
   try {
     const cat = new PrepCategory(req.body);
     await cat.save();
+    bustPrepStructureCache();
     res.json({ success: true, category: cat });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -793,6 +818,7 @@ exports.adminUpdateCategory = async (req, res) => {
   try {
     const cat = await PrepCategory.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!cat) return res.status(404).json({ message: 'Category not found' });
+    bustPrepStructureCache();
     res.json({ success: true, category: cat });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -803,6 +829,7 @@ exports.adminDeleteCategory = async (req, res) => {
   try {
     const cat = await PrepCategory.findByIdAndDelete(req.params.id);
     if (!cat) return res.status(404).json({ message: 'Category not found' });
+    bustPrepStructureCache();
     res.json({ success: true, message: 'Category deleted successfully' });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -822,6 +849,7 @@ exports.adminCreateCompany = async (req, res) => {
   try {
     const comp = new PrepCompany(req.body);
     await comp.save();
+    bustPrepStructureCache();
     res.json({ success: true, company: comp });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -832,6 +860,7 @@ exports.adminUpdateCompany = async (req, res) => {
   try {
     const comp = await PrepCompany.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!comp) return res.status(404).json({ message: 'Company not found' });
+    bustPrepStructureCache();
     res.json({ success: true, company: comp });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -842,6 +871,7 @@ exports.adminDeleteCompany = async (req, res) => {
   try {
     const comp = await PrepCompany.findByIdAndDelete(req.params.id);
     if (!comp) return res.status(404).json({ message: 'Company not found' });
+    bustPrepStructureCache();
     res.json({ success: true, message: 'Company deleted successfully' });
   } catch (err) {
     res.status(500).json({ message: err.message });

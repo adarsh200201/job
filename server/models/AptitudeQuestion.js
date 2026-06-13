@@ -66,6 +66,7 @@ const aptitudeQuestionSchema = new mongoose.Schema({
 
 // Compound index for duplicate prevention
 aptitudeQuestionSchema.index({ question: 1, category: 1, subCategory: 1 });
+aptitudeQuestionSchema.index({ createdAt: -1 });
 
 // Pre-save hook to keep topic/subCategory and answer/correctAnswer synchronized
 aptitudeQuestionSchema.pre('save', function(next) {
