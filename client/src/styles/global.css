@@ -322,7 +322,7 @@ main.container {
 
 .nav-link {
   color: #475569 !important; /* Modern Slate-600 */
-  padding: 0.5rem 1.25rem !important;
+  padding: 0.5rem 0.85rem !important;
   font-size: 0.92rem;
   font-weight: 600;
   border-radius: 9999px; /* Seamless round pills */

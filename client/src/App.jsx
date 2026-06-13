@@ -488,7 +488,7 @@ function AppLayout() {
                 </span>
               </Link>
 
-              <ul className="nav-links" style={{ flex: 1, display: isMobile ? 'none' : 'flex', justifyContent: 'flex-end', flexWrap: 'nowrap', gap: '1.5rem', overflow: 'visible' }}>
+              <ul className="nav-links" style={{ flex: 1, display: isMobile ? 'none' : 'flex', justifyContent: 'flex-end', flexWrap: 'nowrap', gap: '0.5rem', overflow: 'visible' }}>
                 <NavDropdown label="Govt Jobs" items={govtJobItems} to="/govt-jobs" />
 
                 <NavDropdown label="Exam Updates" items={examUpdatesItems} to="/results" />
