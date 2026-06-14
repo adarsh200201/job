@@ -9,7 +9,27 @@
       "destination": "https://nextjobpost-backend.onrender.com/sitemap.xml"
     },
     {
-      "source": "/((?!ads\\.txt|robots\\.txt|favicon\\.png|googlebc759ed7720b94f2\\.html|logo.*\\.png|logo\\.webp|app_mockup.*|assets/|sw\\.js|manifest\\.webmanifest|workbox-.*\\.js|sitemap\\.xml).*)",
+      "source": "/sitemap-pages.xml",
+      "destination": "https://nextjobpost-backend.onrender.com/sitemap-pages.xml"
+    },
+    {
+      "source": "/sitemap-jobs.xml",
+      "destination": "https://nextjobpost-backend.onrender.com/sitemap-jobs.xml"
+    },
+    {
+      "source": "/sitemap-results.xml",
+      "destination": "https://nextjobpost-backend.onrender.com/sitemap-results.xml"
+    },
+    {
+      "source": "/sitemap-admitcards.xml",
+      "destination": "https://nextjobpost-backend.onrender.com/sitemap-admitcards.xml"
+    },
+    {
+      "source": "/sitemap-preparation.xml",
+      "destination": "https://nextjobpost-backend.onrender.com/sitemap-preparation.xml"
+    },
+    {
+      "source": "/((?!ads\\.txt|robots\\.txt|favicon\\.png|googlebc759ed7720b94f2\\.html|logo.*\\.png|logo\\.webp|app_mockup.*|assets/|sw\\.js|manifest\\.webmanifest|workbox-.*\\.js|sitemap\\.xml|sitemap-pages\\.xml|sitemap-jobs\\.xml|sitemap-results\\.xml|sitemap-admitcards\\.xml|sitemap-preparation\\.xml).*)",
       "destination": "/index.html"
     }
   ]
