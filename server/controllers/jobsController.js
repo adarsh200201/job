@@ -382,6 +382,30 @@ exports.getJobById = async (req, res) => {
   }
 };
 
+// Helper to generate a unique permanent slug
+async function generateUniqueSlug(title, excludeJobId = null) {
+  let slugBase = slugify(title, { lower: true, strict: true, trim: true });
+  if (!slugBase) {
+    slugBase = 'job';
+  }
+  
+  let slug = slugBase;
+  let counter = 1;
+  while (true) {
+    const query = { slug };
+    if (excludeJobId) {
+      query._id = { $ne: excludeJobId };
+    }
+    const collision = await Job.findOne(query);
+    if (!collision) {
+      break;
+    }
+    slug = `${slugBase}-${counter}`;
+    counter++;
+  }
+  return slug;
+}
+
 // Create a new job
 // POST /api/jobs
 exports.createJob = async (req, res) => {
@@ -415,12 +439,71 @@ exports.createJob = async (req, res) => {
         message: 'Missing required fields' 
       });
     }
+
+    // ─── Duplicate Check & Update ───
+    let existingJob = null;
+    if (sourceUrl) {
+      existingJob = await Job.findOne({ sourceUrl });
+    } else if (title && company) {
+      existingJob = await Job.findOne({ title, company });
+    }
+
+    if (existingJob) {
+      // Update existing job fields instead of creating a duplicate document
+      const updateData = {
+        title,
+        company,
+        location: isGov ? '' : location,
+        type: isGov ? 'Full-Time' : type,
+        experience: isGov ? '' : experience,
+        jobDescription,
+        responsibilities: Array.isArray(responsibilities) ? responsibilities : [responsibilities].filter(Boolean),
+        requirements: Array.isArray(requirements) ? requirements : [requirements].filter(Boolean),
+        skills: Array.isArray(skills) ? skills : [skills].filter(Boolean),
+        education: isGov ? '' : education,
+        batch: isGov ? '' : batch,
+        eligibility: isGov ? eligibility : '',
+        vacancies: isGov ? vacancies : '',
+        salary,
+        applyLink,
+        lastDate: lastDate || null,
+        image: image || existingJob.image,
+        whatsapp,
+        telegram,
+        contact,
+        aboutCompany: aboutCompany || '',
+        whyJoin: whyJoin || '',
+        description: description || '',
+        howToApply: howToApply || '',
+        finalThoughts: finalThoughts || '',
+        highlightText: highlightText || '',
+        metaTitle: metaTitle || `${title} - ${company} - Job Openings`,
+        metaDescription: metaDescription || (isGov 
+          ? `${title} at ${company}. Eligibility: ${eligibility || ''}. Vacancies: ${vacancies || ''}.`
+          : `${title} at ${company} in ${location}. ${jobDescription.substring(0, 150)}...`),
+        isFeatured: isFeatured !== undefined ? isFeatured : existingJob.isFeatured,
+        isActive: isActive !== undefined ? isActive : existingJob.isActive,
+        postType: postType || existingJob.postType,
+        sourceWebsite: sourceWebsite || existingJob.sourceWebsite,
+        importantDates: importantDates || '',
+        pdfLink: pdfLink || '',
+        isGovernment: isGov
+      };
+
+      Object.assign(existingJob, updateData);
+      await existingJob.save();
+
+      exports.bustJobsCache(); // Invalidate list cache so updates reflect immediately
+      return res.status(200).json({
+        success: true,
+        message: 'Job updated successfully (duplicate matched)',
+        slug: existingJob.slug,
+        data: existingJob
+      });
+    }
     
-    // Create slug from title with a unique suffix to prevent duplicate key errors
-    const crypto = require('crypto');
-    const slugBase = slugify(title, { lower: true, strict: true, trim: true });
-    const slugSuffix = crypto.randomBytes(3).toString('hex'); // e.g. "a1b2c3"
-    const slug = `${slugBase}-${slugSuffix}`;
+    // Create clean permanent slug from title (with collision checks)
+    const slug = await generateUniqueSlug(title);
     
     // Create job
     const job = await Job.create({
@@ -501,11 +584,7 @@ exports.updateJob = async (req, res) => {
     
     // If title is being updated, update the slug as well and validate/sanitize government fields
     if (updates.title) {
-      updates.slug = slugify(updates.title, {
-        lower: true,
-        strict: true,
-        trim: true
-      });
+      updates.slug = await generateUniqueSlug(updates.title, id);
 
       const isGov = updates.isGovernment === true || updates.isGovernment === 'true';
       let hasMissing = !updates.title || !updates.company || !updates.jobDescription || !updates.applyLink;

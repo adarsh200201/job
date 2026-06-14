@@ -82,19 +82,31 @@ const JobSchema = new mongoose.Schema(
 );
 
 // Create slug from title before saving (using consistent slugify method)
-JobSchema.pre('save', function(next) {
+JobSchema.pre('save', async function(next) {
   if (!this.slug) {
-    const crypto = require('crypto');
-    const base = slugify(this.title, { lower: true, strict: true, trim: true });
-    const suffix = crypto.randomBytes(3).toString('hex'); // e.g. "a1b2c3"
-    this.slug = `${base}-${suffix}`;
+    let base = slugify(this.title, { lower: true, strict: true, trim: true });
+    if (!base) {
+      base = 'job';
+    }
+    let slug = base;
+    let counter = 1;
+    while (true) {
+      const collision = await this.constructor.findOne({ 
+        slug, 
+        _id: { $ne: this._id } 
+      });
+      if (!collision) {
+        break;
+      }
+      slug = `${base}-${counter}`;
+      counter++;
+    }
+    this.slug = slug;
   }
   next();
 });
 
 // Add indexes for faster queries
-// Note: slug index is already created via 'unique: true' in the schema, but adding an explicit index provides a safe fallback
-JobSchema.index({ slug: 1 });
 JobSchema.index({ isActive: 1, createdAt: -1 });
 JobSchema.index({ company: 1 });
 JobSchema.index({ location: 1 });
