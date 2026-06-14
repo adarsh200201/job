@@ -26,7 +26,7 @@
       "dest": "https://nextjobpost-backend.onrender.com/sitemap.xml"
     },
     {
-      "src": "/(.*)",
+      "src": "/((?!ads\\.txt|robots\\.txt|favicon\\.png|googlebc759ed7720b94f2\\.html|logo.*\\.png|logo\\.webp|app_mockup.*|assets/|sw\\.js|manifest\\.webmanifest|workbox-.*\\.js|sitemap\\.xml).*)",
       "dest": "/index.html"
     }
   ],
