@@ -11,6 +11,11 @@ export default defineConfig({
       injectRegister: 'inline',
       workbox: {
         globPatterns: ['**/*.{js,css,html,png,svg,ico,json,webp}'],
+        navigateFallbackDenylist: [
+          /^\/ads\.txt$/,
+          /^\/robots\.txt$/,
+          /^\/sitemap\.xml$/
+        ]
       },
       manifest: {
         name: 'NextJobPost',
