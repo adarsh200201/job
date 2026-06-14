@@ -640,7 +640,7 @@ export default function JobDetails() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    if (!slug) {
+    if (!slug || ['ads.txt', 'robots.txt', 'sitemap.xml'].includes(slug.toLowerCase())) {
       setJob(null);
       setRecent([]);
       setLoading(false);
