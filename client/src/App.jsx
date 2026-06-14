@@ -34,39 +34,52 @@ const BASIC_CATEGORIES = [
   'engineering-freshers'
 ];
 
-// Lazy load page components for code splitting
-const Home = React.lazy(() => import('./pages/Home.jsx'));
-const JobDetails = React.lazy(() => import('./pages/JobDetails.jsx'));
-const AdminLogin = React.lazy(() => import('./pages/AdminLogin.jsx'));
-const AdminDashboard = React.lazy(() => import('./pages/AdminDashboard.jsx'));
-const About = React.lazy(() => import('./pages/About.jsx'));
-const Contact = React.lazy(() => import('./pages/Contact.jsx'));
-const FAQ = React.lazy(() => import('./pages/FAQ.jsx'));
-const Blog = React.lazy(() => import('./pages/Blog.jsx'));
-const Terms = React.lazy(() => import('./pages/Terms.jsx'));
-const Disclaimer = React.lazy(() => import('./pages/Disclaimer.jsx'));
-const Login = React.lazy(() => import('./pages/Login.jsx'));
-const SignUp = React.lazy(() => import('./pages/SignUp.jsx'));
-const AuthCallback = React.lazy(() => import('./pages/AuthCallback.jsx'));
-const StudentCareerCenter = React.lazy(() => import('./pages/StudentCareerCenter.jsx'));
-const SalarySearch = React.lazy(() => import('./pages/SalarySearch.jsx'));
-const UserDashboard = React.lazy(() => import('./pages/UserDashboard.jsx'));
-const Onboarding = React.lazy(() => import('./pages/Onboarding.jsx'));
-const PrivacyPolicy = React.lazy(() => import('./pages/PrivacyPolicy.jsx'));
-const GovtJobsCategory = React.lazy(() => import('./pages/GovtJobsCategory.jsx'));
-const PreparationHub = React.lazy(() => import('./pages/Preparation/PreparationHub.jsx'));
-const AptitudePrep = React.lazy(() => import('./pages/Preparation/AptitudePrep.jsx'));
-const TechnicalPrep = React.lazy(() => import('./pages/Preparation/TechnicalPrep.jsx'));
-const DSAPrep = React.lazy(() => import('./pages/Preparation/DSAPrep.jsx'));
-const CompanyPrepPage = React.lazy(() => import('./pages/Preparation/CompanyPrepPage.jsx'));
-const GovPrepPage = React.lazy(() => import('./pages/Preparation/GovPrepPage.jsx'));
-const MockTests = React.lazy(() => import('./pages/Preparation/MockTests.jsx'));
-const ResumeBuilder = React.lazy(() => import('./pages/ResumeBuilder.jsx'));
+// Helper to automatically retry dynamic imports when a chunk load fails (due to deployment/newer hashes)
+const lazyWithRetry = (componentImport) => {
+  return React.lazy(async () => {
+    try {
+      return await componentImport();
+    } catch (error) {
+      console.error("Failed to load chunk dynamically. Reloading to get the latest version...", error);
+      window.location.reload();
+      return new Promise(() => {}); // Unresolved promise blocks rendering before refresh
+    }
+  });
+};
 
-const ProgrammaticSEOJobsPage = React.lazy(() => import('./pages/ProgrammaticSEOJobsPage.jsx'));
-const TopicHubPage = React.lazy(() => import('./pages/TopicHubPage.jsx'));
-const JobsCalendar = React.lazy(() => import('./pages/JobsCalendar.jsx'));
-const CurrentAffairsHub = React.lazy(() => import('./pages/CurrentAffairsHub.jsx'));
+// Lazy load page components for code splitting
+const Home = lazyWithRetry(() => import('./pages/Home.jsx'));
+const JobDetails = lazyWithRetry(() => import('./pages/JobDetails.jsx'));
+const AdminLogin = lazyWithRetry(() => import('./pages/AdminLogin.jsx'));
+const AdminDashboard = lazyWithRetry(() => import('./pages/AdminDashboard.jsx'));
+const About = lazyWithRetry(() => import('./pages/About.jsx'));
+const Contact = lazyWithRetry(() => import('./pages/Contact.jsx'));
+const FAQ = lazyWithRetry(() => import('./pages/FAQ.jsx'));
+const Blog = lazyWithRetry(() => import('./pages/Blog.jsx'));
+const Terms = lazyWithRetry(() => import('./pages/Terms.jsx'));
+const Disclaimer = lazyWithRetry(() => import('./pages/Disclaimer.jsx'));
+const Login = lazyWithRetry(() => import('./pages/Login.jsx'));
+const SignUp = lazyWithRetry(() => import('./pages/SignUp.jsx'));
+const AuthCallback = lazyWithRetry(() => import('./pages/AuthCallback.jsx'));
+const StudentCareerCenter = lazyWithRetry(() => import('./pages/StudentCareerCenter.jsx'));
+const SalarySearch = lazyWithRetry(() => import('./pages/SalarySearch.jsx'));
+const UserDashboard = lazyWithRetry(() => import('./pages/UserDashboard.jsx'));
+const Onboarding = lazyWithRetry(() => import('./pages/Onboarding.jsx'));
+const PrivacyPolicy = lazyWithRetry(() => import('./pages/PrivacyPolicy.jsx'));
+const GovtJobsCategory = lazyWithRetry(() => import('./pages/GovtJobsCategory.jsx'));
+const PreparationHub = lazyWithRetry(() => import('./pages/Preparation/PreparationHub.jsx'));
+const AptitudePrep = lazyWithRetry(() => import('./pages/Preparation/AptitudePrep.jsx'));
+const TechnicalPrep = lazyWithRetry(() => import('./pages/Preparation/TechnicalPrep.jsx'));
+const DSAPrep = lazyWithRetry(() => import('./pages/Preparation/DSAPrep.jsx'));
+const CompanyPrepPage = lazyWithRetry(() => import('./pages/Preparation/CompanyPrepPage.jsx'));
+const GovPrepPage = lazyWithRetry(() => import('./pages/Preparation/GovPrepPage.jsx'));
+const MockTests = lazyWithRetry(() => import('./pages/Preparation/MockTests.jsx'));
+const ResumeBuilder = lazyWithRetry(() => import('./pages/ResumeBuilder.jsx'));
+
+const ProgrammaticSEOJobsPage = lazyWithRetry(() => import('./pages/ProgrammaticSEOJobsPage.jsx'));
+const TopicHubPage = lazyWithRetry(() => import('./pages/TopicHubPage.jsx'));
+const JobsCalendar = lazyWithRetry(() => import('./pages/JobsCalendar.jsx'));
+const CurrentAffairsHub = lazyWithRetry(() => import('./pages/CurrentAffairsHub.jsx'));
 
 // Loading fallback
 function LoadingFallback() {
@@ -378,7 +391,28 @@ function DynamicRouteWrapper() {
 export default function App() {
   useEffect(() => {
     startKeepAlive();
-    return () => { stopKeepAlive(); };
+
+    // Global listener for dynamic import chunk errors (common after redeployments)
+    const handleChunkError = (error) => {
+      const errorText = error?.message || error?.reason?.message || '';
+      if (
+        errorText.includes('Failed to fetch dynamically imported module') ||
+        errorText.includes('error loading dynamically imported module') ||
+        errorText.includes('ChunkLoadError')
+      ) {
+        console.error("Uncaught chunk load error detected globally, reloading page...", error);
+        window.location.reload();
+      }
+    };
+
+    window.addEventListener('error', handleChunkError, true);
+    window.addEventListener('unhandledrejection', handleChunkError, true);
+
+    return () => {
+      stopKeepAlive();
+      window.removeEventListener('error', handleChunkError, true);
+      window.removeEventListener('unhandledrejection', handleChunkError, true);
+    };
   }, []);
 
   return (
