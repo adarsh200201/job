@@ -1,5 +1,5 @@
 import React, { Suspense, useEffect } from 'react';
-import { Routes, Route, Link, NavLink, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Routes, Route, Link, NavLink, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import { Analytics } from '@vercel/analytics/react';
 import Footer from './components/Footer.jsx';
@@ -62,6 +62,11 @@ const CompanyPrepPage = React.lazy(() => import('./pages/Preparation/CompanyPrep
 const GovPrepPage = React.lazy(() => import('./pages/Preparation/GovPrepPage.jsx'));
 const MockTests = React.lazy(() => import('./pages/Preparation/MockTests.jsx'));
 const ResumeBuilder = React.lazy(() => import('./pages/ResumeBuilder.jsx'));
+
+const ProgrammaticSEOJobsPage = React.lazy(() => import('./pages/ProgrammaticSEOJobsPage.jsx'));
+const TopicHubPage = React.lazy(() => import('./pages/TopicHubPage.jsx'));
+const JobsCalendar = React.lazy(() => import('./pages/JobsCalendar.jsx'));
+const CurrentAffairsHub = React.lazy(() => import('./pages/CurrentAffairsHub.jsx'));
 
 // Loading fallback
 function LoadingFallback() {
@@ -341,6 +346,35 @@ function UserRoute({ children }) {
   return children;
 }
 
+// Catch-all dynamic switcher route for programmatic SEO, exam hubs & job details
+function DynamicRouteWrapper() {
+  const { slug } = useParams();
+  
+  if (!slug) return <Navigate to="/" replace />;
+
+  // 1. Programmatic SEO page combinations
+  if (slug.includes('-jobs-in-')) {
+    return <ProgrammaticSEOJobsPage slug={slug} />;
+  }
+
+  // 2. Topical cluster hub pages (Syllabus, Admit Cards, Results, etc.)
+  const isCluster = [
+    'ssc-syllabus', 'ssc-results', 'ssc-admit-cards', 'ssc-preparation',
+    'railway-syllabus', 'railway-results', 'railway-admit-cards', 'railway-preparation'
+  ].includes(slug);
+
+  if (isCluster) {
+    if (slug.endsWith('-preparation')) {
+      const category = slug.startsWith('ssc') ? 'SSC' : 'Railway';
+      return <Navigate to={`/preparation/gov?q=${category}`} replace />;
+    }
+    return <TopicHubPage slug={slug} />;
+  }
+
+  // 3. Standard job detail page
+  return <JobDetails />;
+}
+
 export default function App() {
   useEffect(() => {
     startKeepAlive();
@@ -379,6 +413,7 @@ function AppLayout() {
     '/preparation/company', '/preparation/gov', '/preparation/mock-tests',
     '/resume-builder',
     '/private-jobs', '/freshers-jobs', '/work-from-home-jobs', '/internships', '/software-jobs', '/engineering-freshers',
+    '/ssc-calendar', '/govt-jobs-calendar', '/exam-dates', '/current-affairs',
     ...Object.keys(MEGA_CATEGORIES).map(k => `/${k}`)
   ];
   const isJobDetail = !staticPaths.includes(location.pathname);
@@ -450,11 +485,14 @@ function AppLayout() {
     { label: '📋 Results',     to: '/results' },
     { label: '🎫 Admit Cards', to: '/admit-cards' },
     { label: '🔑 Answer Keys', to: '/answer-keys' },
+    { label: '📅 Govt Jobs Calendar', to: '/govt-jobs-calendar' },
+    { label: '⏰ Sarkari Exam Dates', to: '/exam-dates' },
   ];
 
 
 
   const prepItems = [
+    { label: '📰 Current Affairs GK', to: '/current-affairs' },
     { label: '🧮 Aptitude & Reasoning', to: '/preparation/aptitude' },
     { label: '💻 Technical MCQ',        to: '/preparation/technical' },
     { label: '🌲 DSA Practice',          to: '/preparation/dsa' },
@@ -516,8 +554,6 @@ function AppLayout() {
                 <NavDropdown label="Exam Updates" items={examUpdatesItems} to="/results" />
 
                 <NavDropdown label="Preparation" items={prepItems} to="/preparation" />
-
-
 
                 <NavDropdown label="More" items={moreItems} to="#" mega={true} />
 
@@ -694,6 +730,16 @@ function AppLayout() {
 
               <div className="mobile-menu-divider" />
 
+              <NavLink to="/current-affairs" className={({ isActive }) => `mobile-menu-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+                📰 Current Affairs GK
+              </NavLink>
+              <NavLink to="/govt-jobs-calendar" className={({ isActive }) => `mobile-menu-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+                📅 Govt Jobs Calendar
+              </NavLink>
+              <NavLink to="/exam-dates" className={({ isActive }) => `mobile-menu-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+                ⏰ Sarkari Exam Dates
+              </NavLink>
+
               <NavLink to="/student-career-center" className={({ isActive }) => `mobile-menu-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
                 📝 Practice Tests
               </NavLink>
@@ -731,6 +777,10 @@ function AppLayout() {
             <Route path="/resume-builder" element={<ResumeBuilder />} />
             <Route path="/student-career-center" element={<StudentCareerCenter />} />
             <Route path="/salaries" element={<SalarySearch />} />
+            <Route path="/ssc-calendar" element={<JobsCalendar type="ssc" />} />
+            <Route path="/govt-jobs-calendar" element={<JobsCalendar type="all" />} />
+            <Route path="/exam-dates" element={<JobsCalendar type="dates" />} />
+            <Route path="/current-affairs" element={<CurrentAffairsHub />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/faq" element={<FAQ />} />
@@ -762,7 +812,7 @@ function AppLayout() {
             ))}
 
             {/* Job detail catch-all */}
-            <Route path="/:slug" element={<JobDetails />} />
+            <Route path="/:slug" element={<DynamicRouteWrapper />} />
           </Routes>
         </Suspense>
       </main>

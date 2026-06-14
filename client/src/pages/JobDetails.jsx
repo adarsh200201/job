@@ -18,6 +18,7 @@ import {
   trackAdClicked 
 } from '../utils/analytics.js';
 import SidebarAd from '../components/SidebarAd.jsx';
+import SidebarCareerHub from '../components/SidebarCareerHub.jsx';
 
 function extractVacancy(title) {
   if (!title) return 'As per notification';
@@ -458,6 +459,17 @@ export default function JobDetails() {
   const navigate = useNavigate();
   const [job, setJob] = useState(null);
 
+  const getCTRMetaTitle = () => {
+    if (!job) return '';
+    if (job.metaTitle) return job.metaTitle;
+    if (job.isGovernment) {
+      const vacancyText = job.vacancies && job.vacancies !== 'As per notification' ? ` – ${job.vacancies} Vacancies` : '';
+      return `${job.title}${vacancyText} | Apply Online`;
+    } else {
+      return `${job.title} at ${job.company} | Apply Now`;
+    }
+  };
+
   const getJobDetailsLabel = () => {
     const titleLower = String(job?.title || '').toLowerCase();
     if (titleLower.includes('syllabus') || titleLower.includes('pattern')) return 'Exam details';
@@ -874,20 +886,20 @@ export default function JobDetails() {
     return (
       <div className="job-details-mobile mt-0 mb-5" style={{ backgroundColor: '#ffffff', minHeight: '100vh', paddingBottom: '80px', fontFamily: "'Inter', sans-serif" }}>
         <Helmet>
-          <title>{job.metaTitle || `${job.title} at ${job.company} | NextJobPost`}</title>
+          <title>{getCTRMetaTitle()}</title>
           <meta name="description" content={job.metaDescription || job.shortSummary || `Apply for the ${job.title} job opening at ${job.company} in ${job.location}. Find eligibility criteria, responsibilities, and apply now.`} />
           <link rel="canonical" href={window.location.href} />
           
           {/* Open Graph / Facebook */}
           <meta property="og:type" content="article" />
-          <meta property="og:title" content={job.metaTitle || `${job.title} at ${job.company} | NextJobPost`} />
+          <meta property="og:title" content={getCTRMetaTitle()} />
           <meta property="og:description" content={job.metaDescription || job.shortSummary || `Apply for the ${job.title} job opening at ${job.company} in ${job.location}.`} />
           <meta property="og:image" content={getImageUrl(job.image) || `${window.location.origin}/logo.png`} />
           <meta property="og:url" content={window.location.href} />
           
           {/* Twitter */}
           <meta name="twitter:card" content="summary_large_image" />
-          <meta name="twitter:title" content={job.metaTitle || `${job.title} at ${job.company} | NextJobPost`} />
+          <meta name="twitter:title" content={getCTRMetaTitle()} />
           <meta name="twitter:description" content={job.metaDescription || job.shortSummary || `Apply for the ${job.title} job opening at ${job.company} in ${job.location}.`} />
           <meta name="twitter:image" content={getImageUrl(job.image) || `${window.location.origin}/logo.png`} />
 
@@ -1528,20 +1540,20 @@ export default function JobDetails() {
   return (
     <div className="job-details mt-0 mb-4 animate-fade-in-up">
       <Helmet>
-        <title>{job.metaTitle || `${job.title} at ${job.company} | NextJobPost`}</title>
+        <title>{getCTRMetaTitle()}</title>
         <meta name="description" content={job.metaDescription || job.shortSummary || `Apply for the ${job.title} job opening at ${job.company} in ${job.location}. Find eligibility criteria, responsibilities, and apply now.`} />
         <link rel="canonical" href={window.location.href} />
         
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="article" />
-        <meta property="og:title" content={job.metaTitle || `${job.title} at ${job.company} | NextJobPost`} />
+        <meta property="og:title" content={getCTRMetaTitle()} />
         <meta property="og:description" content={job.metaDescription || job.shortSummary || `Apply for the ${job.title} job opening at ${job.company} in ${job.location}.`} />
         <meta property="og:image" content={getImageUrl(job.image) || `${window.location.origin}/logo.png`} />
         <meta property="og:url" content={window.location.href} />
         
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={job.metaTitle || `${job.title} at ${job.company} | NextJobPost`} />
+        <meta name="twitter:title" content={getCTRMetaTitle()} />
         <meta name="twitter:description" content={job.metaDescription || job.shortSummary || `Apply for the ${job.title} job opening at ${job.company} in ${job.location}.`} />
         <meta name="twitter:image" content={getImageUrl(job.image) || `${window.location.origin}/logo.png`} />
 
@@ -2400,6 +2412,7 @@ export default function JobDetails() {
 
         <div className="col-12 col-lg-4 col-right">
           <div className="sidebar-sticky" style={{ display: 'flex', flexDirection: 'column', gap: '2rem', width: '100%' }}>
+            <SidebarCareerHub contextTitle={job.title} />
             <SidebarFilter />
             <SidebarAd />
           </div>

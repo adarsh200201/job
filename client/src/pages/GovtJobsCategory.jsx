@@ -10,6 +10,7 @@ import { JobCardSkeleton } from '../components/SkeletonLoader.jsx';
 import SidebarAd from '../components/SidebarAd.jsx';
 import { MEGA_CATEGORIES } from '../utils/categoryConfig.js';
 import SidebarCategories from '../components/SidebarCategories.jsx';
+import SidebarCareerHub from '../components/SidebarCareerHub.jsx';
 
 // Configurations for each category to ensure optimized SEO meta tags
 const CATEGORY_CONFIGS = {
@@ -17,7 +18,7 @@ const CATEGORY_CONFIGS = {
     postTypeQuery: 'Government Job',
     searchQuery: '',
     typeQuery: '',
-    title: 'Latest Govt Jobs 2026 - State & Central Govt Recruitment & Vacancies',
+    title: 'Latest Govt Jobs 2026 – State & Central Recruitment | Apply Online',
     heading: '🏛️ Latest Government Jobs & Recruitment 2026',
     description: 'Find the latest government job vacancies, notifications, and recruitment schedules for state and central government departments across India.',
     keywords: 'govt jobs, government recruitment, sarkari naukri, central govt jobs, state govt jobs, latest vacancies',
@@ -26,7 +27,7 @@ const CATEGORY_CONFIGS = {
   'upsc-jobs': {
     searchQuery: 'UPSC',
     typeQuery: '',
-    title: 'UPSC Jobs 2026 - Latest UPSC Recruitment, Vacancies & Notifications',
+    title: 'UPSC Jobs 2026 – Civil Services & IAS Recruitment | Apply Online',
     heading: '🎓 UPSC Jobs & Recruitment 2026',
     description: 'Discover and apply to the latest UPSC jobs, Union Public Service Commission recruitment notifications, civil services exams, vacancies, and application details for central government careers in India.',
     keywords: 'upsc jobs, upsc recruitment 2026, civil services vacancy, upsc notifications, ias jobs, ips recruitment, central govt jobs, union public service commission',
@@ -35,7 +36,7 @@ const CATEGORY_CONFIGS = {
   'ssc-jobs': {
     searchQuery: 'SSC',
     typeQuery: '',
-    title: 'SSC Jobs 2026 - Latest Staff Selection Commission Recruitment & Exams',
+    title: 'SSC Jobs 2026 – Latest CHSL, CGL & MTS Recruitment | Apply Online',
     heading: '📋 SSC Jobs & Recruitment 2026',
     description: 'Apply online for the latest Staff Selection Commission (SSC) jobs, including SSC CGL, CHSL, MTS, GD Constable, and other competitive exam recruitment notifications.',
     keywords: 'ssc jobs, staff selection commission recruitment, ssc cgl, ssc chsl, ssc mts, ssc gd, ssc vacancies',
@@ -44,7 +45,7 @@ const CATEGORY_CONFIGS = {
   'railway-jobs': {
     searchQuery: 'Railway',
     typeQuery: '',
-    title: 'Railway Jobs 2026 - Latest RRB & RRC Recruitment & Careers',
+    title: 'Latest Railway Jobs 2026 – 5,000+ Vacancies | RRB & RRC Recruitment',
     heading: '🚂 Indian Railway Jobs & RRB Recruitment 2026',
     description: 'Explore the latest Indian Railway jobs, RRB recruitment notifications, NTPC, Group D, ALP, Technician vacancies, and online application details.',
     keywords: 'railway jobs, indian railway recruitment, rrb recruitment, rrc jobs, railway vacancy, rrb ntpc, rrb group d',
@@ -53,7 +54,7 @@ const CATEGORY_CONFIGS = {
   'banking-jobs': {
     searchQuery: 'Banking',
     typeQuery: '',
-    title: 'Banking Jobs 2026 - Latest IBPS, SBI & RBI Bank Careers & Recruitment',
+    title: 'Bank Jobs 2026 – Latest IBPS, SBI & RBI Bank Recruitment | Apply Now',
     heading: '🏦 Banking Jobs & Bank Recruitment 2026',
     description: 'Find the latest banking sector jobs in India. View SBI, IBPS, RBI, and public/private sector bank recruitment notifications for PO, Clerk, and Specialist Officers.',
     keywords: 'banking jobs, bank recruitment, sbi po, ibps clerk, rbi recruitment, bank exam notifications, sbi clerk',
@@ -464,6 +465,7 @@ export default function GovtJobsCategory({ categoryKey }) {
         <div className="col-12 col-lg-4 col-right">
           <JoinUpdates />
           <div className="sidebar-sticky" style={{ display: 'flex', flexDirection: 'column', gap: '2rem', width: '100%' }}>
+            <SidebarCareerHub contextTitle={config.heading} />
             <SidebarCategories jobs={sortedJobs} />
             <SidebarAd />
           </div>

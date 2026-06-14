@@ -364,16 +364,16 @@ export default function Footer() {
             <div className="footer-subcols-2">
               <ul className="footer-links">
                 <li><Link to="/govt-jobs">All Govt Jobs</Link></li>
+                <li><Link to="/govt-jobs-calendar">Govt Jobs Calendar</Link></li>
+                <li><Link to="/ssc-calendar">SSC Calendar 2026</Link></li>
+                <li><Link to="/exam-dates">Sarkari Exam Dates</Link></li>
                 <li><Link to="/admit-cards">Admit Cards</Link></li>
-                <li><Link to="/exam-calendar">Exam Calendar</Link></li>
-                <li><Link to="/previous-papers">Previous Papers</Link></li>
-                <li><a href="https://www.rrcb.gov.in/" target="_blank" rel="noopener noreferrer">RRB Sites</a></li>
               </ul>
               <ul className="footer-links">
                 <li><Link to="/results">Exam Results</Link></li>
                 <li><Link to="/answer-keys">Answer Keys</Link></li>
-                <li><Link to="/syllabus-jobs">Syllabus</Link></li>
-                <li><Link to="/prep-strategy">Preparation</Link></li>
+                <li><Link to="/current-affairs">Current Affairs GK</Link></li>
+                <li><Link to="/preparation">Preparation Hub</Link></li>
               </ul>
             </div>
           </div>

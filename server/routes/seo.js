@@ -131,10 +131,47 @@ router.get('/sitemap-pages.xml', async (req, res) => {
       '/work-from-home-jobs',
       '/internships',
       '/software-jobs',
-      '/engineering-freshers'
+      '/engineering-freshers',
+      
+      // Linkable Backlink Assets
+      '/ssc-calendar',
+      '/govt-jobs-calendar',
+      '/exam-dates',
+      '/current-affairs',
+      
+      // Exam Clusters Hubs
+      '/ssc-syllabus',
+      '/ssc-results',
+      '/ssc-admit-cards',
+      '/ssc-preparation',
+      '/railway-syllabus',
+      '/railway-results',
+      '/railway-admit-cards',
+      '/railway-preparation'
     ];
     
-    const allPages = [...new Set([...basePages, ...megaCategoryPages])];
+    // Generate Programmatic SEO combinations dynamically
+    const qualifications = ['10th-pass', '12th-pass', 'graduate', 'post-graduate', 'diploma', 'iti'];
+    const categories = ['ssc', 'railway', 'bank', 'upsc', 'defence', 'teaching'];
+    const states = [
+      'gujarat', 'bihar', 'rajasthan', 'up', 'maharashtra', 'delhi', 'mp', 
+      'punjab', 'haryana', 'karnataka', 'tamil-nadu', 'west-bengal', 
+      'andhra-pradesh', 'telangana', 'kerala', 'odisha'
+    ];
+    
+    const programmaticPages = [];
+    for (const q of qualifications) {
+      for (const s of states) {
+        programmaticPages.push(`/${q}-jobs-in-${s}`);
+      }
+    }
+    for (const c of categories) {
+      for (const s of states) {
+        programmaticPages.push(`/${c}-jobs-in-${s}`);
+      }
+    }
+    
+    const allPages = [...new Set([...basePages, ...megaCategoryPages, ...programmaticPages])];
     
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';

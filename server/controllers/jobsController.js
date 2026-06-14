@@ -14,7 +14,9 @@ function buildFilters(query) {
   // Text search across multiple fields
   if (query.q) {
     const qClean = query.q.trim().toLowerCase();
-    const regex = new RegExp(query.q, 'i');
+    // Use word boundary boundaries for short queries (2 letters or less) to avoid false-positive substring matching (e.g. up matching group)
+    const pattern = qClean.length <= 2 ? `\\b${qClean}` : query.q;
+    const regex = new RegExp(pattern, 'i');
     
     // Avoid matching template/description texts for government boards like SSC/UPSC
     const isGovtBoardSearch = qClean.includes('ssc') || qClean.includes('upsc');
