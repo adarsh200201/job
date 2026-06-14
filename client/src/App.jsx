@@ -1,6 +1,7 @@
 import React, { Suspense, useEffect } from 'react';
 import { Routes, Route, Link, NavLink, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { SpeedInsights } from '@vercel/speed-insights/react';
+import { Analytics } from '@vercel/analytics/react';
 import Footer from './components/Footer.jsx';
 import PreFooterSections from './components/PreFooterSections.jsx';
 import HeroSearch from './components/HeroSearch.jsx';
@@ -768,6 +769,7 @@ function AppLayout() {
       <PreFooterSections />
       <Footer />
       <SpeedInsights />
+      <Analytics />
     </>
   );
 }
