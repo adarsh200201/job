@@ -24,7 +24,13 @@ const BASIC_CATEGORIES = [
   'psu-jobs',
   'results',
   'admit-cards',
-  'answer-keys'
+  'answer-keys',
+  'private-jobs',
+  'freshers-jobs',
+  'work-from-home-jobs',
+  'internships',
+  'software-jobs',
+  'engineering-freshers'
 ];
 
 // Lazy load page components for code splitting
@@ -371,6 +377,7 @@ function AppLayout() {
     '/preparation', '/preparation/aptitude', '/preparation/technical', '/preparation/dsa',
     '/preparation/company', '/preparation/gov', '/preparation/mock-tests',
     '/resume-builder',
+    '/private-jobs', '/freshers-jobs', '/work-from-home-jobs', '/internships', '/software-jobs', '/engineering-freshers',
     ...Object.keys(MEGA_CATEGORIES).map(k => `/${k}`)
   ];
   const isJobDetail = !staticPaths.includes(location.pathname);

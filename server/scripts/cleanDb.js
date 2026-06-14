@@ -11,18 +11,66 @@ const { connectDB } = require('../utils/db');
 
 const isGarbageSlug = (slug) => {
   if (!slug) return true;
-  if (slug.length < 12) {
-    if (/^-/i.test(slug)) return true;
-    const parts = slug.split('-');
-    if (parts.length <= 2) {
-      const base = parts[0].toLowerCase();
-      if (['and', 'or', 'the', 'in', 'to', 'for', 'a', 'an', 'at', 'by', 'of', 'on', 'with', 'if'].includes(base)) {
-        return true;
-      }
+  
+  const parts = slug.toLowerCase().split('-').filter(Boolean);
+  if (parts.length === 0) return true;
+  
+  // If the last part is a hex hash (e.g. 5-6 characters, alphanumeric/hex), remove it
+  if (parts.length > 1) {
+    const last = parts[parts.length - 1];
+    if (/^[0-9a-f]{5,6}$/i.test(last)) {
+      parts.pop();
     }
   }
-  if (/^-[0-9a-fA-F]+$/i.test(slug) || /^[0-9a-fA-F]{6}$/i.test(slug)) return true;
+  
+  // Junk words list
+  const junkWords = new Set([
+    'and', 'or', 'the', 'in', 'to', 'for', 'a', 'an', 'at', 'by', 'of', 'on', 'with', 'if', 'now', 'apply', 'test', 'scrape', 'mock'
+  ]);
+  
+  // Check if all remaining parts are junk words or pure numbers
+  const allJunk = parts.every(p => junkWords.has(p) || /^\d+$/.test(p));
+  if (allJunk) return true;
+  
+  // Check if any word contains suspicious scraper traces like website names
+  const garbagePatterns = /foundthejob|govtjobsalert|http|https|www/i;
+  if (parts.some(p => garbagePatterns.test(p))) return true;
+
+  // Reject test/scrape keywords
+  if (parts.some(p => p.includes('test') || p.includes('scrape') || p.includes('mock'))) {
+    return true;
+  }
+  
   return false;
+};
+
+const normalizeTitle = (title) => {
+  if (!title) return '';
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
+const normalizeCompany = (company) => {
+  if (!company) return '';
+  return company
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
+const normalizeUrl = (url) => {
+  if (!url) return '';
+  let clean = url.trim().toLowerCase();
+  clean = clean.replace(/^https?:\/\//i, '');
+  clean = clean.replace(/^www\./i, '');
+  if (clean.endsWith('/')) {
+    clean = clean.slice(0, -1);
+  }
+  return clean;
 };
 
 async function cleanDatabase() {
@@ -51,7 +99,7 @@ async function cleanDatabase() {
 
       // 2. Group by sourceUrl
       if (job.sourceUrl) {
-        const urlClean = job.sourceUrl.trim().toLowerCase();
+        const urlClean = normalizeUrl(job.sourceUrl);
         if (!duplicatesByUrl.has(urlClean)) {
           duplicatesByUrl.set(urlClean, []);
         }
@@ -59,7 +107,7 @@ async function cleanDatabase() {
       }
 
       // 3. Group by title + company
-      const titleCompanyKey = `${job.title.trim().toLowerCase()}|${job.company.trim().toLowerCase()}`;
+      const titleCompanyKey = `${normalizeTitle(job.title)}|${normalizeCompany(job.company)}`;
       if (!duplicatesByTitleAndCompany.has(titleCompanyKey)) {
         duplicatesByTitleAndCompany.set(titleCompanyKey, []);
       }

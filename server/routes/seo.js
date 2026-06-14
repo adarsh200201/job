@@ -72,7 +72,13 @@ router.get('/sitemap.xml', async (req, res) => {
       '/preparation/dsa',
       '/preparation/company',
       '/preparation/gov',
-      '/preparation/mock-tests'
+      '/preparation/mock-tests',
+      '/private-jobs',
+      '/freshers-jobs',
+      '/work-from-home-jobs',
+      '/internships',
+      '/software-jobs',
+      '/engineering-freshers'
     ];
 
     // Read dynamic state & qualification category landing pages from config
@@ -98,17 +104,36 @@ router.get('/sitemap.xml', async (req, res) => {
     const seenSlugs = new Set();
     const isGarbageSlug = (slug) => {
       if (!slug) return true;
-      if (slug.length < 12) {
-        if (/^-/i.test(slug)) return true;
-        const parts = slug.split('-');
-        if (parts.length <= 2) {
-          const base = parts[0].toLowerCase();
-          if (['and', 'or', 'the', 'in', 'to', 'for', 'a', 'an', 'at', 'by', 'of', 'on', 'with', 'if'].includes(base)) {
-            return true;
-          }
+      
+      const parts = slug.toLowerCase().split('-').filter(Boolean);
+      if (parts.length === 0) return true;
+      
+      // If the last part is a hex hash (e.g. 5-6 characters, alphanumeric/hex), remove it
+      if (parts.length > 1) {
+        const last = parts[parts.length - 1];
+        if (/^[0-9a-f]{5,6}$/i.test(last)) {
+          parts.pop();
         }
       }
-      if (/^-[0-9a-fA-F]+$/i.test(slug) || /^[0-9a-fA-F]{6}$/i.test(slug)) return true;
+      
+      // Junk words list
+      const junkWords = new Set([
+        'and', 'or', 'the', 'in', 'to', 'for', 'a', 'an', 'at', 'by', 'of', 'on', 'with', 'if', 'now', 'apply', 'test', 'scrape', 'mock'
+      ]);
+      
+      // Check if all remaining parts are junk words or pure numbers
+      const allJunk = parts.every(p => junkWords.has(p) || /^\d+$/.test(p));
+      if (allJunk) return true;
+      
+      // Check if any word contains suspicious scraper traces like website names
+      const garbagePatterns = /foundthejob|govtjobsalert|http|https|www/i;
+      if (parts.some(p => garbagePatterns.test(p))) return true;
+
+      // Reject test/scrape keywords
+      if (parts.some(p => p.includes('test') || p.includes('scrape') || p.includes('mock'))) {
+        return true;
+      }
+      
       return false;
     };
 

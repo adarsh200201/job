@@ -406,6 +406,63 @@ async function generateUniqueSlug(title, excludeJobId = null) {
   return slug;
 }
 
+const isGarbageTitle = (title) => {
+  if (!title) return true;
+  const t = title.trim().toLowerCase();
+  
+  // Exclude extremely short titles
+  if (t.length < 8) return true;
+  
+  // Test/scrape keyword check
+  if (/test|scrape|mock/i.test(t)) return true;
+  
+  // URL or domain check (Broken scraper titles)
+  if (/http|https|www\.|foundthejob|govtjobsalert/i.test(t)) return true;
+
+  // Junk word list check
+  const cleanTitle = t.replace(/[^a-z0-9]/g, ' ').replace(/\s+/g, ' ').trim();
+  const words = cleanTitle.split(' ');
+  const junkWords = new Set(['and', 'or', 'the', 'in', 'to', 'for', 'a', 'an', 'at', 'by', 'of', 'on', 'with', 'if', 'now', 'apply']);
+  const allJunk = words.every(w => junkWords.has(w) || /^\d+$/.test(w));
+  if (allJunk) return true;
+
+  // Title starting or ending with trailing conjunctions/junk words
+  if (/^(?:and|or)\b/i.test(t)) return true;
+  if (/\b(?:and|or)$/i.test(t)) return true;
+
+  return false;
+};
+
+const normalizeTitle = (title) => {
+  if (!title) return '';
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
+const normalizeCompany = (company) => {
+  if (!company) return '';
+  return company
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
+const normalizeUrl = (url) => {
+  if (!url) return '';
+  let clean = url.trim().toLowerCase();
+  clean = clean.replace(/^https?:\/\//i, '');
+  clean = clean.replace(/^www\./i, '');
+  if (clean.endsWith('/')) {
+    clean = clean.slice(0, -1);
+  }
+  return clean;
+};
+
+
 // Create a new job
 // POST /api/jobs
 exports.createJob = async (req, res) => {
@@ -440,18 +497,56 @@ exports.createJob = async (req, res) => {
       });
     }
 
+    // ─── Clean and Enrich Title ───
+    let cleanTitle = title;
+    if (title && title.trim().split(/\s+/).length <= 2 && title.trim().length < 20) {
+      if (isGov) {
+        cleanTitle = `${title} Recruitment 2026`;
+      } else {
+        if (company && !title.toLowerCase().includes(company.toLowerCase())) {
+          cleanTitle = `${company} ${title} Hiring 2026`;
+        } else {
+          cleanTitle = `${title} Hiring 2026`;
+        }
+      }
+    }
+
+    // Reject garbage/test postings
+    if (isGarbageTitle(cleanTitle)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Job rejected: title identified as scraper garbage, test post, or containing URL link.'
+      });
+    }
+
     // ─── Duplicate Check & Update ───
     let existingJob = null;
     if (sourceUrl) {
-      existingJob = await Job.findOne({ sourceUrl });
-    } else if (title && company) {
-      existingJob = await Job.findOne({ title, company });
+      const normSourceUrl = normalizeUrl(sourceUrl);
+      const dateLimit = new Date();
+      dateLimit.setDate(dateLimit.getDate() - 15);
+      const candidates = await Job.find({ createdAt: { $gte: dateLimit } });
+      existingJob = candidates.find(c => c.sourceUrl && normalizeUrl(c.sourceUrl) === normSourceUrl);
+    }
+
+    if (!existingJob && cleanTitle && company) {
+      const dateLimit = new Date();
+      dateLimit.setDate(dateLimit.getDate() - 15);
+      const candidates = await Job.find({ createdAt: { $gte: dateLimit } });
+      
+      const normTitle = normalizeTitle(cleanTitle);
+      const normCompany = normalizeCompany(company);
+      
+      existingJob = candidates.find(c => 
+        normalizeTitle(c.title) === normTitle && 
+        normalizeCompany(c.company) === normCompany
+      );
     }
 
     if (existingJob) {
       // Update existing job fields instead of creating a duplicate document
       const updateData = {
-        title,
+        title: cleanTitle,
         company,
         location: isGov ? '' : location,
         type: isGov ? 'Full-Time' : type,
@@ -477,7 +572,7 @@ exports.createJob = async (req, res) => {
         howToApply: howToApply || '',
         finalThoughts: finalThoughts || '',
         highlightText: highlightText || '',
-        metaTitle: metaTitle || `${title} - ${company} - Job Openings`,
+        metaTitle: metaTitle || `${cleanTitle} - ${company} - Job Openings`,
         metaDescription: metaDescription || (isGov 
           ? `${title} at ${company}. Eligibility: ${eligibility || ''}. Vacancies: ${vacancies || ''}.`
           : `${title} at ${company} in ${location}. ${jobDescription.substring(0, 150)}...`),
@@ -503,11 +598,11 @@ exports.createJob = async (req, res) => {
     }
     
     // Create clean permanent slug from title (with collision checks)
-    const slug = await generateUniqueSlug(title);
+    const slug = await generateUniqueSlug(cleanTitle);
     
     // Create job
     const job = await Job.create({
-      title,
+      title: cleanTitle,
       slug,
       company,
       location: isGov ? '' : location,
@@ -534,10 +629,10 @@ exports.createJob = async (req, res) => {
       howToApply: howToApply || '',
       finalThoughts: finalThoughts || '',
       highlightText: highlightText || '',
-      metaTitle: metaTitle || `${title} - ${company} - Job Openings`,
+      metaTitle: metaTitle || `${cleanTitle} - ${company} - Job Openings`,
       metaDescription: metaDescription || (isGov 
-        ? `${title} at ${company}. Eligibility: ${eligibility || ''}. Vacancies: ${vacancies || ''}.`
-        : `${title} at ${company} in ${location}. ${jobDescription.substring(0, 150)}...`),
+        ? `${cleanTitle} at ${company}. Eligibility: ${eligibility || ''}. Vacancies: ${vacancies || ''}.`
+        : `${cleanTitle} at ${company} in ${location}. ${jobDescription.substring(0, 150)}...`),
       isFeatured: isFeatured || false,
       isActive: isActive !== undefined ? isActive : true,
       postType: postType || 'Job',
@@ -618,14 +713,71 @@ exports.updateJob = async (req, res) => {
       }
     }
     
-    const job = await Job.findByIdAndUpdate(
-      id, 
-      updates, 
-      { 
-        new: true,  // Return the updated document
-        runValidators: true  // Run model validators on update
+    const job = await Job.findById(id);
+    if (!job) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Job not found' 
+      });
+    }
+
+    // If title is being updated, update the slug as well and validate/sanitize government fields
+    if (updates.title) {
+      const isGov = (updates.isGovernment !== undefined) 
+        ? (updates.isGovernment === true || updates.isGovernment === 'true') 
+        : job.isGovernment;
+      
+      const company = updates.company || job.company;
+      
+      // Clean and Enrich Title
+      let cleanTitle = updates.title;
+      if (updates.title.trim().split(/\s+/).length <= 2 && updates.title.trim().length < 20) {
+        if (isGov) {
+          cleanTitle = `${updates.title} Recruitment 2026`;
+        } else {
+          if (company && !updates.title.toLowerCase().includes(company.toLowerCase())) {
+            cleanTitle = `${company} ${updates.title} Hiring 2026`;
+          } else {
+            cleanTitle = `${updates.title} Hiring 2026`;
+          }
+        }
       }
-    );
+      updates.title = cleanTitle;
+      updates.slug = await generateUniqueSlug(cleanTitle, id);
+
+      let hasMissing = !updates.title || !company || !(updates.jobDescription || job.jobDescription) || !(updates.applyLink || job.applyLink);
+      if (!isGov) {
+        if (!(updates.location || job.location) || !(updates.type || job.type) || !(updates.experience || job.experience) || !(updates.education || job.education)) {
+          hasMissing = true;
+        }
+      } else {
+        if (!(updates.eligibility || job.eligibility) || !(updates.vacancies || job.vacancies)) {
+          hasMissing = true;
+        }
+      }
+
+      if (hasMissing) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Missing required fields' 
+        });
+      }
+
+      // Sanitize fields based on government status
+      if (isGov) {
+        updates.location = '';
+        updates.type = 'Full-Time';
+        updates.experience = '';
+        updates.education = '';
+        updates.batch = '';
+      } else {
+        updates.eligibility = '';
+        updates.vacancies = '';
+      }
+    }
+    
+    Object.assign(job, updates);
+    await job.save();
     
     if (!job) {
       return res.status(404).json({ 

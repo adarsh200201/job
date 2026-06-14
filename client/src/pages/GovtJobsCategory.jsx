@@ -124,6 +124,66 @@ const CATEGORY_CONFIGS = {
     description: 'Get the official final and provisional answer keys, question paper solutions, and objection link details for government competitive exams.',
     keywords: 'answer key, provisional key, final answer key, exam solutions, question paper',
     emoji: '🗝️'
+  },
+  'private-jobs': {
+    isGovernmentQuery: 'false',
+    searchQuery: '',
+    typeQuery: '',
+    title: 'Private Jobs 2026 - Latest Private Sector Openings & Careers',
+    heading: '💼 Latest Private Jobs & Vacancies 2026',
+    description: 'Find the latest private sector jobs, corporate vacancies, and corporate career opportunities for freshers and experienced professionals in India.',
+    keywords: 'private jobs, corporate jobs, private sector careers, corporate recruitment',
+    emoji: '💼'
+  },
+  'freshers-jobs': {
+    isGovernmentQuery: 'false',
+    searchQuery: 'fresher',
+    typeQuery: '',
+    title: 'Freshers Jobs 2026 - Latest Job Openings for College Graduates',
+    heading: '🎓 Latest Jobs for Freshers 2026',
+    description: 'Apply online for the latest freshers jobs, entry-level openings, and graduate trainee positions at top companies in India.',
+    keywords: 'freshers jobs, entry level jobs, graduate recruitment, jobs for freshers',
+    emoji: '🎓'
+  },
+  'work-from-home-jobs': {
+    isGovernmentQuery: 'false',
+    searchQuery: '',
+    typeQuery: 'Remote',
+    title: 'Work From Home Jobs 2026 - Latest Remote Jobs & Work From Home Careers',
+    heading: '🏡 Work From Home & Remote Jobs 2026',
+    description: 'Explore and apply online for the latest work from home jobs, remote positions, and freelance online career opportunities in India.',
+    keywords: 'work from home jobs, remote jobs, remote vacancies, freelance jobs, online work',
+    emoji: '🏡'
+  },
+  'internships': {
+    isGovernmentQuery: 'false',
+    searchQuery: '',
+    typeQuery: 'Internship',
+    title: 'Internships 2026 - Latest Paid Internships for College Students',
+    heading: '📝 Latest Paid Internships 2026',
+    description: 'Find paid internships, summer training programs, and virtual internship opportunities for engineering, science, commerce, and arts students.',
+    keywords: 'internships, paid internship, summer internship, internships for students',
+    emoji: '📝'
+  },
+  'software-jobs': {
+    isGovernmentQuery: 'false',
+    searchQuery: 'software',
+    typeQuery: '',
+    title: 'Software Jobs 2026 - Latest Software Engineer & Developer Openings',
+    heading: '💻 Software Jobs & IT Careers 2026',
+    description: 'Apply online for the latest software engineering jobs, web developer vacancies, frontend/backend roles, and IT careers at top tech companies.',
+    keywords: 'software jobs, it jobs, software developer, web developer, software engineering vacancies',
+    emoji: '💻'
+  },
+  'engineering-freshers': {
+    isGovernmentQuery: 'false',
+    searchQuery: 'engineer',
+    typeQuery: '',
+    title: 'Engineering Jobs for Freshers 2026 - Latest Openings for B.Tech/B.E Graduates',
+    heading: '⚙️ Engineering Freshers Jobs & Careers 2026',
+    description: 'Latest entry-level job opportunities for engineering freshers. Apply online for graduate engineer trainee (GET) positions across IT and core engineering sectors.',
+    keywords: 'engineering freshers jobs, get jobs, btech freshers, jobs for be graduates, entry level engineer',
+    emoji: '⚙️'
   }
 };
 
@@ -162,7 +222,15 @@ export default function GovtJobsCategory({ categoryKey }) {
         if (config.typeQuery) {
           params.set('type', config.typeQuery);
         }
-        params.set('isGovernment', 'true');
+        if (config.isGovernmentQuery !== undefined) {
+          if (config.isGovernmentQuery !== 'all') {
+            params.set('isGovernment', config.isGovernmentQuery);
+          } else {
+            params.delete('isGovernment');
+          }
+        } else {
+          params.set('isGovernment', 'true');
+        }
         // Always show 20 per page — same as home page
         if (!params.has('limit')) {
           params.set('limit', '20');
