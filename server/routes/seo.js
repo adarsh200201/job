@@ -35,13 +35,74 @@ const getMegaCategoryKeys = () => {
   return [];
 };
 
-router.get('/sitemap.xml', async (req, res) => {
+const isGarbageSlug = (slug) => {
+  if (!slug) return true;
+  
+  const parts = slug.toLowerCase().split('-').filter(Boolean);
+  if (parts.length === 0) return true;
+  
+  // If the last part is a hex hash (e.g. 5-6 characters, alphanumeric/hex), remove it
+  if (parts.length > 1) {
+    const last = parts[parts.length - 1];
+    if (/^[0-9a-f]{5,6}$/i.test(last)) {
+      parts.pop();
+    }
+  }
+  
+  // Junk words list
+  const junkWords = new Set([
+    'and', 'or', 'the', 'in', 'to', 'for', 'a', 'an', 'at', 'by', 'of', 'on', 'with', 'if', 'now', 'apply', 'test', 'scrape', 'mock'
+  ]);
+  
+  // Check if all remaining parts are junk words or pure numbers
+  const allJunk = parts.every(p => junkWords.has(p) || /^\d+$/.test(p));
+  if (allJunk) return true;
+  
+  // Check if any word contains suspicious scraper traces like website names
+  const garbagePatterns = /foundthejob|govtjobsalert|http|https|www/i;
+  if (parts.some(p => garbagePatterns.test(p))) return true;
+
+  // Reject test/scrape keywords
+  if (parts.some(p => p.includes('test') || p.includes('scrape') || p.includes('mock'))) {
+    return true;
+  }
+  
+  return false;
+};
+
+// 1. Sitemap Index
+router.get('/sitemap.xml', (req, res) => {
+  const baseUrl = getBaseUrl(req);
+  let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+  xml += '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+  
+  const files = [
+    'sitemap-pages.xml',
+    'sitemap-jobs.xml',
+    'sitemap-results.xml',
+    'sitemap-admitcards.xml',
+    'sitemap-preparation.xml'
+  ];
+  
+  for (const file of files) {
+    xml += '  <sitemap>\n';
+    xml += `    <loc>${baseUrl}/${file}</loc>\n`;
+    xml += '  </sitemap>\n';
+  }
+  xml += '</sitemapindex>';
+  
+  res.header('Content-Type', 'application/xml');
+  res.status(200).send(xml);
+});
+
+// 2. Pages Sitemap (Static Pages & Categories)
+router.get('/sitemap-pages.xml', async (req, res) => {
   try {
     const baseUrl = getBaseUrl(req);
-    const jobs = await Job.find({ isActive: true }).select('slug updatedAt').sort({ updatedAt: -1 });
-
-    // Core static landing pages
-    const baseStaticPages = [
+    const megaKeys = getMegaCategoryKeys();
+    const megaCategoryPages = megaKeys.map(k => `/${k}`);
+    
+    const basePages = [
       '',
       '/about',
       '/contact',
@@ -61,18 +122,10 @@ router.get('/sitemap.xml', async (req, res) => {
       '/banking-jobs',
       '/defence-jobs',
       '/other-govt-jobs',
-      '/teaching-jobs',
       '/psu-jobs',
       '/results',
       '/admit-cards',
       '/answer-keys',
-      '/preparation',
-      '/preparation/aptitude',
-      '/preparation/technical',
-      '/preparation/dsa',
-      '/preparation/company',
-      '/preparation/gov',
-      '/preparation/mock-tests',
       '/private-jobs',
       '/freshers-jobs',
       '/work-from-home-jobs',
@@ -80,70 +133,45 @@ router.get('/sitemap.xml', async (req, res) => {
       '/software-jobs',
       '/engineering-freshers'
     ];
-
-    // Read dynamic state & qualification category landing pages from config
-    const megaKeys = getMegaCategoryKeys();
-    const megaCategoryPages = megaKeys.map(k => `/${k}`);
-
-    // Combine and deduplicate
-    const allStaticPages = [...new Set([...baseStaticPages, ...megaCategoryPages])];
-
+    
+    const allPages = [...new Set([...basePages, ...megaCategoryPages])];
+    
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
-
-    // Add static & category landing pages
-    for (const page of allStaticPages) {
+    for (const page of allPages) {
       xml += '  <url>\n';
       xml += `    <loc>${baseUrl}${page}</loc>\n`;
       xml += '    <changefreq>daily</changefreq>\n';
       xml += '    <priority>0.8</priority>\n';
       xml += '  </url>\n';
     }
+    xml += '</urlset>';
+    
+    res.header('Content-Type', 'application/xml');
+    res.status(200).send(xml);
+  } catch (err) {
+    console.error('Error generating pages sitemap:', err);
+    res.status(500).send('Error generating sitemap');
+  }
+});
 
-    // Filter dynamic job pages to exclude duplicates and garbage
+// 3. Jobs Sitemap
+router.get('/sitemap-jobs.xml', async (req, res) => {
+  try {
+    const baseUrl = getBaseUrl(req);
+    const jobs = await Job.find({ 
+      isActive: true, 
+      postType: { $nin: ['Result', 'Admit Card', 'Answer Key'] }
+    }).select('slug updatedAt').sort({ updatedAt: -1 });
+    
+    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+    
     const seenSlugs = new Set();
-    const isGarbageSlug = (slug) => {
-      if (!slug) return true;
-      
-      const parts = slug.toLowerCase().split('-').filter(Boolean);
-      if (parts.length === 0) return true;
-      
-      // If the last part is a hex hash (e.g. 5-6 characters, alphanumeric/hex), remove it
-      if (parts.length > 1) {
-        const last = parts[parts.length - 1];
-        if (/^[0-9a-f]{5,6}$/i.test(last)) {
-          parts.pop();
-        }
-      }
-      
-      // Junk words list
-      const junkWords = new Set([
-        'and', 'or', 'the', 'in', 'to', 'for', 'a', 'an', 'at', 'by', 'of', 'on', 'with', 'if', 'now', 'apply', 'test', 'scrape', 'mock'
-      ]);
-      
-      // Check if all remaining parts are junk words or pure numbers
-      const allJunk = parts.every(p => junkWords.has(p) || /^\d+$/.test(p));
-      if (allJunk) return true;
-      
-      // Check if any word contains suspicious scraper traces like website names
-      const garbagePatterns = /foundthejob|govtjobsalert|http|https|www/i;
-      if (parts.some(p => garbagePatterns.test(p))) return true;
-
-      // Reject test/scrape keywords
-      if (parts.some(p => p.includes('test') || p.includes('scrape') || p.includes('mock'))) {
-        return true;
-      }
-      
-      return false;
-    };
-
-    // Add dynamic job pages
     for (const job of jobs) {
-      if (!job.slug || seenSlugs.has(job.slug) || isGarbageSlug(job.slug)) {
-        continue;
-      }
+      if (!job.slug || seenSlugs.has(job.slug) || isGarbageSlug(job.slug)) continue;
       seenSlugs.add(job.slug);
-
+      
       const lastMod = job.updatedAt ? new Date(job.updatedAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
       xml += '  <url>\n';
       xml += `    <loc>${baseUrl}/${job.slug}</loc>\n`;
@@ -152,15 +180,112 @@ router.get('/sitemap.xml', async (req, res) => {
       xml += '    <priority>0.7</priority>\n';
       xml += '  </url>\n';
     }
-
     xml += '</urlset>';
-
+    
     res.header('Content-Type', 'application/xml');
     res.status(200).send(xml);
-  } catch (error) {
-    console.error('Error generating sitemap:', error);
+  } catch (err) {
+    console.error('Error generating jobs sitemap:', err);
     res.status(500).send('Error generating sitemap');
   }
+});
+
+// 4. Results Sitemap (Results & Answer Keys)
+router.get('/sitemap-results.xml', async (req, res) => {
+  try {
+    const baseUrl = getBaseUrl(req);
+    const jobs = await Job.find({ 
+      isActive: true, 
+      postType: { $in: ['Result', 'Answer Key'] }
+    }).select('slug updatedAt').sort({ updatedAt: -1 });
+    
+    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+    
+    const seenSlugs = new Set();
+    for (const job of jobs) {
+      if (!job.slug || seenSlugs.has(job.slug) || isGarbageSlug(job.slug)) continue;
+      seenSlugs.add(job.slug);
+      
+      const lastMod = job.updatedAt ? new Date(job.updatedAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+      xml += '  <url>\n';
+      xml += `    <loc>${baseUrl}/${job.slug}</loc>\n`;
+      xml += `    <lastmod>${lastMod}</lastmod>\n`;
+      xml += '    <changefreq>weekly</changefreq>\n';
+      xml += '    <priority>0.7</priority>\n';
+      xml += '  </url>\n';
+    }
+    xml += '</urlset>';
+    
+    res.header('Content-Type', 'application/xml');
+    res.status(200).send(xml);
+  } catch (err) {
+    console.error('Error generating results sitemap:', err);
+    res.status(500).send('Error generating sitemap');
+  }
+});
+
+// 5. Admit Cards Sitemap
+router.get('/sitemap-admitcards.xml', async (req, res) => {
+  try {
+    const baseUrl = getBaseUrl(req);
+    const jobs = await Job.find({ 
+      isActive: true, 
+      postType: 'Admit Card'
+    }).select('slug updatedAt').sort({ updatedAt: -1 });
+    
+    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+    
+    const seenSlugs = new Set();
+    for (const job of jobs) {
+      if (!job.slug || seenSlugs.has(job.slug) || isGarbageSlug(job.slug)) continue;
+      seenSlugs.add(job.slug);
+      
+      const lastMod = job.updatedAt ? new Date(job.updatedAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+      xml += '  <url>\n';
+      xml += `    <loc>${baseUrl}/${job.slug}</loc>\n`;
+      xml += `    <lastmod>${lastMod}</lastmod>\n`;
+      xml += '    <changefreq>weekly</changefreq>\n';
+      xml += '    <priority>0.7</priority>\n';
+      xml += '  </url>\n';
+    }
+    xml += '</urlset>';
+    
+    res.header('Content-Type', 'application/xml');
+    res.status(200).send(xml);
+  } catch (err) {
+    console.error('Error generating admitcards sitemap:', err);
+    res.status(500).send('Error generating sitemap');
+  }
+});
+
+// 6. Preparation Sitemap
+router.get('/sitemap-preparation.xml', (req, res) => {
+  const baseUrl = getBaseUrl(req);
+  const prepPages = [
+    '/preparation',
+    '/preparation/aptitude',
+    '/preparation/technical',
+    '/preparation/dsa',
+    '/preparation/company',
+    '/preparation/gov',
+    '/preparation/mock-tests'
+  ];
+  
+  let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+  xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+  for (const page of prepPages) {
+    xml += '  <url>\n';
+    xml += `    <loc>${baseUrl}${page}</loc>\n`;
+    xml += '    <changefreq>weekly</changefreq>\n';
+    xml += '    <priority>0.7</priority>\n';
+    xml += '  </url>\n';
+  }
+  xml += '</urlset>';
+  
+  res.header('Content-Type', 'application/xml');
+  res.status(200).send(xml);
 });
 
 router.get('/robots.txt', (req, res) => {
