@@ -239,6 +239,35 @@ const parseInlineFields = (line, knownKeys) => {
   return results;
 };
 
+// Validates a job URL — rejects broken hostnames, tracker/shortlink domains, and HTML-contaminated hrefs
+const isValidJobUrl = (url) => {
+  if (!url || typeof url !== 'string') return false;
+  // Reject if the URL contains HTML entities or tags — means it's corrupted from regex over HTML
+  if (url.includes('%3C') || url.includes('%3E') || url.includes('%22') || url.includes('<') || url.includes('>')) return false;
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname;
+    if (!host) return false;
+    // Reject if hostname starts with dot (e.g. ".in" from broken shortened URLs)
+    if (host.startsWith('.')) return false;
+    const parts = host.split('.');
+    // Must have at least domain + TLD, and the first part must be non-empty
+    if (parts.length < 2 || parts[0] === '') return false;
+    // Reject known tracker/shortlink/aggregator domains that should never appear as apply links
+    const blockedDomains = [
+      'pdlink.in', 'bit.ly', 'tinyurl.com', 'ow.ly', 'goo.gl', 'short.ly',
+      'rebrand.ly', 'cutt.ly', 't.co', 'buff.ly', 'dlvr.it',
+      // Job aggregators (we don't want to send users away from our site to scraped sources)
+      'internshala.com', 'internshals.com', 'naukri.com', 'shine.com',
+      'monster.com', 'timesjobs.com', 'freshersworld.com', 'placementindia.com',
+      'govtjobsalert.in', 'sarkariresult.com', 'rojgarresult.com', 'freejobalert.com',
+    ];
+    if (blockedDomains.some(d => host === d || host.endsWith('.' + d))) return false;
+    return true;
+  } catch {
+    return false;
+  }
+};
 
 // Dynamic section enrichment for sparse off-campus/program postings
 const getEnrichedJob = (originalJob) => {
@@ -253,11 +282,16 @@ const getEnrichedJob = (originalJob) => {
 
   if (!enriched.isGovernment) {
     const rawDesc = enriched.jobDescription || enriched.description || '';
-    
-    // Extract all HTTP links from the raw description
-    const urlRegex = /https?:\/\/[^\s]+/g;
-    const extractedUrls = [...rawDesc.matchAll(urlRegex)].map(m => m[0].replace(/[).,]+$/, ''));
-    
+
+    // Detect if description is HTML-formatted (from scraper/enriched template)
+    // HTML descriptions must NOT go through the text URL regex — it breaks HTML
+    // by stripping closing tags like </a></p> (since > and < are non-whitespace)
+    const isHtmlDesc = /<[a-z][\s\S]*>/i.test(rawDesc);
+
+    // Extract all HTTP links from the raw description (plain text only)
+    const urlRegex = /https?:\/\/[^\s<>"]+/g;
+    const extractedUrls = isHtmlDesc ? [] : [...rawDesc.matchAll(urlRegex)].map(m => m[0].replace(/[).,]+$/, ''));
+
     // Build labeled link entries from extracted URLs
     if (extractedUrls.length > 0 && !enriched.extractedLinks) {
       const labelMap = [
@@ -288,9 +322,17 @@ const getEnrichedJob = (originalJob) => {
       );
     }
 
-    // Strip all URLs from the displayed job description
-    let cleanDesc = rawDesc.replace(urlRegex, '');
+    // Strip all URLs from the displayed job description — ONLY for plain text
+    // HTML descriptions are handled entirely by RichTextDisplay DOM sanitization
+    let cleanDesc = isHtmlDesc ? rawDesc : rawDesc.replace(urlRegex, '');
 
+    // For HTML descriptions: skip all text-line parsing — RichTextDisplay handles it via DOM
+    // Declare these here so the highlights block below can always reference them safely
+    let telegramFields = [];
+    let descLines = [];
+    if (isHtmlDesc) {
+      enriched.jobDescription = rawDesc;
+    } else {
     // Remove lines that are now empty after URL stripping, or are well-known label-only lines
     const linesToStrip = [
       /^[•\-\*]?\s*[\p{Emoji_Presentation}\p{Extended_Pictographic}\s]*Apply\s*Link\s*:?\s*$/u,
@@ -314,7 +356,7 @@ const getEnrichedJob = (originalJob) => {
 
     enriched.jobDescription = cleanDesc || rawDesc;
 
-    const descLines = cleanDesc.split('\n').map(l => stripUnicodeBold(l).trim()).filter(Boolean);
+    descLines = cleanDesc.split('\n').map(l => stripUnicodeBold(l).trim()).filter(Boolean);
 
     // Parse structured key:value bullet lines into telegramFields
     const KNOWN_KEYS = [
@@ -341,8 +383,9 @@ const getEnrichedJob = (originalJob) => {
       /freshly posted/i,
       /^[🚨🔔📢📣⚡🎯✅🔗]+\s*$/u,  // emoji-only lines
     ];
-    const telegramFields = [];
-    const bodyLines = [];
+    telegramFields = [];
+    let bodyLines = [];
+
 
     descLines.forEach(line => {
       const m = line.match(keyPattern);
@@ -410,6 +453,8 @@ const getEnrichedJob = (originalJob) => {
       const parsedType = findField('job role', 'role', 'position', 'designation', 'job type');
       if (parsedType && !enriched.type) enriched.type = parsedType;
     }
+    } // end !isHtmlDesc block
+
 
     // Parse key items (e.g. checkmarks, emojis, bullets) for highlights/requirements
     // Only do this if we didn't already parse structured telegramFields (to avoid duplication)
@@ -424,9 +469,8 @@ const getEnrichedJob = (originalJob) => {
       if (parsedHighlights.length > 0 && (!enriched.requirements || enriched.requirements.length === 0)) {
         enriched.requirements = parsedHighlights;
       }
-    }
-    
-    // Auto-create "Why Join" if missing
+    } // end highlights parsing (plain-text only)
+
     if (!enriched.whyJoin) {
       const placementHighlight = rawDesc.includes('Placement') || rawDesc.includes('Job Assistance') || rawDesc.includes('Hiring Partners') || rawDesc.includes('Hiring');
       const salaryHighlight = rawDesc.match(/\d+\s*(?:LPA|Lakh|L)/i);
@@ -448,6 +492,25 @@ const getEnrichedJob = (originalJob) => {
           <li style="margin-bottom: 8px;">Complete the initial screening profile to highlight your interest in Data Science &amp; Analytics.</li>
           <li style="margin-bottom: 8px;">Submit the application and await further instructions regarding onboarding or interviews.</li>
         </ol>
+      `;
+    }
+
+    // Auto-create "Final Thoughts" if missing
+    if (!enriched.finalThoughts) {
+      const companyName = enriched.company || 'this company';
+      const roleText = enriched.type || enriched.title || 'this role';
+      const locationText = enriched.location ? ` in ${enriched.location}` : '';
+      const batchText = enriched.batch ? ` for the ${enriched.batch} batch` : '';
+      enriched.finalThoughts = `
+        <p>The <strong>${companyName}</strong> recruitment drive is a great opportunity${batchText} to kickstart or advance your career${locationText}. If you meet the eligibility criteria for <strong>${roleText}</strong>, don't wait — opportunities like this don't come around often.</p>
+        <p>Make sure to:</p>
+        <ul style="line-height: 1.9; padding-left: 1.25rem; margin: 0 0 12px 0;">
+          <li>Read the official notification carefully before applying</li>
+          <li>Keep all required documents ready before filling the form</li>
+          <li>Apply before the last date to avoid last-minute issues</li>
+          <li>Follow <a href="https://nextjobpost.in" style="color:#6366f1;font-weight:600;">NextJobPost</a> for the latest job alerts and updates</li>
+        </ul>
+        <p>We wish you the best of luck in your application process!</p>
       `;
     }
   }
@@ -540,7 +603,8 @@ export default function JobDetails() {
         job.requirements && job.requirements.length > 0 && { id: 'requirements', target: 'requirements-section' },
         job.whyJoin && { id: 'why-join', target: 'why-join-section' },
         job.howToApply && { id: 'how-to-apply', target: 'how-to-apply-section' },
-        (job.pdfLink || job.applyLink || (job.extractedLinks && job.extractedLinks.length > 0)) && { id: 'essential-links', target: 'essential-links-section' },
+        job.finalThoughts && { id: 'final-thoughts', target: 'final-thoughts-section' },
+        (!job.isGovernment || job.pdfLink || job.applyLink || (job.extractedLinks && job.extractedLinks.length > 0)) && { id: 'essential-links', target: 'essential-links-section' },
         recent.length > 0 && { id: 'similar-jobs', target: 'similar-jobs-section' }
       ].filter(Boolean);
 
@@ -850,7 +914,8 @@ export default function JobDetails() {
       job.requirements && job.requirements.length > 0 && { id: 'requirements', label: 'Requirements', target: 'requirements-section' },
       job.whyJoin && { id: 'why-join', label: 'Why join', target: 'why-join-section' },
       job.howToApply && { id: 'how-to-apply', label: 'How to apply', target: 'how-to-apply-section' },
-      (job.pdfLink || job.applyLink || (job.extractedLinks && job.extractedLinks.length > 0)) && { id: 'essential-links', label: 'Links', target: 'essential-links-section' },
+      job.finalThoughts && { id: 'final-thoughts', label: 'Final thoughts', target: 'final-thoughts-section' },
+      (!job.isGovernment || job.pdfLink || job.applyLink || (job.extractedLinks && job.extractedLinks.length > 0)) && { id: 'essential-links', label: 'Links', target: 'essential-links-section' },
       recent.length > 0 && { id: 'similar-jobs', label: 'Similar jobs', target: 'similar-jobs-section' }
     ].filter(Boolean);
 
@@ -1333,13 +1398,13 @@ export default function JobDetails() {
                 </div>
               )}
 
-              {/* Extracted private links */}
-              {!job.isGovernment && job.extractedLinks && job.extractedLinks.length > 0 && (
+              {/* Extracted private links — only show structurally valid, non-tracker URLs */}
+              {!job.isGovernment && job.extractedLinks && job.extractedLinks.filter(l => isValidJobUrl(l.url)).length > 0 && (
                 <div className="essential-links-section">
                   <ul>
-                    {job.extractedLinks.map((link, idx) => (
+                    {job.extractedLinks.filter(l => isValidJobUrl(l.url)).map((link, idx) => (
                       <li key={idx}>
-                        <a href={link.url} target="_blank" rel="noopener noreferrer">
+                        <a href={link.url} target="_blank" rel="noopener noreferrer nofollow">
                           {link.label}
                         </a>
                       </li>
@@ -2116,7 +2181,7 @@ export default function JobDetails() {
           )}
 
           {job.finalThoughts && (
-            <div className="mb-4 text-dark">
+            <div id="final-thoughts-section" className="mb-4 text-dark" style={{ scrollMarginTop: '110px' }}>
               <h2 className="capsule-header p-3 rounded" style={getHeaderStyle()}>
                 <span>💭</span> Final Thoughts
               </h2>
@@ -2126,8 +2191,8 @@ export default function JobDetails() {
             </div>
           )}
 
-          {/* ESSENTIAL LINKS — for private/off-campus jobs with extracted URLs */}
-          {!job.isGovernment && job.extractedLinks && job.extractedLinks.length > 0 && (
+          {/* ESSENTIAL LINKS — always show for non-government jobs (has WhatsApp/Telegram at minimum) */}
+          {!job.isGovernment && (
             <div className="essential-links-section mb-4">
               <h2>Essential Links — {job.company}</h2>
               <ul>
@@ -2143,9 +2208,9 @@ export default function JobDetails() {
                     </a>
                   </li>
                 )}
-                {job.extractedLinks.map((link, idx) => (
+                {job.extractedLinks && job.extractedLinks.filter(l => isValidJobUrl(l.url)).map((link, idx) => (
                   <li key={idx}>
-                    <a href={link.url} target="_blank" rel="noopener noreferrer">
+                    <a href={link.url} target="_blank" rel="noopener noreferrer nofollow">
                       {link.label}
                     </a>
                   </li>
@@ -2157,7 +2222,7 @@ export default function JobDetails() {
                     rel="noopener noreferrer"
                     onClick={() => handleSocialJoinClick('WhatsApp')}
                   >
-                    Join WhatsApp Channel for Government Jobs
+                    Join WhatsApp Channel for Latest Job Updates
                   </a>
                 </li>
                 <li>
@@ -2167,13 +2232,12 @@ export default function JobDetails() {
                     rel="noopener noreferrer"
                     onClick={() => handleSocialJoinClick('Telegram')}
                   >
-                    Join Telegram Channel for Government Jobs
+                    Join Telegram Channel for Latest Job Updates
                   </a>
                 </li>
               </ul>
             </div>
           )}
-
 
 
           <div className="my-5 p-4 rounded-4 shadow-sm" style={{

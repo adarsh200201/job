@@ -75,29 +75,96 @@ export default function RichTextDisplay({ content }) {
     const anchors = Array.from(div.querySelectorAll('a'));
     anchors.forEach(a => {
       const href = a.getAttribute('href') || '';
-      
+
+      // Helper: check if a URL is structurally valid (has a real domain with TLD)
+      const isValidUrl = (url) => {
+        if (!url) return false;
+        // Reject HTML-contaminated hrefs (URL-encoded tags)
+        if (url.includes('%3C') || url.includes('%3E') || url.includes('%22')) return false;
+        try {
+          const parsed = new URL(url);
+          // Must have a real hostname with at least one dot and a TLD segment
+          // e.g. "https://.in/..." has hostname ".in" which is invalid
+          const host = parsed.hostname;
+          const parts = host.split('.');
+          // Reject if hostname starts with dot, has no real domain, or is too short
+          if (!host || host.startsWith('.') || parts.length < 2 || parts[0] === '') return false;
+          // Reject known tracker/shortlink/aggregator domains
+          const blockedDomains = [
+            'pdlink.in', 'bit.ly', 'tinyurl.com', 'ow.ly', 'goo.gl', 'short.ly',
+            'rebrand.ly', 'cutt.ly', 't.co', 'buff.ly', 'dlvr.it',
+            'internshala.com', 'internshals.com', 'naukri.com', 'shine.com',
+            'monster.com', 'timesjobs.com', 'freshersworld.com', 'placementindia.com',
+            'govtjobsalert.in', 'sarkariresult.com', 'rojgarresult.com', 'freejobalert.com',
+          ];
+          if (blockedDomains.some(d => host === d || host.endsWith('.' + d))) return false;
+          return true;
+        } catch {
+          return false;
+        }
+      };
+
       // Redirect WhatsApp and Telegram links to official channels
-      if (href.includes('whatsapp.com')) {
+      if (href.includes('whatsapp.com') || href.includes('wa.me')) {
         a.setAttribute('href', 'https://chat.whatsapp.com/LVpuUJluTpUEdIc4daAemQ');
+        a.setAttribute('target', '_blank');
+        a.setAttribute('rel', 'noopener noreferrer');
       } else if (href.includes('t.me') || href.includes('telegram.me') || href.includes('telegram.dog')) {
         a.setAttribute('href', 'https://t.me/nextjobpost');
+        a.setAttribute('target', '_blank');
+        a.setAttribute('rel', 'noopener noreferrer');
       } else if ((href.includes('govtjobsalert.in') || href.includes('sarkariresult.com')) && !href.toLowerCase().endsWith('.pdf')) {
-        a.removeAttribute('href');
-        a.style.cursor = 'default';
-        a.style.textDecoration = 'none';
-        a.style.color = 'inherit';
+        // Strip competitor domain non-PDF links entirely
+        a.remove();
+      } else if (!href || !isValidUrl(href)) {
+        // Remove broken/empty/invalid hrefs entirely
+        a.remove();
+      } else {
+        // All valid external links: open in new tab safely
+        a.setAttribute('target', '_blank');
+        a.setAttribute('rel', 'noopener noreferrer nofollow');
       }
-      
-      if (a.textContent.trim().toLowerCase() === 'apply online') {
+
+      if (a.parentNode && a.textContent.trim().toLowerCase() === 'apply online') {
         a.textContent = 'Apply Now';
       }
     });
 
+    const BLOCKED_URL_PATTERN = /https?:\/\/(?:\.in|\.com|\.org|\.net|\.co|\.info|\.us|\.xyz|[^\s]*\.(?:pdlink\.in|bit\.ly|tinyurl\.com|ow\.ly|goo\.gl|internshala\.com|internshals\.com|naukri\.com|shine\.com|monster\.com|timesjobs\.com|freshersworld\.com|govtjobsalert\.in|sarkariresult\.com|rojgarresult\.com|freejobalert\.com))[^\s]*/gi;
     const walk = document.createTreeWalker(div, NodeFilter.SHOW_TEXT, null, false);
     let node;
     while (node = walk.nextNode()) {
-      node.nodeValue = cleanTextBranding(node.nodeValue).replace(/Apply Online/gi, 'Apply Now');
+      // Skip text inside anchor tags whose href is valid — don't strip the visible URL text there
+      let parent = node.parentNode;
+      let insideValidAnchor = false;
+      while (parent && parent !== div) {
+        if (parent.tagName === 'A' && parent.getAttribute('href')) {
+          insideValidAnchor = true;
+          break;
+        }
+        parent = parent.parentNode;
+      }
+      let val = cleanTextBranding(node.nodeValue).replace(/Apply Online/gi, 'Apply Now');
+      if (!insideValidAnchor) {
+        // Strip bare tracker/aggregator URLs from text nodes
+        val = val.replace(BLOCKED_URL_PATTERN, '').replace(/\s{2,}/g, ' ').trim();
+      }
+      node.nodeValue = val;
     }
+
+    // Clean up empty elements or elements containing only dangling "Apply Now" labels
+    const cleanDanglingLabels = () => {
+      const elements = Array.from(div.querySelectorAll('p, li, span, strong, b, a, h1, h2, h3, h4, h5, h6'));
+      const danglingPattern = /^\s*(?:apply\s*(?:now|online|link)?|registration\s*(?:link)?|click\s*here\s*to\s*apply|official\s*link|apply\s*here|link|join\s*here|job\s*link|careers?\s*link)[:\-\–\—\s]*$/i;
+      for (let i = elements.length - 1; i >= 0; i--) {
+        const el = elements[i];
+        const text = el.textContent.trim();
+        if (!text || danglingPattern.test(text)) {
+          el.remove();
+        }
+      }
+    };
+    cleanDanglingLabels();
 
     return div.innerHTML;
   };
