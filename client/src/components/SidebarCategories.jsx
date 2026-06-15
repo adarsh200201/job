@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import api from '../api/index.js';
 
 const PlayIcon = () => (
   <svg width="10" height="10" viewBox="0 0 24 24" fill="#0066cc" style={{ flexShrink: 0, marginTop: '4px' }}>
@@ -61,24 +62,76 @@ const catLinkStyle = {
 };
 
 export default function SidebarCategories({ jobs = [] }) {
-  // 1. Trending Jobs: Slice first 7 jobs
-  const trendingJobs = Array.isArray(jobs) ? jobs.slice(0, 7) : [];
+  const [trending, setTrending] = useState([]);
+  const [govt, setGovt] = useState([]);
+  const [updates, setUpdates] = useState([]);
 
-  // 2. Latest Govt Jobs: Filter by Full-Time or next slice
-  const latestGovtJobs = Array.isArray(jobs) 
-    ? jobs.filter(j => j.type === 'Full-Time').slice(0, 8)
+  useEffect(() => {
+    let active = true;
+    
+    async function fetchSidebarData() {
+      try {
+        // Fetch trending (latest jobs)
+        const trendingRes = await api.get('/jobs?limit=7');
+        // Fetch latest govt jobs
+        const govtRes = await api.get('/jobs?isGovernment=true&limit=8');
+        // Fetch recent updates
+        const updatesRes = await api.get('/jobs?status=all&limit=30');
+        
+        if (!active) return;
+        
+        if (trendingRes.data?.success) {
+          setTrending(trendingRes.data.data || []);
+        }
+        if (govtRes.data?.success) {
+          setGovt(govtRes.data.data || []);
+        }
+        if (updatesRes.data?.success) {
+          const allPosts = updatesRes.data.data || [];
+          const filteredUpdates = allPosts.filter(j => 
+            ['Result', 'Admit Card', 'Answer Key'].includes(j.postType) ||
+            j.title.toLowerCase().includes('result') || 
+            j.title.toLowerCase().includes('admit') || 
+            j.title.toLowerCase().includes('key')
+          ).slice(0, 7);
+          setUpdates(filteredUpdates);
+        }
+      } catch (err) {
+        console.error('Error fetching sidebar data:', err);
+      }
+    }
+    
+    fetchSidebarData();
+    
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // Use state data if loaded, otherwise fall back to prop data
+  const trendingJobs = trending.length > 0 
+    ? trending 
+    : (Array.isArray(jobs) ? jobs.slice(0, 7) : []);
+
+  // For government jobs, filter actual isGovernment rather than type === 'Full-Time'
+  const govtJobsPropFiltered = Array.isArray(jobs)
+    ? jobs.filter(j => j.isGovernment === true || j.isGovernment === 'true').slice(0, 8)
     : [];
-  const backupGovtJobs = latestGovtJobs.length > 0 ? latestGovtJobs : (Array.isArray(jobs) ? jobs.slice(7, 15) : []);
+  const backupGovtJobs = govt.length > 0 
+    ? govt 
+    : (govtJobsPropFiltered.length > 0 ? govtJobsPropFiltered : (Array.isArray(jobs) ? jobs.slice(7, 15) : []));
 
-  // 3. Recent Updates: Filter for result/admit/answer keys or next slice
-  const recentUpdates = Array.isArray(jobs)
+  const updatesPropFiltered = Array.isArray(jobs)
     ? jobs.filter(j => 
+        ['Result', 'Admit Card', 'Answer Key'].includes(j.postType) ||
         j.title.toLowerCase().includes('result') || 
         j.title.toLowerCase().includes('admit') || 
         j.title.toLowerCase().includes('key')
       ).slice(0, 7)
     : [];
-  const backupRecentUpdates = recentUpdates.length > 0 ? recentUpdates : (Array.isArray(jobs) ? jobs.slice(15, 22) : []);
+  const backupRecentUpdates = updates.length > 0 
+    ? updates 
+    : (updatesPropFiltered.length > 0 ? updatesPropFiltered : (Array.isArray(jobs) ? jobs.slice(15, 22) : []));
 
   // Central Govt categories
   const centralGovtItems = [

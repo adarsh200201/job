@@ -166,6 +166,41 @@ const enrichThinDescription = (description, title, company, location, salary, ex
   return description + enrichedSection;
 };
 
+const sanitizeTextForCompetitors = (text) => {
+  if (!text || typeof text !== 'string') return text;
+  
+  const competitorPattern = /https?:\/\/(?:\.in|\.com|\.org|\.net|\.co|\.info|\.us|\.xyz|[^\s]*\.(?:pdlink\.in|bit\.ly|tinyurl\.com|ow\.ly|goo\.gl|short\.ly|rebrand\.ly|cutt\.ly|t\.co|buff\.ly|dlvr\.it|internshala\.com|internshals\.com|naukri\.com|shine\.com|monster\.com|timesjobs\.com|freshersworld\.com|placementindia\.com|govtjobsalert\.in|sarkariresult\.com|rojgarresult\.com|freejobalert\.com|freshershunt\.in|fresherslive\.com|freshersvoice\.com|offcampusjobs4u\.in|youth4work\.com|ambitionbox\.com|glassdoor\.com|glassdoor\.co\.in|indeed\.com|indeed\.co\.in|foundthejob\.com|internships\.com|internshipss\.com))[^\s<"'>]*/gi;
+
+  let val = text;
+  
+  // 1. Remove competitor/shortlink URLs
+  val = val.replace(competitorPattern, '');
+  
+  // 2. Remove leftover empty anchor tags
+  val = val.replace(/<a\b[^>]*>\s*<\/a>/gi, '');
+  
+  // 3. Clean up dangling labels inside HTML tags
+  const danglingPatterns = [
+    /<(strong|b|p|li|span)\b[^>]*>\s*(?:visit\s+the\s+full\s+details\s+and\s+application\s+page|apply\s*(?:now|online|link)?|registration\s*(?:link)?|click\s*here\s*to\s*apply|official\s*link|apply\s*here|link|join\s*here|job\s*link|careers?\s*link)\s*[:\-\–\—\s]*\s*<\/\1>/gi
+  ];
+  for (const pattern of danglingPatterns) {
+    val = val.replace(pattern, '');
+  }
+  
+  // 4. Clean up empty tags (repeat to handle nesting)
+  for (let i = 0; i < 3; i++) {
+    val = val.replace(/<(p|li|strong|b|span|div)\b[^>]*>\s*<\/\1>/gi, '');
+  }
+  
+  // 5. Clean dangling prefixes in plain text followed by a dot, number, or end of string
+  val = val.replace(/\b(?:visit\s+the\s+full\s+details\s+and\s+application\s+page|apply\s*(?:now|online|link)?|registration\s*(?:link)?|click\s*here\s*to\s*apply|official\s*link|apply\s*here|link|join\s*here|job\s*link|careers?\s*link)\s*[:\-\–\—\s]*\s*(?=\d|\.|$)/gi, '');
+  
+  // 6. Remove excess spacing
+  val = val.replace(/\s{2,}/g, ' ');
+  
+  return val.trim();
+};
+
 const enrichJobTitleAndCompany = (rawTitle, rawCompany, jobDescription, isGov) => {
   const companyCleaned = cleanCompany(rawCompany);
   const titleCleaned = cleanScrapedTitle(rawTitle || '');
@@ -388,17 +423,21 @@ async function cleanDatabase() {
       if (jobsToDelete.has(idStr)) continue;
       
       let changed = false;
+      const updateFields = {};
       
       const { title: cleanTitle, company: companyCleaned, role: roleFromDesc } = enrichJobTitleAndCompany(job.title, job.company, job.jobDescription, job.isGovernment);
       
       if (companyCleaned !== job.company) {
         job.company = companyCleaned;
+        updateFields.company = companyCleaned;
         changed = true;
       }
       
       if (cleanTitle !== job.title) {
         job.title = cleanTitle;
         job.slug = await generateUniqueSlugForCleanDb(cleanTitle, job._id);
+        updateFields.title = cleanTitle;
+        updateFields.slug = job.slug;
         changed = true;
       }
       
@@ -415,16 +454,26 @@ async function cleanDatabase() {
       
       if (enrichedDesc !== job.jobDescription) {
         job.jobDescription = enrichedDesc;
+        updateFields.jobDescription = enrichedDesc;
         changed = true;
       }
       
+      // Sanitize all text fields for competitor URLs
+      const textFields = ['jobDescription', 'howToApply', 'finalThoughts', 'whyJoin', 'aboutCompany', 'description', 'shortSummary'];
+      textFields.forEach(field => {
+        const originalVal = job[field];
+        if (originalVal && typeof originalVal === 'string') {
+          const cleanedVal = sanitizeTextForCompetitors(originalVal);
+          if (cleanedVal !== originalVal) {
+            job[field] = cleanedVal;
+            updateFields[field] = cleanedVal;
+            changed = true;
+          }
+        }
+      });
+      
       if (changed) {
-        await Job.updateOne({ _id: job._id }, { 
-          title: job.title,
-          slug: job.slug,
-          company: job.company,
-          jobDescription: job.jobDescription 
-        });
+        await Job.updateOne({ _id: job._id }, { $set: updateFields });
         enrichedCount++;
       }
     }

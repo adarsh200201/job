@@ -263,7 +263,7 @@ const isValidJobUrl = (url) => {
       'govtjobsalert.in', 'sarkariresult.com', 'rojgarresult.com', 'freejobalert.com',
       'freshershunt.in', 'fresherslive.com', 'freshersvoice.com', 'offcampusjobs4u.in',
       'youth4work.com', 'ambitionbox.com', 'glassdoor.com', 'glassdoor.co.in',
-      'indeed.com', 'indeed.co.in', 'foundthejob.com',
+      'indeed.com', 'indeed.co.in', 'foundthejob.com', 'internships.com', 'internshipss.com',
     ];
     if (blockedDomains.some(d => host === d || host.endsWith('.' + d))) return false;
     return true;
