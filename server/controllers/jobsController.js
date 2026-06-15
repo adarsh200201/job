@@ -453,6 +453,41 @@ const normalizeCompany = (company) => {
     .trim();
 };
 
+const sanitizeTextForCompetitors = (text) => {
+  if (!text || typeof text !== 'string') return text;
+  
+  const competitorPattern = /https?:\/\/(?:\.in|\.com|\.org|\.net|\.co|\.info|\.us|\.xyz|[^\s]*\.(?:pdlink\.in|bit\.ly|tinyurl\.com|ow\.ly|goo\.gl|short\.ly|rebrand\.ly|cutt\.ly|t\.co|buff\.ly|dlvr\.it|internshala\.com|internshals\.com|naukri\.com|shine\.com|monster\.com|timesjobs\.com|freshersworld\.com|placementindia\.com|govtjobsalert\.in|sarkariresult\.com|rojgarresult\.com|freejobalert\.com|freshershunt\.in|fresherslive\.com|freshersvoice\.com|offcampusjobs4u\.in|youth4work\.com|ambitionbox\.com|glassdoor\.com|glassdoor\.co\.in|indeed\.com|indeed\.co\.in|foundthejob\.com))[^\s<"'>]*/gi;
+
+  let val = text;
+  
+  // 1. Remove competitor/shortlink URLs
+  val = val.replace(competitorPattern, '');
+  
+  // 2. Remove leftover empty anchor tags
+  val = val.replace(/<a\b[^>]*>\s*<\/a>/gi, '');
+  
+  // 3. Clean up dangling labels inside HTML tags
+  const danglingPatterns = [
+    /<(strong|b|p|li|span)\b[^>]*>\s*(?:visit\s+the\s+full\s+details\s+and\s+application\s+page|apply\s*(?:now|online|link)?|registration\s*(?:link)?|click\s*here\s*to\s*apply|official\s*link|apply\s*here|link|join\s*here|job\s*link|careers?\s*link)\s*[:\-\–\—\s]*\s*<\/\1>/gi
+  ];
+  for (const pattern of danglingPatterns) {
+    val = val.replace(pattern, '');
+  }
+  
+  // 4. Clean up empty tags (repeat to handle nesting)
+  for (let i = 0; i < 3; i++) {
+    val = val.replace(/<(p|li|strong|b|span|div)\b[^>]*>\s*<\/\1>/gi, '');
+  }
+  
+  // 5. Clean dangling prefixes in plain text followed by a dot, number, or end of string
+  val = val.replace(/\b(?:visit\s+the\s+full\s+details\s+and\s+application\s+page|apply\s*(?:now|online|link)?|registration\s*(?:link)?|click\s*here\s*to\s*apply|official\s*link|apply\s*here|link|join\s*here|job\s*link|careers?\s*link)\s*[:\-\–\—\s]*\s*(?=\d|\.|$)/gi, '');
+  
+  // 6. Remove excess spacing
+  val = val.replace(/\s{2,}/g, ' ');
+  
+  return val.trim();
+};
+
 const normalizeUrl = (url) => {
   if (!url) return '';
   let clean = url.trim().toLowerCase();
@@ -677,6 +712,14 @@ const isDuplicateTitleAndCompany = (t1, c1, t2, c2) => {
 // POST /api/jobs
 exports.createJob = async (req, res) => {
   try {
+    // Sanitize incoming text fields for competitor URLs
+    const textFields = ['jobDescription', 'howToApply', 'finalThoughts', 'whyJoin', 'aboutCompany', 'description', 'shortSummary'];
+    textFields.forEach(field => {
+      if (req.body[field]) {
+        req.body[field] = sanitizeTextForCompetitors(req.body[field]);
+      }
+    });
+
     const {
       title, company, location, type, experience, jobDescription,
       responsibilities, requirements, skills, education, batch,
@@ -882,6 +925,14 @@ exports.updateJob = async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
+    
+    // Sanitize updates text fields for competitor URLs
+    const textFields = ['jobDescription', 'howToApply', 'finalThoughts', 'whyJoin', 'aboutCompany', 'description', 'shortSummary'];
+    textFields.forEach(field => {
+      if (updates[field]) {
+        updates[field] = sanitizeTextForCompetitors(updates[field]);
+      }
+    });
     
     const job = await Job.findById(id);
     if (!job) {
