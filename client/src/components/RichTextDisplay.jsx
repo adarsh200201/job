@@ -168,7 +168,7 @@ export default function RichTextDisplay({ content }) {
       let val = cleanTextBranding(node.nodeValue).replace(/Apply Online/gi, 'Apply Now');
       if (!insideValidAnchor) {
         // Strip bare tracker/aggregator URLs from text nodes
-        val = val.replace(BLOCKED_URL_PATTERN, '').replace(/\s{2,}/g, ' ').trim();
+        val = val.replace(BLOCKED_URL_PATTERN, '').replace(/\s{2,}/g, ' ');
       }
       node.nodeValue = val;
     }
