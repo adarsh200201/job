@@ -96,6 +96,9 @@ export default function RichTextDisplay({ content }) {
             'internshala.com', 'internshals.com', 'naukri.com', 'shine.com',
             'monster.com', 'timesjobs.com', 'freshersworld.com', 'placementindia.com',
             'govtjobsalert.in', 'sarkariresult.com', 'rojgarresult.com', 'freejobalert.com',
+            'freshershunt.in', 'fresherslive.com', 'freshersvoice.com', 'offcampusjobs4u.in',
+            'youth4work.com', 'ambitionbox.com', 'glassdoor.com', 'glassdoor.co.in',
+            'indeed.com', 'indeed.co.in', 'foundthejob.com',
           ];
           if (blockedDomains.some(d => host === d || host.endsWith('.' + d))) return false;
           return true;
@@ -125,12 +128,29 @@ export default function RichTextDisplay({ content }) {
         a.setAttribute('rel', 'noopener noreferrer nofollow');
       }
 
-      if (a.parentNode && a.textContent.trim().toLowerCase() === 'apply online') {
-        a.textContent = 'Apply Now';
+      if (a.parentNode) {
+        if (a.textContent.trim().toLowerCase() === 'apply online') {
+          a.textContent = 'Apply Now';
+        }
+        
+        // Do not disclose raw URLs in visible anchor text (AdSense/copyright safety)
+        const textContent = a.textContent.trim();
+        const isRawUrl = /^(?:https?:\/\/|www\.)[^\s]+$|^(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(?:\/[^\s]*)?$/i.test(textContent);
+        if (isRawUrl) {
+          if (href.includes('whatsapp.com') || href.includes('wa.me')) {
+            a.textContent = 'Join WhatsApp Channel';
+          } else if (href.includes('t.me') || href.includes('telegram.me')) {
+            a.textContent = 'Join Telegram Channel';
+          } else if (href.includes('youtube.com') || href.includes('youtu.be')) {
+            a.textContent = 'Watch Video Guide';
+          } else {
+            a.textContent = 'Apply Now';
+          }
+        }
       }
     });
 
-    const BLOCKED_URL_PATTERN = /https?:\/\/(?:\.in|\.com|\.org|\.net|\.co|\.info|\.us|\.xyz|[^\s]*\.(?:pdlink\.in|bit\.ly|tinyurl\.com|ow\.ly|goo\.gl|internshala\.com|internshals\.com|naukri\.com|shine\.com|monster\.com|timesjobs\.com|freshersworld\.com|govtjobsalert\.in|sarkariresult\.com|rojgarresult\.com|freejobalert\.com))[^\s]*/gi;
+    const BLOCKED_URL_PATTERN = /https?:\/\/(?:\.in|\.com|\.org|\.net|\.co|\.info|\.us|\.xyz|[^\s]*\.(?:pdlink\.in|bit\.ly|tinyurl\.com|ow\.ly|goo\.gl|internshala\.com|internshals\.com|naukri\.com|shine\.com|monster\.com|timesjobs\.com|freshersworld\.com|govtjobsalert\.in|sarkariresult\.com|rojgarresult\.com|freejobalert\.com|freshershunt\.in|fresherslive\.com|freshersvoice\.com|offcampusjobs4u\.in|youth4work\.com|ambitionbox\.com|glassdoor\.com|glassdoor\.co.in|indeed\.com|indeed\.co.in|foundthejob\.com))[^\s]*/gi;
     const walk = document.createTreeWalker(div, NodeFilter.SHOW_TEXT, null, false);
     let node;
     while (node = walk.nextNode()) {

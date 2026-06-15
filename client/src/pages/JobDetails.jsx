@@ -257,10 +257,13 @@ const isValidJobUrl = (url) => {
     const blockedDomains = [
       'pdlink.in', 'bit.ly', 'tinyurl.com', 'ow.ly', 'goo.gl', 'short.ly',
       'rebrand.ly', 'cutt.ly', 't.co', 'buff.ly', 'dlvr.it',
-      // Job aggregators (we don't want to send users away from our site to scraped sources)
+      // Job aggregators & competitor portals
       'internshala.com', 'internshals.com', 'naukri.com', 'shine.com',
       'monster.com', 'timesjobs.com', 'freshersworld.com', 'placementindia.com',
       'govtjobsalert.in', 'sarkariresult.com', 'rojgarresult.com', 'freejobalert.com',
+      'freshershunt.in', 'fresherslive.com', 'freshersvoice.com', 'offcampusjobs4u.in',
+      'youth4work.com', 'ambitionbox.com', 'glassdoor.com', 'glassdoor.co.in',
+      'indeed.com', 'indeed.co.in', 'foundthejob.com',
     ];
     if (blockedDomains.some(d => host === d || host.endsWith('.' + d))) return false;
     return true;
