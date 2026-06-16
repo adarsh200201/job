@@ -170,6 +170,22 @@ export default function RichTextDisplay({ content }) {
         // Strip bare tracker/aggregator URLs from text nodes
         val = val.replace(BLOCKED_URL_PATTERN, '').replace(/\s{2,}/g, ' ');
       }
+      
+      // Auto-insert spacing at boundaries of inline tags if missing
+      const inlineTags = ['STRONG', 'B', 'A', 'SPAN', 'EM', 'U', 'I'];
+      const nextSib = node.nextSibling;
+      if (nextSib && inlineTags.includes(nextSib.tagName)) {
+        if (val && !/\s$/.test(val)) {
+          val += ' ';
+        }
+      }
+      const prevSib = node.previousSibling;
+      if (prevSib && inlineTags.includes(prevSib.tagName)) {
+        if (val && !/^\s/.test(val) && !/^[,\.!\?):;%\]]/.test(val)) {
+          val = ' ' + val;
+        }
+      }
+      
       node.nodeValue = val;
     }
 
