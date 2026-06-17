@@ -33,11 +33,11 @@ async function autoCleanupDB() {
     if (mongoose.connection.readyState !== 1) return;
     const db = mongoose.connection.db;
 
-    // Delete jobs older than 7 days
+    // Delete jobs older than 21 days
     const Job = require('./models/Job');
-    const cutoff7d = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-    const deleted = await Job.deleteMany({ createdAt: { $lt: cutoff7d } });
-    if (deleted.deletedCount > 0) console.log(`🧹 [AutoCleanup] Deleted ${deleted.deletedCount} old jobs (>7 days)`);
+    const cutoff21d = new Date(Date.now() - 21 * 24 * 60 * 60 * 1000);
+    const deleted = await Job.deleteMany({ createdAt: { $lt: cutoff21d } });
+    if (deleted.deletedCount > 0) console.log(`🧹 [AutoCleanup] Deleted ${deleted.deletedCount} old jobs (>21 days)`);
 
     // Delete all scrapeditems (regenerable cache)
     try {
