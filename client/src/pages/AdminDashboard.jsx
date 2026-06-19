@@ -33,6 +33,11 @@ const PREP_MENU = [
   { id: 'import',    icon: '📤', label: 'Import Data' },
   { id: 'analytics', icon: '📊', label: 'Analytics' },
 ];
+const SEO_MENU = [
+  { id: 'dashboard', icon: '📊', label: 'SEO Control'  },
+  { id: 'status',    icon: '🔍', label: 'Index Status'  },
+  { id: 'logs',      icon: '🤖', label: 'Daily Report'  }
+];
 
 const LIGHT = {
   pageBg: 'var(--page-bg)',
@@ -79,6 +84,87 @@ export default function AdminDashboard() {
   const [flashMsg, setFlashMsg] = useState({ text: '', type: '' });
   const [adLink, setAdLink] = useState(DEFAULT_AD_LINK);
   const [settingsSaving, setSettingsSaving] = useState(false);
+
+  // SEO Control Center state
+  const [seoSubmenu, setSeoSubmenu] = useState('dashboard');
+  const [seoStats, setSeoStats] = useState({ total: 0, indexed: 0, pending: 0, failed: 0, notIndexed: 0, topKeywords: [] });
+  const [seoStatsLoading, setSeoStatsLoading] = useState(false);
+  const [seoUrls, setSeoUrls] = useState([]);
+  const [seoUrlsLoading, setSeoUrlsLoading] = useState(false);
+  const [seoSearch, setSeoSearch] = useState('');
+  const [seoStatusFilter, setSeoStatusFilter] = useState('');
+  const [seoPage, setSeoPage] = useState(1);
+  const [seoPages, setSeoPages] = useState(1);
+  const [seoSyncing, setSeoSyncing] = useState(false);
+
+  // SEO Daily Report / Automation Logs state
+  const [seoLogs, setSeoLogs] = useState({ summary: [], recent: [] });
+  const [seoLogsLoading, setSeoLogsLoading] = useState(false);
+
+  const loadSeoLogs = useCallback(async () => {
+    setSeoLogsLoading(true);
+    try {
+      const res = await api.get('/api/seo/automation-logs');
+      if (res.data?.success) setSeoLogs(res.data.data);
+    } catch (err) {
+      console.error('Failed to load SEO automation logs:', err);
+    } finally {
+      setSeoLogsLoading(false);
+    }
+  }, []);
+
+
+  const loadSeoStats = useCallback(async () => {
+    setSeoStatsLoading(true);
+    try {
+      const res = await api.get('/api/seo/dashboard-stats');
+      if (res.data?.success) {
+        setSeoStats(res.data.data);
+      }
+    } catch (err) {
+      console.error('Failed to load SEO dashboard stats:', err);
+    } finally {
+      setSeoStatsLoading(false);
+    }
+  }, []);
+
+  const loadSeoUrls = useCallback(async (pageVal = 1, statusVal = '', searchVal = '') => {
+    setSeoUrlsLoading(true);
+    try {
+      const query = `page=${pageVal}&limit=30&status=${statusVal}&search=${encodeURIComponent(searchVal)}`;
+      const res = await api.get(`/api/seo/index-status?${query}`);
+      if (res.data?.success) {
+        setSeoUrls(res.data.data);
+        setSeoPage(res.data.page);
+        setSeoPages(res.data.pages);
+      }
+    } catch (err) {
+      console.error('Failed to load SEO URLs:', err);
+    } finally {
+      setSeoUrlsLoading(false);
+    }
+  }, []);
+
+  // Fetch SEO status URLs whenever page, status filter, search query changes
+  useEffect(() => {
+    if (adminModule === 'seo' && seoSubmenu === 'status') {
+      loadSeoUrls(seoPage, seoStatusFilter, seoSearch);
+    }
+  }, [adminModule, seoSubmenu, seoPage, seoStatusFilter, seoSearch, loadSeoUrls]);
+
+  // Initial load when entering SEO module
+  useEffect(() => {
+    if (adminModule === 'seo') {
+      loadSeoStats();
+      if (seoSubmenu === 'status') {
+        loadSeoUrls(1, seoStatusFilter, seoSearch);
+      }
+      if (seoSubmenu === 'logs') {
+        loadSeoLogs();
+      }
+    }
+  }, [adminModule, seoSubmenu, loadSeoStats, loadSeoUrls, loadSeoLogs, seoStatusFilter, seoSearch]);
+
 
   // Security module state
   const [securityLogs, setSecurityLogs]       = useState([]);
@@ -216,13 +302,460 @@ export default function AdminDashboard() {
     catch (err) { setJobs(orig); flash(`❌ ${err.response?.data?.message||'Delete failed'}`, 'error'); }
   };
 
+  const triggerSeoSync = async () => {
+    setSeoSyncing(true);
+    try {
+      await api.get('/api/health'); // Check health
+      flash('✅ SEO Index Status Audit Triggered (runs in background)');
+      await loadSeoStats();
+    } catch {
+      flash('❌ Failed to trigger SEO audit', 'error');
+    } finally {
+      setSeoSyncing(false);
+    }
+  };
+
+  const renderSeoModule = () => {
+    if (seoSubmenu === 'dashboard') {
+      const ratio = seoStats.total ? Math.round((seoStats.indexed / seoStats.total) * 100) : 0;
+      return (
+        <div style={{ display: 'grid', gap: '24px' }}>
+          {/* Action Row */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h2 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1.25rem', fontWeight: 800 }}>SEO Control Center Overview</h2>
+            <button
+              onClick={triggerSeoSync}
+              disabled={seoSyncing || seoStatsLoading}
+              className="btn btn-primary"
+              style={{
+                borderRadius: '10px',
+                fontWeight: 700,
+                fontSize: '0.85rem',
+                padding: '10px 18px',
+                backgroundColor: 'var(--accent)',
+                borderColor: 'var(--accent)',
+                color: '#fff',
+                opacity: (seoSyncing || seoStatsLoading) ? 0.7 : 1
+              }}
+            >
+              {seoSyncing ? '⏳ Syncing...' : '🔄 Run Index Audit'}
+            </button>
+          </div>
+
+          {/* Stats Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
+            {[
+              { label: 'Total Pages', value: seoStats.total, color: '#4f46e5', bg: '#eef2ff', icon: '🔗' },
+              { label: 'Indexed', value: seoStats.indexed, color: '#16a34a', bg: '#f0fdf4', icon: '✅' },
+              { label: 'Pending', value: seoStats.pending, color: '#2563eb', bg: '#eff6ff', icon: '⏳' },
+              { label: 'Failed', value: seoStats.failed, color: '#dc2626', bg: '#fef2f2', icon: '❌' },
+              { label: 'Not Indexed', value: seoStats.notIndexed, color: '#d97706', bg: '#fffbeb', icon: '⚠️' }
+            ].map((card, i) => (
+              <div key={i} style={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '14px', padding: '20px', display: 'flex', alignItems: 'center', gap: '14px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.02)' }}>
+                <span style={{ fontSize: '1.8rem', background: card.bg, padding: '8px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '48px', height: '48px' }}>{card.icon}</span>
+                <div>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)' }}>{card.label}</div>
+                  <div style={{ fontSize: '1.45rem', fontWeight: 800, color: card.color, marginTop: '2px' }}>{seoStatsLoading ? '...' : card.value}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Indexing Ratio Bar */}
+          <div style={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.02)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', alignItems: 'center' }}>
+              <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)' }}>Google Indexing Coverage Ratio</span>
+              <span style={{ fontSize: '1rem', fontWeight: 800, color: '#16a34a' }}>{ratio}% Indexed</span>
+            </div>
+            <div style={{ height: '12px', background: darkMode ? '#334155' : '#e2e8f0', borderRadius: '99px', overflow: 'hidden' }}>
+              <div style={{ height: '100%', background: 'linear-gradient(90deg, #16a34a, #22c55e)', width: `${ratio}%`, borderRadius: '99px', transition: 'width 0.5s ease-out' }} />
+            </div>
+            <p style={{ margin: '10px 0 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+              Out of {seoStats.total} total pages tracked, {seoStats.indexed} are indexed in Google search results. Higher ratios indicate better crawl health.
+            </p>
+          </div>
+
+          {/* Keywords Trend Table */}
+          <div style={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.02)' }}>
+            <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)', background: darkMode ? 'rgba(79,70,229,0.06)' : '#fcfcfd' }}>
+              <h3 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '0.98rem', fontWeight: 800 }}>📈 Search Console Keyword Performance</h3>
+              <p style={{ margin: '2px 0 0', color: 'var(--text-muted)', fontSize: '0.78rem' }}>Top 20 keywords from daily Search Console tracking</p>
+            </div>
+            <div style={{ overflowX: 'auto' }}>
+              {seoStatsLoading ? (
+                <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>⏳ Loading keywords...</div>
+              ) : !seoStats.topKeywords || seoStats.topKeywords.length === 0 ? (
+                <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>No keyword metric data found. Run crawler/indexer to sync.</div>
+              ) : (
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
+                  <thead>
+                    <tr style={{ background: 'var(--table-header-bg)' }}>
+                      {['Keyword', 'Target Page Slug', 'Impressions', 'Clicks', 'CTR', 'Avg Position'].map(h => (
+                        <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 700, color: 'var(--text-muted)', borderBottom: '1px solid var(--border)' }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {seoStats.topKeywords.map((item, i) => (
+                      <tr key={i} style={{ borderBottom: '1px solid var(--border)', background: i % 2 === 0 ? 'transparent' : (darkMode ? 'rgba(255,255,255,0.01)' : '#fcfcfd') }}>
+                        <td style={{ padding: '10px 14px', fontWeight: 700, color: 'var(--text-sub)' }}>{item.keyword}</td>
+                        <td style={{ padding: '10px 14px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
+                          <a href={item.page} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)', textDecoration: 'none' }}>
+                            {item.page ? item.page.replace(/https?:\/\/[^\/]+/, '') || '/' : '/'}
+                          </a>
+                        </td>
+                        <td style={{ padding: '10px 14px', color: 'var(--text-sub)' }}>{item.impressions?.toLocaleString() || 0}</td>
+                        <td style={{ padding: '10px 14px', color: 'var(--text-sub)' }}>{item.clicks?.toLocaleString() || 0}</td>
+                        <td style={{ padding: '10px 14px', color: 'var(--text-sub)', fontWeight: 600 }}>{(item.ctr * 100).toFixed(1)}%</td>
+                        <td style={{ padding: '10px 14px', color: item.position <= 5 ? '#16a34a' : item.position <= 10 ? '#d97706' : '#64748b', fontWeight: 700 }}>
+                          #{item.position?.toFixed(1)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (seoSubmenu === 'status') {
+      return (
+        <div style={{ display: 'grid', gap: '20px' }}>
+          {/* Filters Row */}
+          <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', alignItems: 'center' }}>
+            <input
+              type="text"
+              className="form-control"
+              value={seoSearch}
+              onChange={e => { setSeoSearch(e.target.value); setSeoPage(1); }}
+              placeholder="Search URL..."
+              style={{ width: '280px', height: '40px' }}
+            />
+            <select
+              className="form-select"
+              value={seoStatusFilter}
+              onChange={e => { setSeoStatusFilter(e.target.value); setSeoPage(1); }}
+              style={{ width: '160px', height: '40px' }}
+            >
+              <option value="">All Statuses</option>
+              <option value="Indexed">Indexed</option>
+              <option value="Pending">Pending</option>
+              <option value="Not Indexed">Not Indexed</option>
+              <option value="Failed">Failed</option>
+            </select>
+            <button
+              onClick={() => loadSeoUrls(seoPage, seoStatusFilter, seoSearch)}
+              style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--chip-bg)', color: 'var(--text-sub)', fontWeight: 700, cursor: 'pointer', height: '40px' }}
+            >
+              🔄 Refresh List
+            </button>
+          </div>
+
+          {/* URLs Table */}
+          <div style={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.02)' }}>
+            <div style={{ overflowX: 'auto' }}>
+              {seoUrlsLoading ? (
+                <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>⏳ Loading URL list...</div>
+              ) : seoUrls.length === 0 ? (
+                <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>No tracked URLs found matching the criteria.</div>
+              ) : (
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
+                  <thead>
+                    <tr style={{ background: 'var(--table-header-bg)' }}>
+                      {['URL', 'Status', 'Discovered', 'Last Submitted', 'Indexed At'].map(h => (
+                        <th key={h} style={{ padding: '12px 14px', textAlign: 'left', fontWeight: 700, color: 'var(--text-muted)', borderBottom: '1px solid var(--border)' }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {seoUrls.map((item, i) => {
+                      const getBadgeStyle = (status) => {
+                        switch (status) {
+                          case 'Indexed': return { bg: '#dcfce7', text: '#16a34a' };
+                          case 'Pending': return { bg: '#eff6ff', text: '#2563eb' };
+                          case 'Failed': return { bg: '#fef2f2', text: '#dc2626' };
+                          default: return { bg: '#fef9c3', text: '#d97706' };
+                        }
+                      };
+                      const badge = getBadgeStyle(item.status);
+                      const displayUrl = item.url ? item.url.replace(/https?:\/\/[^\/]+/, '') || '/' : '/';
+                      return (
+                        <tr key={item._id || i} style={{ borderBottom: '1px solid var(--border)', background: i % 2 === 0 ? 'transparent' : (darkMode ? 'rgba(255,255,255,0.01)' : '#fcfcfd') }}>
+                          <td style={{ padding: '12px 14px', fontFamily: 'monospace' }}>
+                            <a href={item.url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)', textDecoration: 'none', fontWeight: 600 }}>
+                              {displayUrl}
+                            </a>
+                          </td>
+                          <td style={{ padding: '12px 14px' }}>
+                            <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: '99px', fontSize: '0.74rem', fontWeight: 700, backgroundColor: badge.bg, color: badge.text }}>
+                              {item.status || 'Pending'}
+                            </span>
+                          </td>
+                          <td style={{ padding: '12px 14px', color: 'var(--text-muted)' }}>
+                            {item.createdAt ? new Date(item.createdAt).toLocaleDateString('en-IN') : '—'}
+                          </td>
+                          <td style={{ padding: '12px 14px', color: 'var(--text-muted)' }}>
+                            {item.submittedAt ? new Date(item.submittedAt).toLocaleDateString('en-IN') : 'Not Submitted'}
+                          </td>
+                          <td style={{ padding: '12px 14px', color: 'var(--text-muted)' }}>
+                            {item.indexedAt ? new Date(item.indexedAt).toLocaleDateString('en-IN') : '—'}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
+            </div>
+
+            {/* Pagination footer */}
+            {seoPages > 1 && (
+              <div style={{ padding: '14px 20px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--table-header-bg)' }}>
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Page <strong>{seoPage}</strong> of <strong>{seoPages}</strong></span>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    disabled={seoPage <= 1 || seoUrlsLoading}
+                    onClick={() => setSeoPage(p => Math.max(1, p - 1))}
+                    style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--chip-bg)', color: 'var(--text-sub)', fontWeight: 700, cursor: 'pointer', opacity: (seoPage <= 1 || seoUrlsLoading) ? 0.5 : 1 }}
+                  >
+                    Previous
+                  </button>
+                  <button
+                    disabled={seoPage >= seoPages || seoUrlsLoading}
+                    onClick={() => setSeoPage(p => Math.min(seoPages, p + 1))}
+                    style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--chip-bg)', color: 'var(--text-sub)', fontWeight: 700, cursor: 'pointer', opacity: (seoPage >= seoPages || seoUrlsLoading) ? 0.5 : 1 }}
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // ── Daily Automation Report ────────────────────────────────────────────────
+    if (seoSubmenu === 'logs') {
+      const TASK_META = {
+        health_checker:   { label: 'SEO Health Check',          icon: '🏥', cadence: 'Every 30 min',  color: '#6366f1' },
+        gsc_keyword_sync: { label: 'GSC Keyword Sync',          icon: '📈', cadence: 'Every 24 hrs',  color: '#0ea5e9' },
+        index_tracker:    { label: 'Google Index Tracker',      icon: '🔍', cadence: 'Every 24 hrs',  color: '#8b5cf6' },
+        auto_optimizer:   { label: 'Search Console Optimizer',  icon: '⚡', cadence: 'Every 24 hrs',  color: '#f59e0b' },
+        content_refresh:  { label: 'Content Refresh Engine',    icon: '♻️', cadence: 'Every 24 hrs',  color: '#10b981' },
+        keyword_gap_finder:{ label: 'Keyword Gap Finder',       icon: '🎯', cadence: 'Every 24 hrs',  color: '#ec4899' },
+      };
+      const STATUS_STYLE = {
+        success: { bg: '#f0fdf4', border: '#86efac', text: '#16a34a', label: '✅ Success' },
+        failed:  { bg: '#fef2f2', border: '#fca5a5', text: '#dc2626', label: '❌ Failed'  },
+        skipped: { bg: '#f8fafc', border: '#cbd5e1', text: '#64748b', label: '⏭ Skipped' },
+        running: { bg: '#eff6ff', border: '#93c5fd', text: '#2563eb', label: '⏳ Running' },
+        never:   { bg: '#fafafa', border: '#e5e7eb', text: '#9ca3af', label: '⭕ Never Run'},
+      };
+      const fmtTime = (dt) => {
+        if (!dt) return 'Never';
+        const d = new Date(dt);
+        return d.toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true });
+      };
+      const fmtDur = (ms) => {
+        if (!ms || ms < 1) return '—';
+        if (ms < 1000) return `${ms}ms`;
+        if (ms < 60000) return `${(ms/1000).toFixed(1)}s`;
+        return `${Math.round(ms/60000)}m ${Math.round((ms%60000)/1000)}s`;
+      };
+      const timeAgo = (dt) => {
+        if (!dt) return '';
+        const diff = Date.now() - new Date(dt).getTime();
+        const m = Math.floor(diff / 60000);
+        if (m < 1) return 'just now';
+        if (m < 60) return `${m}m ago`;
+        const h = Math.floor(m / 60);
+        if (h < 24) return `${h}h ago`;
+        return `${Math.floor(h / 24)}d ago`;
+      };
+
+      const summary = seoLogs.summary || [];
+      const recent  = seoLogs.recent  || [];
+      const successCount = summary.filter(s => s.status === 'success').length;
+      const failedCount  = summary.filter(s => s.status === 'failed').length;
+
+      return (
+        <div style={{ display: 'grid', gap: '24px' }}>
+
+          {/* Header */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <h2 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1.25rem', fontWeight: 800 }}>
+                🤖 Daily SEO Automation Report
+              </h2>
+              <p style={{ margin: '4px 0 0', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+                Live status of all 6 automation tasks. Tasks run continuously in the background.
+              </p>
+            </div>
+            <button
+              onClick={loadSeoLogs}
+              disabled={seoLogsLoading}
+              style={{ padding: '9px 18px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--chip-bg)', color: 'var(--text-sub)', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem' }}
+            >
+              {seoLogsLoading ? '⏳ Loading...' : '🔄 Refresh'}
+            </button>
+          </div>
+
+          {/* Quick health bar */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px' }}>
+            {[
+              { label: 'Total Tasks', value: 6,            icon: '🤖', color: '#6366f1' },
+              { label: 'Successful',  value: successCount, icon: '✅', color: '#16a34a' },
+              { label: 'Failed',      value: failedCount,  icon: '❌', color: '#dc2626' },
+              { label: 'Log Entries', value: recent.length,icon: '📋', color: '#0ea5e9' },
+            ].map((c, i) => (
+              <div key={i} style={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '12px', padding: '16px 18px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ fontSize: '1.4rem' }}>{c.icon}</span>
+                <div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>{c.label}</div>
+                  <div style={{ fontSize: '1.3rem', fontWeight: 800, color: c.color }}>{seoLogsLoading ? '…' : c.value}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Task Status Cards Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '16px' }}>
+            {seoLogsLoading ? (
+              Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} style={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '16px', padding: '22px', height: '130px', opacity: 0.4 }} />
+              ))
+            ) : summary.length === 0 ? (
+              <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px 20px', color: 'var(--text-muted)' }}>
+                <div style={{ fontSize: '3rem', marginBottom: '12px' }}>⏳</div>
+                <div style={{ fontWeight: 700, fontSize: '1rem' }}>No automation logs yet</div>
+                <div style={{ fontSize: '0.83rem', marginTop: '6px' }}>Tasks will appear here after the bot runs its first daily cycle.</div>
+              </div>
+            ) : (
+              // Show all 6 tasks, merging summary data with TASK_META
+              Object.entries(TASK_META).map(([taskKey, meta]) => {
+                const log = summary.find(s => s.taskName === taskKey) || { taskName: taskKey, status: 'never', ranAt: null, message: 'Has not run yet', durationMs: 0 };
+                const st = STATUS_STYLE[log.status] || STATUS_STYLE.never;
+                const isDark = darkMode;
+                return (
+                  <div key={taskKey} style={{
+                    background: isDark ? 'rgba(255,255,255,0.03)' : '#fff',
+                    border: `1px solid ${isDark ? '#334155' : '#e5e7eb'}`,
+                    borderLeft: `4px solid ${meta.color}`,
+                    borderRadius: '14px',
+                    padding: '20px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '10px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+                  }}>
+                    {/* Top row */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                        <span style={{ fontSize: '1.6rem', lineHeight: 1 }}>{meta.icon}</span>
+                        <div>
+                          <div style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--text-primary)' }}>{meta.label}</div>
+                          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px' }}>⏱ {meta.cadence}</div>
+                        </div>
+                      </div>
+                      <span style={{
+                        background: isDark ? 'rgba(255,255,255,0.07)' : st.bg,
+                        border: `1px solid ${st.border}`,
+                        color: st.text,
+                        borderRadius: '20px',
+                        padding: '3px 10px',
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
+                        whiteSpace: 'nowrap'
+                      }}>{st.label}</span>
+                    </div>
+                    {/* Message */}
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', background: isDark ? 'rgba(255,255,255,0.04)' : '#f8fafc', borderRadius: '8px', padding: '8px 12px', minHeight: '32px' }}>
+                      {log.message || 'No result message recorded.'}
+                    </div>
+                    {/* Footer */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                      <span>🕐 Last run: <strong>{fmtTime(log.ranAt)}</strong></span>
+                      <span>⚡ {fmtDur(log.durationMs)}</span>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+
+          {/* Recent Activity Feed */}
+          <div style={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '16px', overflow: 'hidden' }}>
+            <div style={{ padding: '18px 22px', borderBottom: '1px solid var(--border)', background: darkMode ? 'rgba(99,102,241,0.06)' : '#fcfcfd', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-primary)' }}>📋 Recent Activity Feed</h3>
+                <p style={{ margin: '2px 0 0', fontSize: '0.75rem', color: 'var(--text-muted)' }}>Last 20 task runs across all automation tasks</p>
+              </div>
+            </div>
+            <div style={{ maxHeight: '420px', overflowY: 'auto' }}>
+              {seoLogsLoading ? (
+                <div style={{ padding: '30px', textAlign: 'center', color: 'var(--text-muted)' }}>⏳ Loading activity...</div>
+              ) : recent.length === 0 ? (
+                <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>No activity yet. Bot will log results here after first run.</div>
+              ) : (
+                recent.slice(0, 20).map((entry, i) => {
+                  const meta  = TASK_META[entry.taskName] || { label: entry.taskName, icon: '🔧', color: '#64748b' };
+                  const st    = STATUS_STYLE[entry.status] || STATUS_STYLE.never;
+                  return (
+                    <div key={i} style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: '14px',
+                      padding: '13px 22px',
+                      borderBottom: '1px solid var(--border)',
+                      background: i % 2 === 0 ? 'transparent' : (darkMode ? 'rgba(255,255,255,0.01)' : '#fafafa')
+                    }}>
+                      {/* Icon dot */}
+                      <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: `${meta.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '1rem' }}>
+                        {meta.icon}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ fontWeight: 700, fontSize: '0.82rem', color: 'var(--text-primary)' }}>{meta.label}</span>
+                          <span style={{ fontSize: '0.7rem', color: st.text, fontWeight: 700, whiteSpace: 'nowrap',
+                            background: darkMode ? 'rgba(255,255,255,0.06)' : st.bg,
+                            border: `1px solid ${st.border}`,
+                            borderRadius: '20px', padding: '2px 8px'
+                          }}>{st.label}</span>
+                        </div>
+                        <div style={{ fontSize: '0.77rem', color: 'var(--text-muted)', marginTop: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {entry.message || '—'}
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{timeAgo(entry.ranAt)}</div>
+                        <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '2px' }}>{fmtDur(entry.durationMs)}</div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+
+        </div>
+      );
+    }
+
+    return null;
+  };
+
+
   const totalJobs    = jobs.length;
   const activeJobs   = jobs.filter(j=>j.isActive).length;
   const featuredJobs = jobs.filter(j=>j.isFeatured).length;
   const draftJobs    = jobs.filter(j=>!j.isActive).length;
 
-  const currentMenu    = adminModule==='jobs' ? JOB_MENU : PREP_MENU;
-  const currentSubPage = adminModule==='jobs' ? jobSubPage : prepSubmenu;
+  const currentMenu    = adminModule==='jobs' ? JOB_MENU : (adminModule==='preparation' ? PREP_MENU : (adminModule==='seo' ? SEO_MENU : []));
+  const currentSubPage = adminModule==='jobs' ? jobSubPage : (adminModule==='preparation' ? prepSubmenu : (adminModule==='seo' ? seoSubmenu : ''));
 
   return (
     <div
@@ -272,16 +805,19 @@ export default function AdminDashboard() {
           <button onClick={() => { setAdminModule('security'); loadLogs(); }} style={{ ...S.moduleBtn, ...(adminModule==='security' ? { background: 'rgba(239,68,68,0.12)', color: '#ef4444' } : { color: T.textSub }) }} title="Security">
             <span style={S.mIcon}>🛡️</span>{sidebarOpen && <span>Security</span>}
           </button>
+          <button onClick={() => { setAdminModule('seo'); loadSeoStats(); }} style={{ ...S.moduleBtn, ...(adminModule==='seo' ? { background: 'rgba(99,102,241,0.12)', color: '#6366f1' } : { color: T.textSub }) }} title="SEO Control Center">
+            <span style={S.mIcon}>🔥</span>{sidebarOpen && <span>SEO Center</span>}
+          </button>
         </div>
 
         <div style={{ ...S.divider, background: T.border }} />
 
         {/* Nav items */}
         <nav style={S.nav}>
-          {sidebarOpen && <p style={{ ...S.sectionLabel, color: T.textMuted }}>{adminModule==='jobs' ? 'JOB TOOLS' : 'PREP TOOLS'}</p>}
+          {sidebarOpen && <p style={{ ...S.sectionLabel, color: T.textMuted }}>{adminModule==='jobs' ? 'JOB TOOLS' : (adminModule==='preparation' ? 'PREP TOOLS' : 'SEO TOOLS')}</p>}
           {currentMenu.map(item => (
             <button key={item.id}
-              onClick={() => adminModule==='jobs' ? (item.id==='create' ? startCreate() : setJobSubPage(item.id)) : setPrepSubmenu(item.id)}
+              onClick={() => adminModule==='jobs' ? (item.id==='create' ? startCreate() : setJobSubPage(item.id)) : (adminModule==='preparation' ? setPrepSubmenu(item.id) : setSeoSubmenu(item.id))}
               style={{ ...S.navItem, color: T.textSub, ...(currentSubPage===item.id ? { background: T.activeItemBg, color: T.accent, fontWeight:700, borderLeft: `3px solid ${T.accent}`, paddingLeft: 'calc(0.75rem - 3px)' } : {}) }}
               title={item.label}
             >
@@ -319,6 +855,8 @@ export default function AdminDashboard() {
               ? (jobSubPage==='list' ? '📋 Job Listings' : jobSubPage==='create' ? (editingId&&editingId!=='new'?'✏️ Edit Job':'➕ Create Job') : '⚙️ Settings')
               : adminModule==='preparation'
               ? `${PREP_MENU.find(m=>m.id===prepSubmenu)?.icon} ${PREP_MENU.find(m=>m.id===prepSubmenu)?.label}`
+              : adminModule==='seo'
+              ? `${SEO_MENU.find(m=>m.id===seoSubmenu)?.icon} ${SEO_MENU.find(m=>m.id===seoSubmenu)?.label}`
               : '🛡️ Security & Monitoring'}
           </div>
           <div style={S.topbarRight}>
@@ -802,6 +1340,13 @@ export default function AdminDashboard() {
               </div>
 
             </div>
+          </div>
+        )}
+
+        {/* ── SEO CONTROL CENTER MODULE ───────────────────── */}
+        {adminModule==='seo' && (
+          <div style={S.page}>
+            {renderSeoModule()}
           </div>
         )}
 

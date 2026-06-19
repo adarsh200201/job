@@ -826,6 +826,75 @@ export default function JobDetails() {
 
   const themeColor = getThemeColor();
 
+  const isExpired = job.lastDate && new Date(job.lastDate) < new Date();
+
+  const ExpiredBanner = () => {
+    if (!isExpired) return null;
+    const formattedDate = new Date(job.lastDate).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+    return (
+      <div className="expired-banner p-3 p-md-4 rounded-4 mb-4" style={{
+        background: 'linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)',
+        border: '1px solid #fca5a5',
+        color: '#991b1b',
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
+        fontFamily: "'Outfit', 'Inter', sans-serif"
+      }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px' }}>
+          <span style={{ fontSize: '1.75rem', lineHeight: 1 }}>⚠️</span>
+          <div style={{ flexGrow: 1 }}>
+            <h5 className="fw-bold mb-1" style={{ color: '#991b1b', fontSize: '1.1rem' }}>This Posting Has Expired</h5>
+            <p className="mb-3" style={{ fontSize: '0.9rem', color: '#7f1d1d', opacity: 0.95 }}>
+              The application deadline (<strong>{formattedDate}</strong>) has passed. This listing is no longer accepting active applications.
+            </p>
+            
+            {recent && recent.length > 0 && (
+              <div style={{ marginTop: '12px' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#7f1d1d', marginBottom: '8px' }}>
+                  🔥 Recommended Active Openings:
+                </div>
+                <div className="row g-2">
+                  {recent.slice(0, 3).map((rJob) => (
+                    <div key={rJob._id} className="col-12 col-md-4">
+                      <a
+                        href={`/${rJob.slug}`}
+                        className="d-block p-2.5 rounded-3 bg-white border text-decoration-none hover-shadow"
+                        style={{
+                          fontSize: '0.82rem',
+                          color: '#1e293b',
+                          transition: 'all 0.2s ease',
+                          borderColor: '#fca5a5'
+                        }}
+                      >
+                        <div className="fw-bold text-truncate" style={{ color: '#0f172a' }}>{rJob.title}</div>
+                        <div className="text-muted text-truncate" style={{ fontSize: '0.74rem' }}>{rJob.company}</div>
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            <div className="mt-3 d-flex flex-wrap gap-2">
+              <a href="/results" className="btn btn-sm btn-outline-danger fw-bold rounded-pill px-3 py-1.5" style={{ fontSize: '0.78rem' }}>
+                📋 Check Latest Results
+              </a>
+              <a href="/admit-cards" className="btn btn-sm btn-outline-danger fw-bold rounded-pill px-3 py-1.5" style={{ fontSize: '0.78rem' }}>
+                🎟️ Check Admit Cards
+              </a>
+              <a href="/govt-jobs" className="btn btn-sm btn-danger text-white fw-bold rounded-pill px-3 py-1.5" style={{ fontSize: '0.78rem', backgroundColor: '#dc2626', border: 'none' }}>
+                🔍 Search Active Jobs
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // Remap generic postType values to a user-friendly label for display
   const rawPostType = String(job.postType || '').trim();
   const displayPostType = (rawPostType === 'Job Post' || rawPostType === 'Job')
@@ -1112,6 +1181,7 @@ export default function JobDetails() {
 
         {/* Main Content Area (Animated - transform localized to content region) */}
         <div className="animate-fade-in-up" style={{ padding: '20px 16px' }}>
+          <ExpiredBanner />
           
           {/* Job details top block */}
           <div id="job-details-top" style={{ marginBottom: '20px' }}>
@@ -1633,6 +1703,7 @@ export default function JobDetails() {
       </Helmet>
       <div className="row g-4">
         <div className="col-12 col-lg-8 col-left">
+          <ExpiredBanner />
           <div className="job-header-section mb-4 mt-2">
             <div className="d-flex flex-wrap align-items-center gap-2.5 mb-3">
               {/* Category Badge */}

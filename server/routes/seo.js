@@ -1,6 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const Job = require('../models/Job');
+const SeoIndexStatus = require('../models/SeoIndexStatus');
+const SeoKeywordMetric = require('../models/SeoKeywordMetric');
+const SeoAutomationLog = require('../models/SeoAutomationLog');
+const adminAuth = require('../middleware/adminAuth');
 const fs = require('fs');
 const path = require('path');
 
@@ -151,20 +155,41 @@ router.get('/sitemap-pages.xml', async (req, res) => {
     ];
     
     // Generate Programmatic SEO combinations dynamically
-    const qualifications = ['10th-pass', '12th-pass', 'graduate', 'post-graduate', 'diploma', 'iti'];
-    const categories = ['ssc', 'railway', 'bank', 'upsc', 'defence', 'teaching'];
+    const qualifications = [
+      '10th-pass', '12th-pass', 'graduate', 'post-graduate', 'diploma', 'iti',
+      'engineering', 'medical', 'teaching', 'computer-it', 'commerce', 'law'
+    ];
+    const categories = ['ssc', 'railway', 'bank', 'upsc', 'defence', 'psu', 'police'];
     const states = [
-      'gujarat', 'bihar', 'rajasthan', 'up', 'maharashtra', 'delhi', 'mp', 
-      'punjab', 'haryana', 'karnataka', 'tamil-nadu', 'west-bengal', 
-      'andhra-pradesh', 'telangana', 'kerala', 'odisha'
+      'gujarat', 'bihar', 'rajasthan', 'maharashtra', 'delhi', 'punjab',
+      'haryana', 'karnataka', 'tamil-nadu', 'west-bengal', 'andhra-pradesh',
+      'telangana', 'kerala', 'odisha', 'andaman-nicobar', 'arunachal-pradesh',
+      'assam', 'chandigarh', 'chhattisgarh', 'dnh-dd', 'goa', 'himachal-pradesh',
+      'jammu-kashmir', 'jharkhand', 'ladakh', 'lakshadweep', 'madhya-pradesh',
+      'manipur', 'meghalaya', 'mizoram', 'nagaland', 'puducherry', 'sikkim',
+      'tripura', 'uttar-pradesh', 'uttarakhand'
     ];
     
     const programmaticPages = [];
+    
+    // 1. Individual State Pages (e.g. /gujarat-govt-jobs)
+    for (const s of states) {
+      programmaticPages.push(`/${s}-govt-jobs`);
+    }
+    
+    // 2. Individual Qualification Pages (e.g. /10th-pass-jobs)
+    for (const q of qualifications) {
+      programmaticPages.push(`/${q}-jobs`);
+    }
+    
+    // 3. Qualification-State Combinations (e.g. /10th-pass-jobs-in-gujarat)
     for (const q of qualifications) {
       for (const s of states) {
         programmaticPages.push(`/${q}-jobs-in-${s}`);
       }
     }
+    
+    // 4. Category-State Combinations (e.g. /ssc-jobs-in-gujarat)
     for (const c of categories) {
       for (const s of states) {
         programmaticPages.push(`/${c}-jobs-in-${s}`);
@@ -333,6 +358,228 @@ router.get('/robots.txt', (req, res) => {
   
   res.header('Content-Type', 'text/plain');
   res.status(200).send(txt);
+});
+
+// 7. SEO Dashboard Stats (Protected Admin Route)
+router.get('/api/seo/dashboard-stats', adminAuth, async (req, res) => {
+  try {
+    const totalCount = await SeoIndexStatus.countDocuments();
+    const indexedCount = await SeoIndexStatus.countDocuments({ status: 'Indexed' });
+    const pendingCount = await SeoIndexStatus.countDocuments({ status: 'Pending' });
+    const failedCount = await SeoIndexStatus.countDocuments({ status: 'Failed' });
+    const notIndexedCount = await SeoIndexStatus.countDocuments({ status: 'Not Indexed' });
+
+    // Fetch some recent keyword metrics for trend analysis
+    const topKeywords = await SeoKeywordMetric.find()
+      .sort({ date: -1, impressions: -1 })
+      .limit(20)
+      .lean();
+
+    res.json({
+      success: true,
+      data: {
+        total: totalCount,
+        indexed: indexedCount,
+        pending: pendingCount,
+        failed: failedCount,
+        notIndexed: notIndexedCount,
+        topKeywords
+      }
+    });
+  } catch (err) {
+    console.error('Error fetching SEO dashboard stats:', err);
+    res.status(500).json({ success: false, message: 'Failed to fetch SEO stats', error: err.message });
+  }
+});
+
+// 8. SEO Index Status List (Protected Admin Route)
+router.get('/api/seo/index-status', adminAuth, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 50;
+    const status = req.query.status;
+    const search = req.query.search;
+    const skip = (page - 1) * limit;
+
+    const query = {};
+    if (status) {
+      query.status = status;
+    }
+    if (search) {
+      query.url = { $regex: search, $options: 'i' };
+    }
+
+    const total = await SeoIndexStatus.countDocuments(query);
+    const urls = await SeoIndexStatus.find(query)
+      .sort({ updatedAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    res.json({
+      success: true,
+      total,
+      page,
+      pages: Math.ceil(total / limit),
+      data: urls
+    });
+  } catch (err) {
+    console.error('Error fetching index status:', err);
+    res.status(500).json({ success: false, message: 'Failed to fetch index status', error: err.message });
+  }
+});
+
+// 9. SEO Index Status Bulk Update (Protected Admin Route)
+router.post('/api/seo/index-status/bulk', adminAuth, async (req, res) => {
+  try {
+    const { urls } = req.body; // Array of { url, status, submittedAt, indexedAt }
+    if (!Array.isArray(urls) || urls.length === 0) {
+      return res.status(400).json({ success: false, message: 'Invalid payload: urls array is required' });
+    }
+
+    const bulkOps = urls.map(item => {
+      const updateDoc = {
+        status: item.status || 'Pending'
+      };
+      if (item.submittedAt) updateDoc.submittedAt = new Date(item.submittedAt);
+      if (item.indexedAt) updateDoc.indexedAt = new Date(item.indexedAt);
+
+      return {
+        updateOne: {
+          filter: { url: item.url },
+          update: { $set: updateDoc },
+          upsert: true
+        }
+      };
+    });
+
+    const result = await SeoIndexStatus.bulkWrite(bulkOps);
+
+    res.json({
+      success: true,
+      message: `Successfully processed ${urls.length} URL index statuses`,
+      matchedCount: result.matchedCount,
+      modifiedCount: result.modifiedCount,
+      upsertedCount: result.upsertedCount
+    });
+  } catch (err) {
+    console.error('Error bulk updating index status:', err);
+    res.status(500).json({ success: false, message: 'Failed to bulk update index status', error: err.message });
+  }
+});
+
+// 10. SEO Keyword Metrics Bulk Upload (Protected Admin Route)
+router.post('/api/seo/keyword-metrics', adminAuth, async (req, res) => {
+  try {
+    const { metrics } = req.body; // Array of { keyword, impressions, clicks, ctr, position, page, date }
+    if (!Array.isArray(metrics) || metrics.length === 0) {
+      return res.status(400).json({ success: false, message: 'Invalid payload: metrics array is required' });
+    }
+
+    const bulkOps = metrics.map(item => {
+      const dateVal = item.date ? new Date(item.date) : new Date();
+      // Set to midnight to align all daily stats cleanly
+      dateVal.setUTCHours(0, 0, 0, 0);
+
+      return {
+        updateOne: {
+          filter: { 
+            keyword: item.keyword, 
+            page: item.page, 
+            date: dateVal 
+          },
+          update: { 
+            $set: { 
+              impressions: Number(item.impressions) || 0, 
+              clicks: Number(item.clicks) || 0, 
+              ctr: Number(item.ctr) || 0, 
+              position: Number(item.position) || 0 
+            } 
+          },
+          upsert: true
+        }
+      };
+    });
+
+    const result = await SeoKeywordMetric.bulkWrite(bulkOps);
+
+    res.json({
+      success: true,
+      message: `Successfully processed ${metrics.length} keyword metrics`,
+      matchedCount: result.matchedCount,
+      modifiedCount: result.modifiedCount,
+      upsertedCount: result.upsertedCount
+    });
+  } catch (err) {
+    console.error('Error bulk uploading keyword metrics:', err);
+    res.status(500).json({ success: false, message: 'Failed to bulk upload keyword metrics', error: err.message });
+  }
+});
+
+// 11. GET Automation Logs — Daily Report (Protected Admin Route)
+router.get('/api/seo/automation-logs', adminAuth, async (req, res) => {
+  try {
+    const ALL_TASKS = [
+      'health_checker',
+      'gsc_keyword_sync',
+      'index_tracker',
+      'auto_optimizer',
+      'content_refresh',
+      'keyword_gap_finder'
+    ];
+
+    // Get the latest run entry for each task
+    const latestPerTask = await Promise.all(
+      ALL_TASKS.map(async (taskName) => {
+        const log = await SeoAutomationLog.findOne({ taskName })
+          .sort({ ranAt: -1 })
+          .lean();
+        return log || { taskName, status: 'never', ranAt: null, message: 'Has not run yet', durationMs: 0 };
+      })
+    );
+
+    // Get the 60 most recent log entries for the activity feed
+    const recentLogs = await SeoAutomationLog.find()
+      .sort({ ranAt: -1 })
+      .limit(60)
+      .lean();
+
+    res.json({
+      success: true,
+      data: {
+        summary: latestPerTask,
+        recent: recentLogs
+      }
+    });
+  } catch (err) {
+    console.error('Error fetching automation logs:', err);
+    res.status(500).json({ success: false, message: 'Failed to fetch automation logs', error: err.message });
+  }
+});
+
+// 12. POST Automation Log Entry — Called by Python scripts (Protected Admin Route)
+router.post('/api/seo/automation-logs', adminAuth, async (req, res) => {
+  try {
+    const { taskName, status, message, details, durationMs, ranAt } = req.body;
+
+    if (!taskName || !status) {
+      return res.status(400).json({ success: false, message: 'taskName and status are required' });
+    }
+
+    const log = await SeoAutomationLog.create({
+      taskName,
+      status,
+      message: message || '',
+      details: details || {},
+      durationMs: durationMs || 0,
+      ranAt: ranAt ? new Date(ranAt) : new Date()
+    });
+
+    res.json({ success: true, data: log });
+  } catch (err) {
+    console.error('Error saving automation log:', err);
+    res.status(500).json({ success: false, message: 'Failed to save automation log', error: err.message });
+  }
 });
 
 module.exports = router;

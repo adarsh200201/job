@@ -631,7 +631,8 @@ exports.getSimilarJobs = async (req, res) => {
     // Internships recommend other internships
     const filter = {
       _id: { $ne: currentJob._id },
-      isActive: true
+      isActive: true,
+      lastDate: { $not: { $lt: new Date() } }
     };
     
     if (currentJob.isGovernment) {

@@ -10,6 +10,7 @@ import { JobCardSkeleton } from '../components/SkeletonLoader.jsx';
 import { trackJobSearch, trackCategoryViewed } from '../utils/analytics.js';
 import SidebarAd from '../components/SidebarAd.jsx';
 import SidebarCategories from '../components/SidebarCategories.jsx';
+import HomeSEOContent from '../components/HomeSEOContent.jsx';
 
 function RecommendationSection({ title, emoji, description, jobs, showSeeAll, onDismiss, isLoggedIn }) {
   if (!jobs || jobs.length === 0) return null;
@@ -108,9 +109,94 @@ export default function Home() {
   const navigate = useNavigate();
   const cache = useCache();
 
+  const [results, setResults] = useState([]);
+  const [admitCards, setAdmitCards] = useState([]);
+  const [answerKeys, setAnswerKeys] = useState([]);
+  const [updatesLoading, setUpdatesLoading] = useState(false);
+
+  const [resultsTotalCount, setResultsTotalCount] = useState(0);
+  const [admitCardsTotalCount, setAdmitCardsTotalCount] = useState(0);
+  const [answerKeysTotalCount, setAnswerKeysTotalCount] = useState(0);
+
+  const [loadingResultsMore, setLoadingResultsMore] = useState(false);
+  const [loadingAdmitMore, setLoadingAdmitMore] = useState(false);
+  const [loadingAnswerMore, setLoadingAnswerMore] = useState(false);
+
+  const queryParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
+  const isPageOne = useMemo(() => parseInt(queryParams.get('page') || '1', 10) === 1, [queryParams]);
+  const hasFilters = useMemo(() => {
+    return queryParams.has('q') || queryParams.has('type') || queryParams.has('location') || queryParams.has('experience') || queryParams.has('education') || queryParams.has('salary');
+  }, [queryParams]);
+
   const handleDismissRecommendations = () => {
     localStorage.setItem('hide_home_recommendations', 'true');
     setHideRecs(true);
+  };
+
+  useEffect(() => {
+    if (isPageOne && !hasFilters) {
+      setUpdatesLoading(true);
+      Promise.all([
+        cache.get((url) => api.get(url), '/jobs?postType=Result&limit=5'),
+        cache.get((url) => api.get(url), '/jobs?postType=Admit Card&limit=5'),
+        cache.get((url) => api.get(url), '/jobs?postType=Answer Key&limit=5')
+      ]).then(([resResults, resAdmit, resAnswer]) => {
+        setResults(resResults.data?.data || resResults.data || []);
+        setResultsTotalCount(resResults.data?.total || 0);
+
+        setAdmitCards(resAdmit.data?.data || resAdmit.data || []);
+        setAdmitCardsTotalCount(resAdmit.data?.total || 0);
+
+        setAnswerKeys(resAnswer.data?.data || resAnswer.data || []);
+        setAnswerKeysTotalCount(resAnswer.data?.total || 0);
+      }).catch(err => {
+        console.error("Error fetching homepage updates:", err);
+      }).finally(() => {
+        setUpdatesLoading(false);
+      });
+    }
+  }, [isPageOne, hasFilters]);
+
+  const loadMoreResults = async () => {
+    setLoadingResultsMore(true);
+    try {
+      const nextLimit = results.length + 5;
+      const res = await api.get(`/jobs?postType=Result&limit=${nextLimit}`);
+      setResults(res.data?.data || res.data || []);
+      setResultsTotalCount(res.data?.total || resultsTotalCount);
+    } catch (err) {
+      console.error("Error loading more results:", err);
+    } finally {
+      setLoadingResultsMore(false);
+    }
+  };
+
+  const loadMoreAdmitCards = async () => {
+    setLoadingAdmitMore(true);
+    try {
+      const nextLimit = admitCards.length + 5;
+      const res = await api.get(`/jobs?postType=Admit Card&limit=${nextLimit}`);
+      setAdmitCards(res.data?.data || res.data || []);
+      setAdmitCardsTotalCount(res.data?.total || admitCardsTotalCount);
+    } catch (err) {
+      console.error("Error loading more admit cards:", err);
+    } finally {
+      setLoadingAdmitMore(false);
+    }
+  };
+
+  const loadMoreAnswerKeys = async () => {
+    setLoadingAnswerMore(true);
+    try {
+      const nextLimit = answerKeys.length + 5;
+      const res = await api.get(`/jobs?postType=Answer Key&limit=${nextLimit}`);
+      setAnswerKeys(res.data?.data || res.data || []);
+      setAnswerKeysTotalCount(res.data?.total || answerKeysTotalCount);
+    } catch (err) {
+      console.error("Error loading more answer keys:", err);
+    } finally {
+      setLoadingAnswerMore(false);
+    }
   };
 
   useEffect(() => {
@@ -198,11 +284,9 @@ export default function Home() {
   }, [jobs]);
 
   const showRecommendations = useMemo(() => {
-    const queryParams = new URLSearchParams(location.search);
-    const isPageOne = parseInt(queryParams.get('page') || '1', 10) === 1;
     const hasRecommendedJobs = recommendations && recommendations.recommended && recommendations.recommended.length > 0;
     return !!(recommendations && !hideRecs && isPageOne && hasRecommendedJobs && recommendations.hasPreferences);
-  }, [recommendations, hideRecs, location.search]);
+  }, [recommendations, hideRecs, isPageOne]);
 
   const goToPage = (page) => {
     const params = new URLSearchParams(location.search);
@@ -421,6 +505,145 @@ export default function Home() {
                 </div>
               </nav>
             )}
+
+            {/* Latest Updates Sections (Only on Page 1 & No filters) */}
+            {isPageOne && !hasFilters && (
+              <div className="homepage-updates-sections" style={{ marginTop: '2.5rem', display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+                
+                {/* 1. Latest Exam Results */}
+                {(results.length > 0 || updatesLoading) && (
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '2px solid #e2e8f0', paddingBottom: '0.5rem' }}>
+                      <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span>📢</span> Latest Exam Results
+                      </h3>
+                      <Link to="/results" className="btn btn-sm btn-outline-primary" style={{ fontSize: '0.8rem', fontWeight: 700, borderRadius: '20px', padding: '0.25rem 0.75rem' }}>
+                        View All →
+                      </Link>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      {updatesLoading ? (
+                        <>
+                          <JobCardSkeleton />
+                          <JobCardSkeleton />
+                        </>
+                      ) : (
+                        results.map((job) => (
+                          <JobDetailCard key={job._id} job={job} />
+                        ))
+                      )}
+                    </div>
+                    {!updatesLoading && resultsTotalCount > results.length && (
+                      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1.25rem' }}>
+                        <button
+                          onClick={loadMoreResults}
+                          disabled={loadingResultsMore}
+                          className="btn btn-outline-primary"
+                          style={{
+                            borderRadius: '20px',
+                            padding: '0.4rem 1.5rem',
+                            fontSize: '0.85rem',
+                            fontWeight: '700',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          {loadingResultsMore ? 'Loading...' : `Load More (${resultsTotalCount - results.length} remaining)`}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* 2. Latest Admit Cards */}
+                {(admitCards.length > 0 || updatesLoading) && (
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '2px solid #e2e8f0', paddingBottom: '0.5rem' }}>
+                      <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span>🪪</span> Latest Admit Cards
+                      </h3>
+                      <Link to="/admit-cards" className="btn btn-sm btn-outline-primary" style={{ fontSize: '0.8rem', fontWeight: 700, borderRadius: '20px', padding: '0.25rem 0.75rem' }}>
+                        View All →
+                      </Link>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      {updatesLoading ? (
+                        <>
+                          <JobCardSkeleton />
+                          <JobCardSkeleton />
+                        </>
+                      ) : (
+                        admitCards.map((job) => (
+                          <JobDetailCard key={job._id} job={job} />
+                        ))
+                      )}
+                    </div>
+                    {!updatesLoading && admitCardsTotalCount > admitCards.length && (
+                      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1.25rem' }}>
+                        <button
+                          onClick={loadMoreAdmitCards}
+                          disabled={loadingAdmitMore}
+                          className="btn btn-outline-primary"
+                          style={{
+                            borderRadius: '20px',
+                            padding: '0.4rem 1.5rem',
+                            fontSize: '0.85rem',
+                            fontWeight: '700',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          {loadingAdmitMore ? 'Loading...' : `Load More (${admitCardsTotalCount - admitCards.length} remaining)`}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* 3. Latest Answer Keys */}
+                {(answerKeys.length > 0 || updatesLoading) && (
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '2px solid #e2e8f0', paddingBottom: '0.5rem' }}>
+                      <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span>🗝️</span> Latest Answer Keys
+                      </h3>
+                      <Link to="/answer-keys" className="btn btn-sm btn-outline-primary" style={{ fontSize: '0.8rem', fontWeight: 700, borderRadius: '20px', padding: '0.25rem 0.75rem' }}>
+                        View All →
+                      </Link>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      {updatesLoading ? (
+                        <>
+                          <JobCardSkeleton />
+                          <JobCardSkeleton />
+                        </>
+                      ) : (
+                        answerKeys.map((job) => (
+                          <JobDetailCard key={job._id} job={job} />
+                        ))
+                      )}
+                    </div>
+                    {!updatesLoading && answerKeysTotalCount > answerKeys.length && (
+                      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1.25rem' }}>
+                        <button
+                          onClick={loadMoreAnswerKeys}
+                          disabled={loadingAnswerMore}
+                          className="btn btn-outline-primary"
+                          style={{
+                            borderRadius: '20px',
+                            padding: '0.4rem 1.5rem',
+                            fontSize: '0.85rem',
+                            fontWeight: '700',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          {loadingAnswerMore ? 'Loading...' : `Load More (${answerKeysTotalCount - answerKeys.length} remaining)`}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+              </div>
+            )}
           </section>
         </div>
 
@@ -432,6 +655,9 @@ export default function Home() {
           </div>
         </div>
       </div>
+      
+      {/* Home SEO Directories & Content Block */}
+      <HomeSEOContent />
     </div>
   );
 }

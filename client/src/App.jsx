@@ -12,6 +12,7 @@ import { usePageTracking } from './hooks/usePageTracking.js';
 import { useSessionTracking } from './hooks/useSessionTracking.js';
 import ScrollToTop from './components/ScrollToTop.jsx';
 import { MEGA_CATEGORIES } from './utils/categoryConfig.js';
+import { STATE_MAPPINGS, QUALIFICATION_MAPPINGS } from './utils/seoConfig.js';
 
 const BASIC_CATEGORIES = [
   'govt-jobs',
@@ -365,8 +366,13 @@ function DynamicRouteWrapper() {
   
   if (!slug) return <Navigate to="/" replace />;
 
-  // 1. Programmatic SEO page combinations
-  if (slug.includes('-jobs-in-')) {
+  // 1. Programmatic SEO page combinations, state pages, and qualification pages
+  const isProgrammaticSEO = 
+    slug.includes('-jobs-in-') || 
+    (slug.endsWith('-govt-jobs') && STATE_MAPPINGS[slug.substring(0, slug.length - 10)]) ||
+    (slug.endsWith('-jobs') && QUALIFICATION_MAPPINGS[slug.substring(0, slug.length - 5)]);
+
+  if (isProgrammaticSEO) {
     return <ProgrammaticSEOJobsPage slug={slug} />;
   }
 
