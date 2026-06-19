@@ -104,7 +104,7 @@ export default function AdminDashboard() {
   const loadSeoLogs = useCallback(async () => {
     setSeoLogsLoading(true);
     try {
-      const res = await api.get('/api/seo/automation-logs');
+      const res = await api.get('/seo/automation-logs');
       if (res.data?.success) setSeoLogs(res.data.data);
     } catch (err) {
       console.error('Failed to load SEO automation logs:', err);
@@ -117,7 +117,7 @@ export default function AdminDashboard() {
   const loadSeoStats = useCallback(async () => {
     setSeoStatsLoading(true);
     try {
-      const res = await api.get('/api/seo/dashboard-stats');
+      const res = await api.get('/seo/dashboard-stats');
       if (res.data?.success) {
         setSeoStats(res.data.data);
       }
@@ -132,7 +132,7 @@ export default function AdminDashboard() {
     setSeoUrlsLoading(true);
     try {
       const query = `page=${pageVal}&limit=30&status=${statusVal}&search=${encodeURIComponent(searchVal)}`;
-      const res = await api.get(`/api/seo/index-status?${query}`);
+      const res = await api.get(`/seo/index-status?${query}`);
       if (res.data?.success) {
         setSeoUrls(res.data.data);
         setSeoPage(res.data.page);
@@ -305,7 +305,7 @@ export default function AdminDashboard() {
   const triggerSeoSync = async () => {
     setSeoSyncing(true);
     try {
-      await api.get('/api/health'); // Check health
+      await api.get('/health'); // Check health
       flash('✅ SEO Index Status Audit Triggered (runs in background)');
       await loadSeoStats();
     } catch {
