@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Job = require('../models/Job');
 const slugify = require('slugify');
-require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
+require('dotenv').config({ path: require('path').join(__dirname, '../../.env') });
 
 const MONGO_URI = process.env.MONGO_URI;
 
@@ -621,6 +621,11 @@ async function seedJobs() {
     const count = await Job.countDocuments();
     console.log(`Current jobs count in database: ${count}`);
     
+    // Stagger createdAt dates to look natural (30 min increments, within 8 days to avoid TTL expiry)
+    sampleJobs.forEach((job, index) => {
+      job.createdAt = new Date(Date.now() - index * 30 * 60 * 1000);
+    });
+
     console.log('Inserting 40 high-quality sample jobs and 13 special hub updates...');
     await Job.create(sampleJobs);
     

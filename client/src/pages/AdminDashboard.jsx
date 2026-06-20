@@ -305,9 +305,17 @@ export default function AdminDashboard() {
   const triggerSeoSync = async () => {
     setSeoSyncing(true);
     try {
-      await api.get('/health'); // Check health
-      flash('✅ SEO Index Status Audit Triggered (runs in background)');
-      await loadSeoStats();
+      const res = await api.post('/seo/run-audit');
+      if (res.data?.success) {
+        flash('✅ SEO Index Status Audit Triggered (running in background)...');
+        // Wait 4 seconds for python script to complete and reload stats
+        setTimeout(async () => {
+          await loadSeoStats();
+          flash('✅ SEO Index Status Stats Refreshed!');
+        }, 4000);
+      } else {
+        throw new Error();
+      }
     } catch {
       flash('❌ Failed to trigger SEO audit', 'error');
     } finally {

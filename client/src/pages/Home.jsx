@@ -395,11 +395,6 @@ export default function Home() {
             )}
 
             <div style={{ marginTop: showRecommendations ? '1.5rem' : '0' }}>
-              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '2px solid #e2e8f0', paddingBottom: '0.5rem' }}>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <span>💼</span> Latest Govt & IT Jobs
-                </h2>
-              </div>
               {loading && jobs.length === 0 && (
                 <>
                   {[...Array(3)].map((_, i) => (

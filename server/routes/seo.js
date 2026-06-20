@@ -582,4 +582,38 @@ router.post('/api/seo/automation-logs', adminAuth, async (req, res) => {
   }
 });
 
+// 13. Run Index status audit manually (Protected Admin Route)
+router.post('/api/seo/run-audit', adminAuth, async (req, res) => {
+  const { exec } = require('child_process');
+  const path = require('path');
+  
+  const scriptPath = 'd:\\Automation\\index_tracker.py';
+  
+  console.log(`[SEO-AUDIT] Triggering manually from dashboard: ${scriptPath}`);
+  
+  const child = exec(`python "${scriptPath}"`, {
+    env: {
+      ...process.env,
+      API_TOKEN: req.headers.authorization ? req.headers.authorization.split(' ')[1] : ''
+    }
+  });
+
+  child.stdout.on('data', (data) => {
+    console.log(`[INDEX-TRACKER STDOUT]: ${data}`);
+  });
+
+  child.stderr.on('data', (data) => {
+    console.error(`[INDEX-TRACKER STDERR]: ${data}`);
+  });
+
+  child.on('close', (code) => {
+    console.log(`[INDEX-TRACKER] finished with code ${code}`);
+  });
+
+  res.json({
+    success: true,
+    message: 'SEO Index Status Audit triggered successfully. Running in background.'
+  });
+});
+
 module.exports = router;
