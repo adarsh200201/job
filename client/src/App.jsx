@@ -59,6 +59,8 @@ const FAQ = lazyWithRetry(() => import('./pages/FAQ.jsx'));
 const Blog = lazyWithRetry(() => import('./pages/Blog.jsx'));
 const Terms = lazyWithRetry(() => import('./pages/Terms.jsx'));
 const Disclaimer = lazyWithRetry(() => import('./pages/Disclaimer.jsx'));
+const EditorialPolicy = lazyWithRetry(() => import('./pages/EditorialPolicy.jsx'));
+const DMCAPolicy = lazyWithRetry(() => import('./pages/DMCAPolicy.jsx'));
 const Login = lazyWithRetry(() => import('./pages/Login.jsx'));
 const SignUp = lazyWithRetry(() => import('./pages/SignUp.jsx'));
 const AuthCallback = lazyWithRetry(() => import('./pages/AuthCallback.jsx'));
@@ -828,6 +830,8 @@ function AppLayout() {
             <Route path="/terms" element={<Terms />} />
             <Route path="/disclaimer" element={<Disclaimer />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/editorial-policy" element={<EditorialPolicy />} />
+            <Route path="/dmca-policy" element={<DMCAPolicy />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/auth/callback" element={<AuthCallback />} />

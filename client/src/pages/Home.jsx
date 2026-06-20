@@ -11,6 +11,8 @@ import { trackJobSearch, trackCategoryViewed } from '../utils/analytics.js';
 import SidebarAd from '../components/SidebarAd.jsx';
 import SidebarCategories from '../components/SidebarCategories.jsx';
 import HomeSEOContent from '../components/HomeSEOContent.jsx';
+import { articlesData } from '../data/articlesData.js';
+
 
 function RecommendationSection({ title, emoji, description, jobs, showSeeAll, onDismiss, isLoggedIn }) {
   if (!jobs || jobs.length === 0) return null;
@@ -112,15 +114,18 @@ export default function Home() {
   const [results, setResults] = useState([]);
   const [admitCards, setAdmitCards] = useState([]);
   const [answerKeys, setAnswerKeys] = useState([]);
+  const [syllabus, setSyllabus] = useState([]);
   const [updatesLoading, setUpdatesLoading] = useState(false);
 
   const [resultsTotalCount, setResultsTotalCount] = useState(0);
   const [admitCardsTotalCount, setAdmitCardsTotalCount] = useState(0);
   const [answerKeysTotalCount, setAnswerKeysTotalCount] = useState(0);
+  const [syllabusTotalCount, setSyllabusTotalCount] = useState(0);
 
   const [loadingResultsMore, setLoadingResultsMore] = useState(false);
   const [loadingAdmitMore, setLoadingAdmitMore] = useState(false);
   const [loadingAnswerMore, setLoadingAnswerMore] = useState(false);
+  const [loadingSyllabusMore, setLoadingSyllabusMore] = useState(false);
 
   const queryParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const isPageOne = useMemo(() => parseInt(queryParams.get('page') || '1', 10) === 1, [queryParams]);
@@ -139,8 +144,9 @@ export default function Home() {
       Promise.all([
         cache.get((url) => api.get(url), '/jobs?postType=Result&limit=5'),
         cache.get((url) => api.get(url), '/jobs?postType=Admit Card&limit=5'),
-        cache.get((url) => api.get(url), '/jobs?postType=Answer Key&limit=5')
-      ]).then(([resResults, resAdmit, resAnswer]) => {
+        cache.get((url) => api.get(url), '/jobs?postType=Answer Key&limit=5'),
+        cache.get((url) => api.get(url), '/jobs?postType=Syllabus&limit=5')
+      ]).then(([resResults, resAdmit, resAnswer, resSyllabus]) => {
         setResults(resResults.data?.data || resResults.data || []);
         setResultsTotalCount(resResults.data?.total || 0);
 
@@ -149,6 +155,9 @@ export default function Home() {
 
         setAnswerKeys(resAnswer.data?.data || resAnswer.data || []);
         setAnswerKeysTotalCount(resAnswer.data?.total || 0);
+
+        setSyllabus(resSyllabus.data?.data || resSyllabus.data || []);
+        setSyllabusTotalCount(resSyllabus.data?.total || 0);
       }).catch(err => {
         console.error("Error fetching homepage updates:", err);
       }).finally(() => {
@@ -198,6 +207,21 @@ export default function Home() {
       setLoadingAnswerMore(false);
     }
   };
+
+  const loadMoreSyllabus = async () => {
+    setLoadingSyllabusMore(true);
+    try {
+      const nextLimit = syllabus.length + 5;
+      const res = await api.get(`/jobs?postType=Syllabus&limit=${nextLimit}`);
+      setSyllabus(res.data?.data || res.data || []);
+      setSyllabusTotalCount(res.data?.total || syllabusTotalCount);
+    } catch (err) {
+      console.error("Error loading more syllabus:", err);
+    } finally {
+      setLoadingSyllabusMore(false);
+    }
+  };
+
 
   useEffect(() => {
     window.prerenderReady = false; // Mark as not ready while we fetch jobs list
@@ -371,6 +395,11 @@ export default function Home() {
             )}
 
             <div style={{ marginTop: showRecommendations ? '1.5rem' : '0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '2px solid #e2e8f0', paddingBottom: '0.5rem' }}>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span>💼</span> Latest Govt & IT Jobs
+                </h2>
+              </div>
               {loading && jobs.length === 0 && (
                 <>
                   {[...Array(3)].map((_, i) => (
@@ -642,6 +671,86 @@ export default function Home() {
                   </div>
                 )}
 
+                {/* 4. Latest Exam Syllabus */}
+                {(syllabus.length > 0 || updatesLoading) && (
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '2px solid #e2e8f0', paddingBottom: '0.5rem' }}>
+                      <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span>📚</span> Latest Exam Syllabus
+                      </h3>
+                      <Link to="/syllabus" className="btn btn-sm btn-outline-primary" style={{ fontSize: '0.8rem', fontWeight: 700, borderRadius: '20px', padding: '0.25rem 0.75rem' }}>
+                        View All →
+                      </Link>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      {updatesLoading ? (
+                        <>
+                          <JobCardSkeleton />
+                          <JobCardSkeleton />
+                        </>
+                      ) : (
+                        syllabus.map((job) => (
+                          <JobDetailCard key={job._id} job={job} />
+                        ))
+                      )}
+                    </div>
+                    {!updatesLoading && syllabusTotalCount > syllabus.length && (
+                      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1.25rem' }}>
+                        <button
+                          onClick={loadMoreSyllabus}
+                          disabled={loadingSyllabusMore}
+                          className="btn btn-outline-primary"
+                          style={{
+                            borderRadius: '20px',
+                            padding: '0.4rem 1.5rem',
+                            fontSize: '0.85rem',
+                            fontWeight: '700',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          {loadingSyllabusMore ? 'Loading...' : `Load More (${syllabusTotalCount - syllabus.length} remaining)`}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* 5. Career Blog Articles */}
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '2px solid #e2e8f0', paddingBottom: '0.5rem' }}>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span>✍️</span> Career Blog & Preparation Advice
+                    </h3>
+                    <Link to="/blog" className="btn btn-sm btn-outline-primary" style={{ fontSize: '0.8rem', fontWeight: 700, borderRadius: '20px', padding: '0.25rem 0.75rem' }}>
+                      Go to Blog →
+                    </Link>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
+                    {articlesData.slice(0, 3).map((article) => (
+                      <div key={article.id} style={{
+                        background: '#ffffff',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '12px',
+                        padding: '1.5rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03)',
+                        transition: 'all 0.2s ease'
+                      }}>
+                        <div>
+                          <div style={{ fontSize: '1.75rem', marginBottom: '0.75rem' }}>{article.icon}</div>
+                          <h4 style={{ fontSize: '1rem', fontWeight: '800', color: '#1e293b', marginBottom: '0.5rem', lineHeight: '1.4' }}>{article.title}</h4>
+                          <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '1rem', lineHeight: '1.5' }}>{article.excerpt}</p>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', paddingTop: '0.75rem', borderTop: '1px dashed #e2e8f0' }}>
+                          <span style={{ fontSize: '0.75rem', fontWeight: '600', color: '#94a3b8' }}>{article.date}</span>
+                          <Link to="/blog" style={{ fontSize: '0.85rem', fontWeight: '700', color: '#2563eb', textDecoration: 'none' }}>Read Article →</Link>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
           </section>

@@ -396,6 +396,10 @@ export default function Footer() {
             <Link to="/disclaimer">Disclaimer</Link>
             <span className="footer-link-divider">|</span>
             <Link to="/terms">Terms & Conditions</Link>
+            <span className="footer-link-divider">|</span>
+            <Link to="/editorial-policy">Editorial Policy</Link>
+            <span className="footer-link-divider">|</span>
+            <Link to="/dmca-policy">DMCA Policy</Link>
           </div>
         </div>
       </div>
