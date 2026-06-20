@@ -100,6 +100,163 @@ function RecommendationSection({ title, emoji, description, jobs, showSeeAll, on
   );
 }
 
+function BlogArticleCard({ article }) {
+  const [hovered, setHovered] = useState(false);
+  
+  const theme = useMemo(() => {
+    switch (article.category) {
+      case 'Resume Writing':
+        return { bg: 'linear-gradient(135deg, #f5f3ff 0%, #ddd6fe 100%)', badgeBg: '#f5f3ff', badgeColor: '#6d28d9', accent: '#7c3aed' };
+      case 'Interview Prep':
+        return { bg: 'linear-gradient(135deg, #eff6ff 0%, #bfdbfe 100%)', badgeBg: '#eff6ff', badgeColor: '#1d4ed8', accent: '#2563eb' };
+      case 'Career Guidance':
+        return { bg: 'linear-gradient(135deg, #ecfdf5 0%, #a7f3d0 100%)', badgeBg: '#ecfdf5', badgeColor: '#047857', accent: '#059669' };
+      case 'Career Tips':
+        return { bg: 'linear-gradient(135deg, #fffbeb 0%, #fde68a 100%)', badgeBg: '#fffbeb', badgeColor: '#b45309', accent: '#d97706' };
+      case 'Career Development':
+        return { bg: 'linear-gradient(135deg, #fdf2f8 0%, #fbcfe8 100%)', badgeBg: '#fdf2f8', badgeColor: '#be185d', accent: '#db2777' };
+      default:
+        return { bg: 'linear-gradient(135deg, #f8fafc 0%, #cbd5e1 100%)', badgeBg: '#f8fafc', badgeColor: '#334155', accent: '#475569' };
+    }
+  }, [article.category]);
+
+  return (
+    <div 
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        background: '#ffffff',
+        border: `1px solid ${hovered ? theme.accent : '#e2e8f0'}`,
+        borderRadius: '16px',
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        boxShadow: hovered 
+          ? '0 20px 25px -5px rgba(0,0,0,0.06), 0 10px 10px -5px rgba(0,0,0,0.02)' 
+          : '0 4px 6px -1px rgba(0,0,0,0.02), 0 2px 4px -1px rgba(0,0,0,0.01)',
+        transform: hovered ? 'translateY(-6px)' : 'translateY(0)',
+        transition: 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)',
+        height: '100%',
+        cursor: 'pointer'
+      }}
+    >
+      <div>
+        {/* Card Banner Background */}
+        <div style={{
+          background: theme.bg,
+          height: '90px',
+          position: 'relative',
+          padding: '1.25rem 1.5rem',
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between'
+        }}>
+          {/* Category Tag */}
+          <span style={{
+            padding: '0.25rem 0.75rem',
+            background: '#ffffff',
+            color: theme.badgeColor,
+            borderRadius: '9999px',
+            fontSize: '0.76rem',
+            fontWeight: '700',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.04)'
+          }}>
+            {article.category}
+          </span>
+          
+          {/* Emoji Badge floating */}
+          <div style={{
+            width: '46px',
+            height: '46px',
+            borderRadius: '12px',
+            background: '#ffffff',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '1.5rem',
+            boxShadow: '0 4px 10px rgba(0,0,0,0.08)',
+            position: 'absolute',
+            bottom: '-23px',
+            right: '24px',
+            border: '2px solid #ffffff'
+          }}>
+            {article.icon}
+          </div>
+        </div>
+
+        {/* Content Body */}
+        <div style={{ padding: '2rem 1.5rem 1.5rem 1.5rem' }}>
+          <h4 style={{
+            fontSize: '1.05rem',
+            fontWeight: '800',
+            color: hovered ? theme.accent : '#1e293b',
+            marginBottom: '0.6rem',
+            lineHeight: '1.4',
+            transition: 'color 200ms ease',
+            minHeight: '2.8rem',
+            display: '-webkit-box',
+            WebkitLineClamp: '2',
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
+          }}>
+            {article.title}
+          </h4>
+          <p style={{
+            fontSize: '0.85rem',
+            color: '#475569',
+            marginBottom: '0',
+            lineHeight: '1.6',
+            display: '-webkit-box',
+            WebkitLineClamp: '3',
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
+          }}>
+            {article.excerpt}
+          </p>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div style={{
+        padding: '1rem 1.5rem',
+        borderTop: '1px solid #f1f5f9',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        background: '#fafafa'
+      }}>
+        <span style={{ fontSize: '0.78rem', fontWeight: '600', color: '#94a3b8' }}>
+          📅 {article.date}
+        </span>
+        <Link 
+          to="/blog" 
+          style={{
+            fontSize: '0.82rem',
+            fontWeight: '700',
+            color: theme.accent,
+            textDecoration: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.25rem'
+          }}
+        >
+          Read Article 
+          <span style={{
+            transform: hovered ? 'translateX(4px)' : 'translateX(0)',
+            transition: 'transform 200ms ease',
+            display: 'inline-block'
+          }}>
+            →
+          </span>
+        </Link>
+      </div>
+    </div>
+  );
+}
+
 export default function Home() {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -722,27 +879,7 @@ export default function Home() {
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
                     {articlesData.slice(0, 3).map((article) => (
-                      <div key={article.id} style={{
-                        background: '#ffffff',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: '12px',
-                        padding: '1.5rem',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'space-between',
-                        boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03)',
-                        transition: 'all 0.2s ease'
-                      }}>
-                        <div>
-                          <div style={{ fontSize: '1.75rem', marginBottom: '0.75rem' }}>{article.icon}</div>
-                          <h4 style={{ fontSize: '1rem', fontWeight: '800', color: '#1e293b', marginBottom: '0.5rem', lineHeight: '1.4' }}>{article.title}</h4>
-                          <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '1rem', lineHeight: '1.5' }}>{article.excerpt}</p>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', paddingTop: '0.75rem', borderTop: '1px dashed #e2e8f0' }}>
-                          <span style={{ fontSize: '0.75rem', fontWeight: '600', color: '#94a3b8' }}>{article.date}</span>
-                          <Link to="/blog" style={{ fontSize: '0.85rem', fontWeight: '700', color: '#2563eb', textDecoration: 'none' }}>Read Article →</Link>
-                        </div>
-                      </div>
+                      <BlogArticleCard key={article.id} article={article} />
                     ))}
                   </div>
                 </div>
