@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { articlesData } from '../data/articlesData.js';
+import HilltopAd from '../components/HilltopAd.jsx';
 
 export default function Blog() {
   const [activeArticle, setActiveArticle] = useState(null);
@@ -47,6 +48,8 @@ export default function Blog() {
             Published on: <strong>{activeArticle.date}</strong> | By: <strong>NextJobPost Career Team</strong>
           </div>
 
+          <HilltopAd zoneId="b008ca5bbdca79f97b70" height={250} width={300} />
+
           {/* Render HTML content */}
           <div 
             className="article-body-content"
@@ -84,6 +87,8 @@ export default function Blog() {
           <h1 className="display-5 fw-bold mb-3" style={{ color: '#162c4a' }}>Career Blog</h1>
           <p className="lead text-muted">Tips, insights, and resources to help you launch your career</p>
         </div>
+
+        <HilltopAd zoneId="b008ca5bbdca79f97b70" height={250} width={300} />
 
         {/* Articles Grid */}
         <div className="row g-4">

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import api from '../api/index.js';
 import { trackAdClicked } from '../utils/analytics.js';
 import GoogleAd from './GoogleAd.jsx';
+import HilltopAd from './HilltopAd.jsx';
 
 const DEFAULT_AD_LINK = 'https://www.effectivegatecpm.com/s738fegejz?key=12ac1ed2eeb4ac73b7d41add24630c1e1e';
 
@@ -29,14 +30,12 @@ export default function SidebarAd() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
-      {/* ── Google AdSense unit (sidebar) ──────────────────────────── */}
-      {ADSENSE_SIDEBAR_SLOT ? (
-        <GoogleAd
-          slot={ADSENSE_SIDEBAR_SLOT}
-          format="auto"
-          style={{ minHeight: 90, background: '#f9fafb', borderRadius: '10px', overflow: 'hidden' }}
-        />
-      ) : null}
+      {/* ── HilltopAds unit (sidebar) ──────────────────────────── */}
+      <HilltopAd
+        zoneId="b008ca5bbdca79f97b70"
+        height={250}
+        width={300}
+      />
 
       {/* ── Custom promo banner ────────────────────────────────────── */}
       <div

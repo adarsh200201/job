@@ -13,6 +13,7 @@ import { useSessionTracking } from './hooks/useSessionTracking.js';
 import ScrollToTop from './components/ScrollToTop.jsx';
 import { MEGA_CATEGORIES } from './utils/categoryConfig.js';
 import { STATE_MAPPINGS, QUALIFICATION_MAPPINGS } from './utils/seoConfig.js';
+import HilltopAd from './components/HilltopAd.jsx';
 
 const BASIC_CATEGORIES = [
   'govt-jobs',
@@ -803,6 +804,9 @@ function AppLayout() {
       )}
 
       <main className={isMobile && isJobDetail ? "container p-0" : isPrepPage ? "container p-0 is-prep-page" : "container py-4"}>
+        {/* Global Hilltop Ad Banner */}
+        <HilltopAd zoneId="b008ca5bbdca79f97b70" height={90} width={728} />
+
         <Suspense fallback={<LoadingFallback />}>
           <Routes>
             {/* Public */}
