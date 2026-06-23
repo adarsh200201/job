@@ -895,6 +895,7 @@ export default function Home() {
         </div>
 
         <div className="col-12 col-lg-4 col-right">
+          <HilltopAd zoneId="b008ca5bbdca79f97b70" height={250} width={300} />
           <JoinUpdates />
           <HilltopAd zoneId="b008ca5bbdca79f97b70" height={250} width={300} />
           <div className="sidebar-sticky" style={{ display: 'flex', flexDirection: 'column', gap: '2rem', width: '100%' }}>
