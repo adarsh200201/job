@@ -804,9 +804,6 @@ function AppLayout() {
       )}
 
       <main className={isMobile && isJobDetail ? "container p-0" : isPrepPage ? "container p-0 is-prep-page" : "container py-4"}>
-        {/* Global Hilltop Ad Banner */}
-        <HilltopAd zoneId="b008ca5bbdca79f97b70" height={90} width={728} />
-
         <Suspense fallback={<LoadingFallback />}>
           <Routes>
             {/* Public */}

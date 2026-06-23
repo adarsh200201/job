@@ -6,6 +6,7 @@ import { useCache } from '../hooks/useCache.js';
 import JobDetailCard from '../components/JobDetailCard.jsx';
 import RecentJobs from '../components/RecentJobs.jsx';
 import JoinUpdates from '../components/JoinUpdates.jsx';
+import HilltopAd from '../components/HilltopAd.jsx';
 import { JobCardSkeleton } from '../components/SkeletonLoader.jsx';
 import { trackJobSearch, trackCategoryViewed } from '../utils/analytics.js';
 import SidebarAd from '../components/SidebarAd.jsx';
@@ -881,6 +882,11 @@ export default function Home() {
                     {articlesData.slice(0, 3).map((article) => (
                       <BlogArticleCard key={article.id} article={article} />
                     ))}
+                    <HilltopAd 
+                      scriptSrc="//relieved-understanding.com/blX.Vus/dCGvlw0SY/WCcj/oeDmP9vu/Z/U/lbkkPUT_cQxYN/jWIkytM_DLkgtLNlziE/2SMhjyIpxBMTwX" 
+                      height={250} 
+                      width={300} 
+                    />
                   </div>
                 </div>
               </div>
@@ -890,6 +896,7 @@ export default function Home() {
 
         <div className="col-12 col-lg-4 col-right">
           <JoinUpdates />
+          <HilltopAd zoneId="b008ca5bbdca79f97b70" height={250} width={300} />
           <div className="sidebar-sticky" style={{ display: 'flex', flexDirection: 'column', gap: '2rem', width: '100%' }}>
             <SidebarCategories jobs={sortedJobs} />
             <SidebarAd />
