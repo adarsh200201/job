@@ -19,7 +19,6 @@ import {
 } from '../utils/analytics.js';
 import SidebarAd from '../components/SidebarAd.jsx';
 import SidebarCareerHub from '../components/SidebarCareerHub.jsx';
-import HilltopAd from '../components/HilltopAd.jsx';
 
 function extractVacancy(title) {
   if (!title) return 'As per notification';
@@ -1350,9 +1349,6 @@ export default function JobDetails() {
 
           {/* Dynamic Content Sections */}
           
-          {/* Hilltop Ads Native Ad */}
-          <HilltopAd zoneId="b008ca5bbdca79f97b70" height={250} width={300} />
-
           {/* Job Description section */}
           {(job.telegramFields || job.jobDescription) && (
             <div id="job-description-section" className="mb-5 text-dark" style={{ scrollMarginTop: '110px' }}>
@@ -2164,9 +2160,6 @@ export default function JobDetails() {
               )}
             </div>
           </div>
-
-          {/* Hilltop Ads Native Ad */}
-          <HilltopAd zoneId="b008ca5bbdca79f97b70" height={250} width={300} />
 
           {/* ABOUT COMPANY */}
           {job.aboutCompany && (

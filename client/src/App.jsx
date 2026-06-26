@@ -13,7 +13,6 @@ import { useSessionTracking } from './hooks/useSessionTracking.js';
 import ScrollToTop from './components/ScrollToTop.jsx';
 import { MEGA_CATEGORIES } from './utils/categoryConfig.js';
 import { STATE_MAPPINGS, QUALIFICATION_MAPPINGS } from './utils/seoConfig.js';
-import HilltopAd from './components/HilltopAd.jsx';
 
 const BASIC_CATEGORIES = [
   'govt-jobs',
