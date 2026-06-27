@@ -12,7 +12,7 @@ export const startKeepAlive = () => {
     return;
   }
 
-  // Ping every 10 seconds (10000 milliseconds)
+  // Ping every 2 seconds (2000 milliseconds)
   keepAliveInterval = setInterval(async () => {
     try {
       await api.get('/health');
@@ -20,9 +20,9 @@ export const startKeepAlive = () => {
     } catch (error) {
       console.error('Keep-alive ping failed:', error.message);
     }
-  }, 10000);
+  }, 2000);
 
-  console.log('Keep-alive mechanism started - pinging every 10 seconds');
+  console.log('Keep-alive mechanism started - pinging every 2 seconds');
 };
 
 /**

@@ -177,6 +177,111 @@ export default function About() {
           </div>
         </div>
 
+        {/* Editorial Team Section */}
+        <div className="mb-5 p-5 bg-white border border-light" style={{ borderRadius: '24px', boxShadow: '0 12px 30px rgba(0,0,0,0.02)' }}>
+          <h2 className="h4 fw-bold mb-2 text-center" style={{ color: '#0f172a' }}>✍️ Our Editorial Team</h2>
+          <p className="text-muted text-center mb-4 mx-auto" style={{ maxWidth: '640px', lineHeight: '1.7' }}>
+            Every article, job description, and preparation guide on NextJobPost is produced and reviewed by a dedicated team of career content professionals with direct experience in government exam preparation, corporate recruitment, and HR advisory.
+          </p>
+          <div className="row g-4">
+            {[
+              {
+                role: 'Editorial Lead',
+                desc: 'Oversees all published content for accuracy, originality, and compliance with Google Publisher Policies. Ensures content meets AdSense quality standards.',
+                icon: '👩‍💼',
+                bg: '#eff6ff',
+                border: '#bfdbfe',
+                color: '#1d4ed8'
+              },
+              {
+                role: 'Government Exam Research Team',
+                desc: 'Monitors official government portals (SSC, UPSC, RRB, IBPS) daily. Cross-references recruitment notifications with official PDF circulars before publication.',
+                icon: '🔍',
+                bg: '#f0fdf4',
+                border: '#bbf7d0',
+                color: '#15803d'
+              },
+              {
+                role: 'Career Content Writers',
+                desc: 'Produce original, research-backed career guides and exam strategy articles. All content is written natively — no AI-generated or copy-pasted text.',
+                icon: '📝',
+                bg: '#fff7ed',
+                border: '#fed7aa',
+                color: '#c2410c'
+              },
+              {
+                role: 'Fact-Checking Reviewers',
+                desc: 'Verify salary data, exam dates, vacancy counts, and eligibility criteria against multiple authoritative government sources before any detail is published.',
+                icon: '✅',
+                bg: '#fdf4ff',
+                border: '#e9d5ff',
+                color: '#7c3aed'
+              }
+            ].map((member, idx) => (
+              <div className="col-md-6" key={idx}>
+                <div className="p-4 h-100 rounded" style={{ background: member.bg, border: `1px solid ${member.border}` }}>
+                  <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>{member.icon}</div>
+                  <h4 className="fw-bold mb-2" style={{ color: member.color, fontSize: '1.05rem' }}>{member.role}</h4>
+                  <p className="mb-0 text-muted small" style={{ lineHeight: '1.65' }}>{member.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Content Verification Process */}
+        <div className="mb-5">
+          <h2 className="h4 fw-bold mb-4 text-center" style={{ color: '#0f172a' }}>🔐 Our Content Verification Process</h2>
+          <p className="text-muted text-center mb-4 mx-auto" style={{ maxWidth: '640px' }}>
+            Every piece of content published on NextJobPost goes through a structured, four-step editorial process designed to ensure accuracy, originality, and genuine value to job seekers.
+          </p>
+          <div className="row g-3">
+            {[
+              { step: '01', title: 'Source Verification', desc: 'All job notification details (vacancy count, salary, eligibility, last date) are cross-referenced with the official PDF notification from the recruiting body before publication.', icon: '🔎' },
+              { step: '02', title: 'Original Writing', desc: 'Our writers produce all editorial content from scratch. We do not reproduce, paraphrase, or syndicate content from other websites. AI-generation tools are used only for research assistance, never for direct publishing.', icon: '✍️' },
+              { step: '03', title: 'Accuracy Review', desc: 'A senior reviewer checks all salary figures, qualification requirements, age limits, and application dates against the primary government source before any article or notification goes live.', icon: '✅' },
+              { step: '04', title: 'Regular Updates', desc: 'Notifications are updated in real-time if official corrections or amendments are issued by the recruiting body. Our team monitors official portals continuously during active recruitment cycles.', icon: '🔄' }
+            ].map((step, idx) => (
+              <div className="col-md-6" key={idx}>
+                <div className="d-flex gap-3 p-4 bg-white rounded border border-light h-100" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
+                  <div style={{ width: '44px', height: '44px', background: '#0d6efd', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: '800', fontSize: '0.85rem', flexShrink: 0 }}>
+                    {step.step}
+                  </div>
+                  <div>
+                    <h4 className="fw-bold mb-1" style={{ fontSize: '1rem', color: '#0f172a' }}>{step.icon} {step.title}</h4>
+                    <p className="text-muted mb-0 small" style={{ lineHeight: '1.65' }}>{step.desc}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Our Commitments */}
+        <div className="mb-5 p-5" style={{ background: 'linear-gradient(135deg, #f0fdf4, #dcfce7)', borderRadius: '24px', border: '1px solid #86efac' }}>
+          <h2 className="h4 fw-bold mb-4 text-center" style={{ color: '#15803d' }}>🤝 Our Core Commitments</h2>
+          <div className="row g-3">
+            {[
+              { icon: '💰', title: 'Zero Fees — Always', desc: 'NextJobPost is and will always remain 100% free for job seekers. We never charge candidates for accessing listings, using preparation tools, or building resumes.' },
+              { icon: '🔗', title: 'Direct Application Links', desc: 'Every apply button redirects directly to the official employer or government portal. We never redirect through intermediary pages or require registration before accessing apply links.' },
+              { icon: '🚫', title: 'No Scam Listings', desc: 'We do not publish listings from companies requesting upfront fees, security deposits, or payment from candidates as part of the application process.' },
+              { icon: '📰', title: 'Source-Based Reporting', desc: 'We cite the official source (SSC.gov.in, UPSC.gov.in, RRB portals, etc.) for every recruitment notification so candidates can independently verify all details.' },
+              { icon: '🔒', title: 'Privacy Respect', desc: 'We do not sell candidate data. Our cookie policy is transparent and minimal. User data is only used for site functionality and is never shared with third-party advertisers.' },
+              { icon: '⚡', title: 'Real-Time Updates', desc: 'When official corrections or deadline extensions are issued, we update our listings immediately. Outdated information is removed or clearly marked as closed.' }
+            ].map((item, idx) => (
+              <div className="col-md-6 col-lg-4" key={idx}>
+                <div className="d-flex align-items-start gap-3 p-3 bg-white rounded" style={{ border: '1px solid #bbf7d0', height: '100%' }}>
+                  <span style={{ fontSize: '1.6rem', flexShrink: 0 }}>{item.icon}</span>
+                  <div>
+                    <h4 className="fw-bold mb-1" style={{ fontSize: '0.95rem', color: '#15803d' }}>{item.title}</h4>
+                    <p className="mb-0" style={{ fontSize: '0.83rem', color: '#374151', lineHeight: '1.6' }}>{item.desc}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Geographic Coverage */}
         <div className="mb-5 p-5 bg-white border border-light" style={{ borderRadius: '24px', boxShadow: '0 12px 30px rgba(0,0,0,0.02)' }}>
           <h2 className="h4 fw-bold mb-3 text-center" style={{ color: '#0f172a' }}>🌍 Nationwide Access</h2>

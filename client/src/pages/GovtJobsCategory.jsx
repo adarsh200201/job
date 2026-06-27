@@ -11,6 +11,8 @@ import SidebarAd from '../components/SidebarAd.jsx';
 import { MEGA_CATEGORIES } from '../utils/categoryConfig.js';
 import SidebarCategories from '../components/SidebarCategories.jsx';
 import SidebarCareerHub from '../components/SidebarCareerHub.jsx';
+import { generateCategorySEOTemplates } from '../utils/seoConfig.js';
+
 
 // Configurations for each category to ensure optimized SEO meta tags
 const CATEGORY_CONFIGS = {
@@ -275,6 +277,10 @@ export default function GovtJobsCategory({ categoryKey }) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const categorySEO = useMemo(() => {
+    return generateCategorySEOTemplates(categoryKey);
+  }, [categoryKey]);
+
   return (
     <div className="jobs-page">
       <Helmet>
@@ -458,6 +464,155 @@ export default function GovtJobsCategory({ categoryKey }) {
                   </button>
                 </div>
               </nav>
+            )}
+
+            {/* Rich SEO Content Guide */}
+            {categorySEO && categorySEO.intro && (
+              <div className="mt-5 p-4 bg-white rounded shadow-sm border border-light" style={{ animation: 'fadeInUp 0.4s ease' }}>
+                <h2 className="h4 fw-bold text-dark mb-4">📖 Complete Career Guide & Recruitment Details</h2>
+                
+                <div className="mb-4">
+                  <p className="text-muted leading-relaxed" style={{ fontSize: '0.92rem', lineHeight: '1.7' }}>
+                    {categorySEO.intro}
+                  </p>
+                </div>
+
+                <div className="row g-3">
+                  <div className="col-12 col-md-6">
+                    <div className="p-3 bg-light rounded border border-light h-100">
+                      <h3 className="h6 fw-bold text-primary d-flex align-items-center gap-2 mb-2">
+                        <span>🎓</span> Eligibility Criteria
+                      </h3>
+                      <p className="text-muted small mb-0" style={{ lineHeight: '1.6' }}>
+                        {categorySEO.eligibility}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="col-12 col-md-6">
+                    <div className="p-3 bg-light rounded border border-light h-100">
+                      <h3 className="h6 fw-bold text-success d-flex align-items-center gap-2 mb-2">
+                        <span>💰</span> Salary & Pay Scales
+                      </h3>
+                      <p className="text-muted small mb-0" style={{ lineHeight: '1.6' }}>
+                        {categorySEO.salary}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="col-12 col-md-6">
+                    <div className="p-3 bg-light rounded border border-light h-100">
+                      <h3 className="h6 fw-bold text-warning d-flex align-items-center gap-2 mb-2">
+                        <span>⚡</span> Selection Procedure
+                      </h3>
+                      <p className="text-muted small mb-0" style={{ lineHeight: '1.6', whiteSpace: 'pre-line' }}>
+                        {categorySEO.selection}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="col-12 col-md-6">
+                    <div className="p-3 bg-light rounded border border-light h-100">
+                      <h3 className="h6 fw-bold text-danger d-flex align-items-center gap-2 mb-2">
+                        <span>📝</span> How to Apply Online
+                      </h3>
+                      <p className="text-muted small mb-0" style={{ lineHeight: '1.6', whiteSpace: 'pre-line' }}>
+                        {categorySEO.apply}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Dynamic FAQs Section */}
+                {categorySEO.faqs && categorySEO.faqs.length > 0 && (
+                  <div className="mt-4 pt-3 border-top">
+                    <h3 className="h5 fw-bold text-dark mb-3">❓ Frequently Asked Questions (FAQ)</h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      {categorySEO.faqs.map((faq, idx) => (
+                        <details key={idx} className="p-3 bg-white rounded border border-light shadow-sm" style={{ cursor: 'pointer', transition: 'all 0.2s' }}>
+                          <summary className="fw-bold text-dark fs-6" style={{ outline: 'none' }}>
+                            {faq.q}
+                          </summary>
+                          <p className="text-muted small mt-2 mb-0" style={{ lineHeight: '1.6' }}>
+                            {faq.a}
+                          </p>
+                        </details>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Hiring Trends Section */}
+                {categorySEO.hiringTrends && (
+                  <div className="mt-4 pt-3 border-top">
+                    <h3 className="h5 fw-bold text-dark mb-3">📈 2026 Hiring Trends &amp; Market Outlook</h3>
+                    <div className="p-3 rounded" style={{ background: 'linear-gradient(135deg, #eff6ff, #f0fdf4)', border: '1px solid #bfdbfe', lineHeight: '1.75', fontSize: '0.92rem', color: '#374151' }}>
+                      {categorySEO.hiringTrends}
+                    </div>
+                  </div>
+                )}
+
+                {/* Top Recruiters Grid */}
+                {categorySEO.topRecruiters && categorySEO.topRecruiters.length > 0 && (
+                  <div className="mt-4 pt-3 border-top">
+                    <h3 className="h5 fw-bold text-dark mb-3">🏛️ Top Recruiting Organizations</h3>
+                    <div className="row g-2">
+                      {categorySEO.topRecruiters.map((org, idx) => (
+                        <div key={idx} className="col-12 col-md-6">
+                          <div className="d-flex align-items-start gap-2 p-3 bg-white rounded border border-light h-100" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
+                            <span style={{ fontSize: '1.4rem', lineHeight: '1', marginTop: '2px' }}>🏢</span>
+                            <div>
+                              <div className="fw-bold text-dark small">{org.name}</div>
+                              <div className="text-muted" style={{ fontSize: '0.8rem', marginTop: '2px' }}>{org.posts}</div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Career Growth Path */}
+                {categorySEO.careerGrowth && (
+                  <div className="mt-4 pt-3 border-top">
+                    <h3 className="h5 fw-bold text-dark mb-3">🚀 Career Growth &amp; Promotion Pathways</h3>
+                    <div className="p-3 rounded" style={{ background: '#fafafa', border: '1px solid #e2e8f0', lineHeight: '1.75', fontSize: '0.92rem', color: '#374151', borderLeft: '4px solid #2563eb' }}>
+                      {categorySEO.careerGrowth}
+                    </div>
+                  </div>
+                )}
+
+                {/* Common Mistakes Alert */}
+                {categorySEO.commonMistakes && categorySEO.commonMistakes.length > 0 && (
+                  <div className="mt-4 pt-3 border-top">
+                    <h3 className="h5 fw-bold text-dark mb-3">⚠️ Common Application Mistakes to Avoid</h3>
+                    <div className="p-3 rounded" style={{ background: '#fff7ed', border: '1px solid #fed7aa' }}>
+                      <ul className="mb-0" style={{ paddingLeft: '1.2rem' }}>
+                        {categorySEO.commonMistakes.map((mistake, idx) => (
+                          <li key={idx} className="small mb-2" style={{ color: '#92400e', lineHeight: '1.6' }}>
+                            {mistake}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                )}
+
+                {/* Preparation Tips Checklist */}
+                {categorySEO.prepTips && categorySEO.prepTips.length > 0 && (
+                  <div className="mt-4 pt-3 border-top">
+                    <h3 className="h5 fw-bold text-dark mb-3">📚 Preparation Tips &amp; Study Strategy</h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      {categorySEO.prepTips.map((tip, idx) => (
+                        <div key={idx} className="d-flex align-items-start gap-2 p-3 bg-white rounded border border-light" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+                          <span style={{ color: '#16a34a', fontWeight: '700', fontSize: '1rem', lineHeight: '1.4', flexShrink: 0 }}>✓</span>
+                          <span className="small text-dark" style={{ lineHeight: '1.6' }}>{tip}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
           </section>
         </div>

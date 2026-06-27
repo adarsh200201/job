@@ -22,7 +22,6 @@ const DEFAULT_AD_LINK = 'https://www.effectivegatecpm.com/s738fegejz?key=12ac1ed
 const JOB_MENU = [
   { id: 'list',     icon: '📋', label: 'Job Listings' },
   { id: 'create',   icon: '➕', label: 'Create Job' },
-  { id: 'settings', icon: '⚙️', label: 'Settings' },
 ];
 const PREP_MENU = [
   { id: 'topics',    icon: '🌲', label: 'Topic Manager' },
@@ -1162,21 +1161,7 @@ export default function AdminDashboard() {
               </div>
             )}
 
-            {/* ── Settings ─────────────────────────────── */}
-            {jobSubPage==='settings' && (
-              <div style={{maxWidth:'580px'}}>
-                <div style={S.settingsCard}>
-                  <h3 style={{fontSize:'1.15rem',fontWeight:800,color:'var(--text-primary)',marginBottom:'0.25rem'}}>⚙️ Site Settings</h3>
-                  <p style={{color:'var(--text-muted)',fontSize:'0.875rem',marginBottom:'1.5rem'}}>Manage ad links and global platform settings</p>
-                  <label style={S.lbl}>📢 Ad Link (triggers with Apply Now button)</label>
-                  <input className="form-control" type="url" value={adLink} onChange={e=>setAdLink(e.target.value)} placeholder={DEFAULT_AD_LINK}/>
-                  <p style={{color:'#9ca3af',fontSize:'0.8rem',marginTop:'0.4rem'}}>Opens in a new tab when users click "Apply Now"</p>
-                  <button onClick={saveSettings} disabled={settingsSaving} style={{...S.btnPrimary,marginTop:'1.25rem'}}>
-                    {settingsSaving?'⏳ Saving…':'💾 Save Settings'}
-                  </button>
-                </div>
-              </div>
-            )}
+            {/* Settings Page Removed */}
           </div>
         )}
 

@@ -26,8 +26,6 @@ function extractVacancy(title) {
   return match ? match[1] : 'As per notification';
 }
 
-const DEFAULT_AD_LINK = 'https://www.effectivegatecpm.com/s738fegejz?key=12ac1ed2eeb4ac73b7d41add24630c1e1e';
-
 // Inline Component for "Also read ---" block
 const AlsoReadCard = ({ relatedJob, themeColor = '#dc3545' }) => {
   if (!relatedJob) return null;
@@ -556,7 +554,6 @@ export default function JobDetails() {
   const [loading, setLoading] = useState(true);
   const [recent, setRecent] = useState([]);
   const [recommendations, setRecommendations] = useState(null);
-  const [adLink, setAdLink] = useState(DEFAULT_AD_LINK);
   const cache = useCache();
   const [hasApplied, setHasApplied] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
@@ -691,32 +688,8 @@ export default function JobDetails() {
   };
 
   const handleApply = (e, applyUrl) => {
-    // Ad popunder disabled for now
-    /*
-    e.preventDefault();
-    if (adLink) {
-      window.open(adLink, '_blank', 'noopener,noreferrer');
-    }
-    window.location.href = applyUrl;
-    */
+    // No popunder
   };
-
-  useEffect(() => {
-    let isMounted = true;
-    const fetchAdLink = async () => {
-      try {
-        const res = await api.get('/settings/adLink');
-        if (isMounted && res.data?.data) {
-          setAdLink(res.data.data);
-        }
-      } catch {
-        // Use default ad link
-      }
-    };
-    fetchAdLink();
-
-    return () => { isMounted = false; };
-  }, []);
 
   useEffect(() => {
     window.scrollTo(0, 0);

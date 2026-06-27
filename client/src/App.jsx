@@ -4,6 +4,7 @@ import { SpeedInsights } from '@vercel/speed-insights/react';
 import { Analytics } from '@vercel/analytics/react';
 import Footer from './components/Footer.jsx';
 import PreFooterSections from './components/PreFooterSections.jsx';
+import CookieConsent from './components/CookieConsent.jsx';
 import HeroSearch from './components/HeroSearch.jsx';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { startKeepAlive, stopKeepAlive } from './utils/keepAlive.js';
@@ -862,6 +863,7 @@ function AppLayout() {
       </main>
       <PreFooterSections />
       <Footer />
+      <CookieConsent />
       <SpeedInsights />
       <Analytics />
     </>

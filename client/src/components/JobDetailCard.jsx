@@ -8,8 +8,6 @@ import api from '../api/index.js';
 import { getImageUrl } from '../utils/imageUtils.js';
 import { trackApplyJobClicked, trackJobImpression, trackJobCardClicked } from '../utils/analytics.js';
 
-const DEFAULT_AD_LINK = 'https://www.effectivegatecpm.com/s738fegejz?key=12ac1ed2eeb4ac73b7d41add24630c1e1e';
-
 function excerpt(text, n = 160) {
   if (!text) return '';
   // Strip HTML tags for plain preview
@@ -76,10 +74,9 @@ function formatDate(dateStr) {
   return `${day} ${month} ${year}`;
 }
 
-function JobDetailCard({ job: rawJob, adLink: propAdLink }) {
+function JobDetailCard({ job: rawJob }) {
   const job = cleanJobBranding(rawJob);
   const { elementRef, isVisible } = useIntersectionObserver();
-  const [adLink, setAdLink] = useState(propAdLink || DEFAULT_AD_LINK);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   useEffect(() => {
@@ -87,14 +84,6 @@ function JobDetailCard({ job: rawJob, adLink: propAdLink }) {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
-  useEffect(() => {
-    if (!propAdLink) {
-      api.get('/settings/adLink').then(res => {
-        if (res.data?.data) setAdLink(res.data.data);
-      }).catch(() => {});
-    }
-  }, [propAdLink]);
 
   // Fire Job Impression once when card enters viewport
   useEffect(() => {
