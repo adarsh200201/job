@@ -657,7 +657,8 @@ const enrichJobTitleAndCompany = (rawTitle, rawCompany, jobDescription, isGov) =
   finalTitle = finalTitle.replace(/\s+/g, ' ').trim();
   
   if (companyCleaned && companyCleaned.length > 2) {
-    const doubleCompanyRegex = new RegExp(`^(${companyCleaned})\\s+\\1\\b`, 'i');
+    const escapedCompany = companyCleaned.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const doubleCompanyRegex = new RegExp(`^(${escapedCompany})\\s+\\1\\b`, 'i');
     finalTitle = finalTitle.replace(doubleCompanyRegex, '$1');
   }
 
