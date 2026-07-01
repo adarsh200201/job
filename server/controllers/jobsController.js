@@ -2,6 +2,7 @@ const Job = require('../models/Job');
 const slugify = require('slugify');
 const { getProfileAndActivityData, calculateJobMatchScore, bustSimilarJobsCache } = require('./recommendationController');
 const GovernmentJobPreferences = require('../models/GovernmentJobPreferences');
+const seoRoutes = require('../routes/seo');
 
 // Helper function to build filters for job search
 function buildFilters(query) {
@@ -174,6 +175,9 @@ exports.bustJobsCache = function() {
   singleJobCache.clear();
   if (typeof bustSimilarJobsCache === 'function') {
     bustSimilarJobsCache();
+  }
+  if (seoRoutes && typeof seoRoutes.bustSitemapsCache === 'function') {
+    seoRoutes.bustSitemapsCache();
   }
 };
 

@@ -1846,7 +1846,7 @@ export default function JobDetails() {
               <img 
                 src={getImageUrl(job.image)} 
                 alt="job banner" 
-                loading="lazy" 
+                fetchPriority="high"
                 className="img-fluid rounded-4 shadow-sm w-100" 
                 style={{ maxHeight: '400px', objectFit: 'cover' }}
                 width="1200"

@@ -7,6 +7,7 @@ dotenv.config(); // fallback: also check current dir .env
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
+const compression = require('compression');
 const cookieParser = require('cookie-parser');
 const mongoSanitize = require('express-mongo-sanitize');
 const session = require('express-session');
@@ -100,6 +101,8 @@ app.use(
     credentials: true,
   })
 );
+
+app.use(compression());
 
 // ─── Security Middleware ───────────────────────────────────────────────────────
 app.use(helmet({

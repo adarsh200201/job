@@ -19,6 +19,54 @@ const getBaseUrl = (req) => {
   return `https://${host}`;
 };
 
+// Sitemap Cache
+const sitemapsCache = new Map();
+const SITEMAP_CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes
+
+function getCachedSitemap(key) {
+  const entry = sitemapsCache.get(key);
+  if (entry && Date.now() - entry.timestamp < SITEMAP_CACHE_TTL_MS) {
+    return entry.xml;
+  }
+  return null;
+}
+
+function cacheSitemap(key, xml) {
+  sitemapsCache.set(key, { xml, timestamp: Date.now() });
+}
+
+function bustSitemapsCache() {
+  sitemapsCache.clear();
+  console.log('🧹 [SitemapsCache] Busted sitemap cache');
+}
+
+router.bustSitemapsCache = bustSitemapsCache;
+
+// Sitemap Cache Middleware
+const sitemapsCacheMiddleware = (req, res, next) => {
+  const cacheKey = req.originalUrl;
+  const cached = getCachedSitemap(cacheKey);
+  if (cached) {
+    res.header('Content-Type', 'application/xml');
+    res.set('X-Cache', 'HIT');
+    return res.status(200).send(cached);
+  }
+  
+  const originalSend = res.send;
+  res.send = function (body) {
+    if (res.statusCode === 200) {
+      cacheSitemap(cacheKey, body);
+    }
+    res.set('X-Cache', 'MISS');
+    return originalSend.call(this, body);
+  };
+  
+  next();
+};
+
+// Mount cache middleware on sitemap routes
+router.use('/sitemap*.xml', sitemapsCacheMiddleware);
+
 // Helper to parse mega categories dynamically from client config to avoid CommonJS/ESM require conflicts
 const getMegaCategoryKeys = () => {
   try {

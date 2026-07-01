@@ -108,6 +108,8 @@ JobSchema.pre('save', async function(next) {
 
 // Add indexes for faster queries
 JobSchema.index({ isActive: 1, createdAt: -1 });
+JobSchema.index({ isActive: 1, postType: 1, updatedAt: -1 });
+JobSchema.index({ postType: 1 });
 JobSchema.index({ company: 1 });
 JobSchema.index({ location: 1 });
 
