@@ -22,9 +22,11 @@ const authRoutes = require('./routes/auth');
 const recommendationRoutes = require('./routes/recommendation');
 const activityRoutes = require('./routes/activity');
 const preparationRoutes = require('./routes/preparation');
+const currentAffairsRoutes = require('./routes/currentAffairs');
 const inputSanitizer = require('./middleware/inputSanitizer');
 const { seedAdminIfNeeded, seedJobsIfNeeded, ensureMinimumJobs, seedDetailedJob } = require('./utils/seed');
 const { seedPrepData } = require('./scripts/seedPrepData');
+const { seedCurrentAffairsIfNeeded } = require('./utils/seedCurrentAffairs');
 
 /* ─── Auto DB Cleanup (prevents Atlas 512 MB quota breach) ─── */
 async function autoCleanupDB() {
@@ -156,6 +158,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/recommendations', recommendationRoutes);
 app.use('/api/activity', activityRoutes);
 app.use('/api/preparation', preparationRoutes);
+app.use('/api/current-affairs', currentAffairsRoutes);
 app.use('/', seoRoutes);
 
 app.use((err, req, res, next) => {
@@ -171,6 +174,7 @@ connectDB()
     await seedDetailedJob();
     await ensureMinimumJobs(12);
     await seedPrepData();
+    await seedCurrentAffairsIfNeeded();
     scheduleAutoCleanup();
   })
   .catch((err) => {
