@@ -8,6 +8,8 @@ import JoinUpdates from '../components/JoinUpdates.jsx';
 import { JobCardSkeleton } from '../components/SkeletonLoader.jsx';
 import SidebarAd from '../components/SidebarAd.jsx';
 import SidebarCareerHub from '../components/SidebarCareerHub.jsx';
+import RecommendedBooks from '../components/Affiliate/RecommendedBooks.jsx';
+import StudentEssentials from '../components/Affiliate/StudentEssentials.jsx';
 import { STATE_MAPPINGS, QUALIFICATION_MAPPINGS, CATEGORY_MAPPINGS, generateSEOTemplates } from '../utils/seoConfig.js';
 import customProgrammaticContent from '../utils/customProgrammaticContent.json';
 
@@ -478,8 +480,19 @@ export default function ProgrammaticSEOJobsPage({ slug }) {
                 <p className="text-muted small mt-1">Check back later or search for other central/state openings.</p>
               </div>
             )}
-            {sortedJobs.map((job) => (
-              <JobDetailCard key={job._id} job={job} />
+            {sortedJobs.map((job, idx) => (
+              <React.Fragment key={job._id}>
+                <JobDetailCard job={job} />
+                {(idx + 1) % 10 === 0 && (
+                  <div style={{ margin: '1.5rem 0' }}>
+                    {Math.floor((idx + 1) / 10) % 2 === 1 ? (
+                      <RecommendedBooks initialCategory="dsa" viewType="carousel" />
+                    ) : (
+                      <StudentEssentials viewType="carousel" />
+                    )}
+                  </div>
+                )}
+              </React.Fragment>
             ))}
 
             {/* Pagination */}

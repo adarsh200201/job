@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import AITutor from '../../components/Preparation/AITutor.jsx';
 import PrepLayout from '../../components/Preparation/PrepLayout.jsx';
+import RecommendedBooks from '../../components/Affiliate/RecommendedBooks.jsx';
 import api from '../../api/index.js';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:4000';
@@ -182,6 +183,11 @@ export default function DSAPrep() {
           </div>
 
         </div>
+      </div>
+
+      {/* 📚 Book Store Module */}
+      <div style={{ maxWidth: 1100, margin: '1rem auto 0', padding: '0 1rem' }}>
+        <RecommendedBooks initialCategory="dsa" viewType="carousel" />
       </div>
 
       <div style={{ maxWidth: selectedTopic ? 1200 : 900, margin: '0 auto', padding: '1.5rem 1rem' }}>

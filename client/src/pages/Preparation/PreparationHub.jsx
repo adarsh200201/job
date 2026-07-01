@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import PrepLayout from '../../components/Preparation/PrepLayout.jsx';
+import WorkEssentials from '../../components/Affiliate/WorkEssentials.jsx';
+import StudentEssentials from '../../components/Affiliate/StudentEssentials.jsx';
 import api from '../../api/index.js';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:4000';
@@ -452,6 +454,12 @@ export default function PreparationHub() {
               ))}
             </div>
           )}
+
+          {/* WFH & Student Essentials widgets */}
+          <div style={{ marginTop: '2.5rem' }}>
+            <WorkEssentials viewType="carousel" />
+            <StudentEssentials viewType="carousel" />
+          </div>
           
 
 

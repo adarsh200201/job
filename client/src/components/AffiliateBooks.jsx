@@ -19,8 +19,8 @@ import React, { useState, useRef } from 'react';
 
 const ASSOCIATE_TAG = 'nextjobpost-21'; // ✅ Amazon Associates ID — confirmed live
 
-function amzLink(asin) {
-  return `https://www.amazon.in/dp/${asin}?tag=${ASSOCIATE_TAG}`;
+function amzLink(asin, title, author) {
+  return `https://www.amazon.in/s?k=${encodeURIComponent(title + ' ' + (author || ''))}&tag=${ASSOCIATE_TAG}`;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -104,7 +104,7 @@ const BOOKS = {
   resume: [
     { title: 'Cracking the Coding Interview', author: 'Gayle McDowell', price: '₹1,250', mrp: '₹1,995', img: 'https://m.media-amazon.com/images/I/41pMsKZBEeL._SX331_BO1,204,203,200_.jpg', asin: '0984782850', badge: '💻 Must Have', color: '#2563eb' },
     { title: 'The Google Resume', author: 'Gayle McDowell', price: '₹750', mrp: '₹1,195', img: 'https://m.media-amazon.com/images/I/51LVPKsTPqL._SX331_BO1,204,203,200_.jpg', asin: '0470927623', badge: '🏆 Bestseller', color: '#f59e0b' },
-    { title: 'Knock \'em Dead Resumes', author: 'Martin Yate', price: '₹699', mrp: '₹1,095', img: 'https://m.media-amazon.com/images/I/41VBejAz6uL._SX331_BO1,204,203,200_.jpg', asin: '1440566704', badge: '📄 Resume Pro', color: '#10b981' },
+    { title: 'Knock \'em Dead Resumes', author: 'Martin Yate', price: '₹499', mrp: '₹799', img: 'https://m.media-amazon.com/images/I/41VBejAz6uL._SX331_BO1,204,203,200_.jpg', asin: '9351031381', badge: '📄 Resume Pro', color: '#10b981' },
     { title: 'What Color Is Your Parachute?', author: 'Richard N. Bolles', price: '₹680', mrp: '₹1,050', img: 'https://m.media-amazon.com/images/I/41bEIL7kz-L._SX331_BO1,204,203,200_.jpg', asin: '1984857886', badge: '🎯 Career Guide', color: '#8b5cf6' },
     { title: 'Never Eat Alone', author: 'Keith Ferrazzi', price: '₹580', mrp: '₹895', img: 'https://m.media-amazon.com/images/I/41cI7BGDH7L._SX331_BO1,204,203,200_.jpg', asin: '0385346654', badge: '🤝 Networking', color: '#ef4444' },
   ],
@@ -119,8 +119,10 @@ const BOOKS = {
 };
 
 // Fallback book image on error
-function BookCover({ src, title, color }) {
+function BookCover({ src, title, color, asin }) {
   const [errored, setErrored] = useState(false);
+  const [fallbackTried, setFallbackTried] = useState(false);
+
   if (errored) {
     return (
       <div style={{
@@ -134,8 +136,15 @@ function BookCover({ src, title, color }) {
   }
   return (
     <img
-      src={src} alt={title}
-      onError={() => setErrored(true)}
+      src={fallbackTried ? `https://images-eu.ssl-images-amazon.com/images/P/${asin}.01.LZZZZZZZ.jpg` : src}
+      alt={title}
+      onError={() => {
+        if (!fallbackTried) {
+          setFallbackTried(true);
+        } else {
+          setErrored(true);
+        }
+      }}
       style={{ width: '100%', height: '160px', objectFit: 'cover', borderRadius: '8px 8px 0 0', display: 'block' }}
     />
   );
@@ -238,12 +247,12 @@ export default function AffiliateBooks({ category = 'general' }) {
             {activeBooks.map((book, idx) => (
               <a
                 key={idx}
-                href={amzLink(book.asin)}
+                href={amzLink(book.asin, book.title, book.author)}
                 target="_blank"
                 rel="noopener noreferrer sponsored"
                 className="njp-book-card"
               >
-                <BookCover src={book.img} title={book.title} color={book.color} />
+                <BookCover src={book.img} title={book.title} color={book.color} asin={book.asin} />
                 <div className="njp-book-body">
                   <span className="njp-book-badge" style={{ background: book.color }}>
                     {book.badge}
@@ -252,6 +261,7 @@ export default function AffiliateBooks({ category = 'general' }) {
                   <div className="njp-book-author">by {book.author}</div>
                   <div className="njp-book-price-row">
                     <span className="njp-book-price">{book.price}</span>
+                    <span style={{ fontSize: '0.62rem', color: '#94a3b8', fontWeight: '500', marginLeft: '2px' }}>(approx.)</span>
                     <span className="njp-book-mrp">{book.mrp}</span>
                   </div>
                 </div>

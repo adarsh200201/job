@@ -12,6 +12,8 @@ import SidebarAd from '../components/SidebarAd.jsx';
 import SidebarCategories from '../components/SidebarCategories.jsx';
 import HomeSEOContent from '../components/HomeSEOContent.jsx';
 import { articlesData } from '../data/articlesData.js';
+import RecommendedBooks from '../components/Affiliate/RecommendedBooks.jsx';
+import StudentEssentials from '../components/Affiliate/StudentEssentials.jsx';
 
 
 function RecommendationSection({ title, emoji, description, jobs, showSeeAll, onDismiss, isLoggedIn }) {
@@ -560,8 +562,19 @@ export default function Home() {
                 </>
               )}
               {sortedJobs.length === 0 && !loading && <p className="text-center text-muted">No jobs available.</p>}
-              {sortedJobs.map((job) => (
-                <JobDetailCard key={job._id} job={job} />
+              {sortedJobs.map((job, idx) => (
+                <React.Fragment key={job._id}>
+                  <JobDetailCard job={job} />
+                  {(idx + 1) % 10 === 0 && (
+                    <div style={{ margin: '1.5rem 0' }}>
+                      {Math.floor((idx + 1) / 10) % 2 === 1 ? (
+                        <RecommendedBooks initialCategory="dsa" viewType="carousel" />
+                      ) : (
+                        <StudentEssentials viewType="carousel" />
+                      )}
+                    </div>
+                  )}
+                </React.Fragment>
               ))}
             </div>
 
