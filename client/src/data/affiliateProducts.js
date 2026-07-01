@@ -26,7 +26,7 @@ export const AFFILIATE_DATA = {
             rating: 4.7,
             reviews: 22400,
             badge: "Must Buy",
-            img: "https://m.media-amazon.com/images/I/41pMsKZBEeL._SX331_BO1,204,203,200_.jpg"
+            img: "https://images-eu.ssl-images-amazon.com/images/P/0984782850.01.LZZZZZZZ.jpg"
           },
           {
             asin: "B0GSMSPRGR",
@@ -50,7 +50,7 @@ export const AFFILIATE_DATA = {
             rating: 4.4,
             reviews: 5800,
             badge: "Campus Favorite",
-            img: "https://m.media-amazon.com/images/I/51VU3MFWJJL._SY344_BO1,204,203,200_.jpg"
+            img: "https://images-eu.ssl-images-amazon.com/images/P/8193245288.01.LZZZZZZZ.jpg"
           }
         ]
       },
@@ -92,7 +92,7 @@ export const AFFILIATE_DATA = {
             rating: 4.6,
             reviews: 1300,
             badge: "In-Depth",
-            img: "https://m.media-amazon.com/images/I/41vsMN5GNVL._SX331_BO1,204,203,200_.jpg"
+            img: "https://images-eu.ssl-images-amazon.com/images/P/9353066360.01.LZZZZZZZ.jpg"
           }
         ]
       },
@@ -122,7 +122,7 @@ export const AFFILIATE_DATA = {
             rating: 4.8,
             reviews: 2300,
             badge: "Advanced Python",
-            img: "https://m.media-amazon.com/images/I/41RUj0YHSSL._SX331_BO1,204,203,200_.jpg"
+            img: "https://images-eu.ssl-images-amazon.com/images/P/9355422474.01.LZZZZZZZ.jpg"
           },
           {
             asin: "1718504500",
@@ -152,7 +152,7 @@ export const AFFILIATE_DATA = {
             rating: 4.5,
             reviews: 28400,
             badge: "Bestseller",
-            img: "https://m.media-amazon.com/images/I/51VU3MFWJJL._SY344_BO1,204,203,200_.jpg"
+            img: "https://images-eu.ssl-images-amazon.com/images/P/8121908957.01.LZZZZZZZ.jpg"
           },
           {
             asin: "B00Q43XKD6",
@@ -176,7 +176,7 @@ export const AFFILIATE_DATA = {
             rating: 4.4,
             reviews: 19100,
             badge: "High Difficulty",
-            img: "https://m.media-amazon.com/images/I/51LVPKsTPqL._SX331_BO1,204,203,200_.jpg"
+            img: "https://images-eu.ssl-images-amazon.com/images/P/9352606337.01.LZZZZZZZ.jpg"
           }
         ]
       },
@@ -194,7 +194,7 @@ export const AFFILIATE_DATA = {
             rating: 4.7,
             reviews: 22400,
             badge: "Essential",
-            img: "https://m.media-amazon.com/images/I/41pMsKZBEeL._SX331_BO1,204,203,200_.jpg"
+            img: "https://images-eu.ssl-images-amazon.com/images/P/0984782850.01.LZZZZZZZ.jpg"
           },
           {
             asin: "9368089043",
@@ -218,7 +218,7 @@ export const AFFILIATE_DATA = {
             rating: 4.3,
             reviews: 2100,
             badge: "Communication",
-            img: "https://m.media-amazon.com/images/I/41vsMN5GNVL._SX331_BO1,204,203,200_.jpg"
+            img: "https://images-eu.ssl-images-amazon.com/images/P/8126539119.01.LZZZZZZZ.jpg"
           }
         ]
       },
@@ -236,7 +236,7 @@ export const AFFILIATE_DATA = {
             rating: 4.3,
             reviews: 4200,
             badge: "ATS Strategy",
-            img: "https://m.media-amazon.com/images/I/41VBejAz6uL._SX331_BO1,204,203,200_.jpg"
+            img: "https://images-eu.ssl-images-amazon.com/images/P/9351031381.01.LZZZZZZZ.jpg"
           },
           {
             asin: "0470927623",
@@ -248,7 +248,7 @@ export const AFFILIATE_DATA = {
             rating: 4.5,
             reviews: 8700,
             badge: "Tech Specific",
-            img: "https://m.media-amazon.com/images/I/51LVPKsTPqL._SX331_BO1,204,203,200_.jpg"
+            img: "https://images-eu.ssl-images-amazon.com/images/P/0470927623.01.LZZZZZZZ.jpg"
           },
           {
             asin: "1984861204",
@@ -302,7 +302,7 @@ export const AFFILIATE_DATA = {
             rating: 4.7,
             reviews: 18500,
             badge: "Developer Choice",
-            img: "https://m.media-amazon.com/images/I/71vFKBpKakL._SX679_.jpg"
+            img: "https://images-eu.ssl-images-amazon.com/images/P/B08N5N15KR.01.LZZZZZZZ.jpg"
           },
           {
             asin: "B0CFQDMTK8",
@@ -314,7 +314,7 @@ export const AFFILIATE_DATA = {
             rating: 4.2,
             reviews: 4200,
             badge: "Best Value",
-            img: "https://m.media-amazon.com/images/I/71+D+c7qFPL._SX679_.jpg"
+            img: "https://images-eu.ssl-images-amazon.com/images/P/B0CFQDMTK8.01.LZZZZZZZ.jpg"
           }
         ]
       },
@@ -332,7 +332,7 @@ export const AFFILIATE_DATA = {
             rating: 4.3,
             reviews: 9400,
             badge: "Bestseller",
-            img: "https://m.media-amazon.com/images/I/61m1N1ePqHL._SX679_.jpg"
+            img: "https://images-eu.ssl-images-amazon.com/images/P/B0892BPC32.01.LZZZZZZZ.jpg"
           },
           {
             asin: "B089K81DGF",
@@ -344,7 +344,7 @@ export const AFFILIATE_DATA = {
             rating: 4.6,
             reviews: 3100,
             badge: "Premium Pick",
-            img: "https://m.media-amazon.com/images/I/61u9ZqE-wQL._SX679_.jpg"
+            img: "https://images-eu.ssl-images-amazon.com/images/P/B089K81DGF.01.LZZZZZZZ.jpg"
           }
         ]
       },
@@ -362,7 +362,7 @@ export const AFFILIATE_DATA = {
             rating: 4.7,
             reviews: 14500,
             badge: "Pro Productivity",
-            img: "https://m.media-amazon.com/images/I/61ni3t1ryQL._SX679_.jpg"
+            img: "https://images-eu.ssl-images-amazon.com/images/P/B0716ZFW98.01.LZZZZZZZ.jpg"
           },
           {
             asin: "B00DR8LAE2",
@@ -374,7 +374,7 @@ export const AFFILIATE_DATA = {
             rating: 4.4,
             reviews: 98000,
             badge: "Budget Friendly",
-            img: "https://m.media-amazon.com/images/I/516mE8gE8kL._SX679_.jpg"
+            img: "https://images-eu.ssl-images-amazon.com/images/P/B00DR8LAE2.01.LZZZZZZZ.jpg"
           }
         ]
       },
@@ -392,7 +392,7 @@ export const AFFILIATE_DATA = {
             rating: 4.3,
             reviews: 38400,
             badge: "Standard Choice",
-            img: "https://m.media-amazon.com/images/I/61yo4qRiO3L._SX679_.jpg"
+            img: "https://images-eu.ssl-images-amazon.com/images/P/B003L62T7W.01.LZZZZZZZ.jpg"
           }
         ]
       },
@@ -410,7 +410,7 @@ export const AFFILIATE_DATA = {
             rating: 4.4,
             reviews: 18500,
             badge: "Top Rated",
-            img: "https://m.media-amazon.com/images/I/41Kx1g2t8KL._SX679_.jpg"
+            img: "https://images-eu.ssl-images-amazon.com/images/P/B09GRL3V35.01.LZZZZZZZ.jpg"
           }
         ]
       },
@@ -428,7 +428,7 @@ export const AFFILIATE_DATA = {
             rating: 4.4,
             reviews: 19400,
             badge: "Best Screen",
-            img: "https://m.media-amazon.com/images/I/71P4q-3WNFL._SX679_.jpg"
+            img: "https://images-eu.ssl-images-amazon.com/images/P/B08C5DQQ2S.01.LZZZZZZZ.jpg"
           }
         ]
       },
@@ -446,7 +446,7 @@ export const AFFILIATE_DATA = {
             rating: 4.2,
             reviews: 8700,
             badge: "Ergonomic",
-            img: "https://m.media-amazon.com/images/I/61-d70-tP1L._SX679_.jpg"
+            img: "https://images-eu.ssl-images-amazon.com/images/P/B08C7K85J6.01.LZZZZZZZ.jpg"
           }
         ]
       },
@@ -464,7 +464,7 @@ export const AFFILIATE_DATA = {
             rating: 4.4,
             reviews: 12100,
             badge: "Compact",
-            img: "https://m.media-amazon.com/images/I/51wXpM4j3SL._SX679_.jpg"
+            img: "https://images-eu.ssl-images-amazon.com/images/P/B00Y25XF7K.01.LZZZZZZZ.jpg"
           }
         ]
       }
@@ -488,7 +488,7 @@ export const AFFILIATE_DATA = {
             rating: 4.5,
             reviews: 18200,
             badge: "🏆 Bestseller",
-            img: "https://m.media-amazon.com/images/I/51VU3MFWJJL._SY344_BO1,204,203,200_.jpg"
+            img: "https://images-eu.ssl-images-amazon.com/images/P/8121908957.01.LZZZZZZZ.jpg"
           },
           {
             asin: "9352606337",
@@ -500,7 +500,7 @@ export const AFFILIATE_DATA = {
             rating: 4.4,
             reviews: 6300,
             badge: "🔥 Advanced Pick",
-            img: "https://m.media-amazon.com/images/I/51LVPKsTPqL._SX331_BO1,204,203,200_.jpg"
+            img: "https://images-eu.ssl-images-amazon.com/images/P/9352606337.01.LZZZZZZZ.jpg"
           },
           {
             asin: "8190458825",
@@ -512,7 +512,7 @@ export const AFFILIATE_DATA = {
             rating: 4.3,
             reviews: 7900,
             badge: "⚡ Speed Tricks",
-            img: "https://m.media-amazon.com/images/I/41UNvFRVFHL._SX331_BO1,204,203,200_.jpg"
+            img: "https://images-eu.ssl-images-amazon.com/images/P/8190458825.01.LZZZZZZZ.jpg"
           }
         ]
       },
@@ -530,7 +530,7 @@ export const AFFILIATE_DATA = {
             rating: 4.6,
             reviews: 14500,
             badge: "🏆 Top Rated",
-            img: "https://m.media-amazon.com/images/I/41pMsKZBEeL._SX331_BO1,204,203,200_.jpg"
+            img: "https://images-eu.ssl-images-amazon.com/images/P/9352534034.01.LZZZZZZZ.jpg"
           },
           {
             asin: "8190458884",
@@ -542,7 +542,7 @@ export const AFFILIATE_DATA = {
             rating: 4.4,
             reviews: 5800,
             badge: "💡 Analytical",
-            img: "https://m.media-amazon.com/images/I/41bEIL7kz-L._SX331_BO1,204,203,200_.jpg"
+            img: "https://images-eu.ssl-images-amazon.com/images/P/8190458884.01.LZZZZZZZ.jpg"
           }
         ]
       },
@@ -560,7 +560,7 @@ export const AFFILIATE_DATA = {
             rating: 4.7,
             reviews: 42000,
             badge: "🔥 Essential",
-            img: "https://m.media-amazon.com/images/I/51CRvXWvRvL._SY344_BO1,204,203,200_.jpg"
+            img: "https://images-eu.ssl-images-amazon.com/images/P/0143424524.01.LZZZZZZZ.jpg"
           },
           {
             asin: "8121900093",
@@ -572,7 +572,7 @@ export const AFFILIATE_DATA = {
             rating: 4.5,
             reviews: 12800,
             badge: "📚 Classic",
-            img: "https://m.media-amazon.com/images/I/51VU3MFWJJL._SY344_BO1,204,203,200_.jpg"
+            img: "https://images-eu.ssl-images-amazon.com/images/P/8121900093.01.LZZZZZZZ.jpg"
           },
           {
             asin: "8174826718",
@@ -584,7 +584,7 @@ export const AFFILIATE_DATA = {
             rating: 4.4,
             reviews: 9100,
             badge: "📝 Practice Guide",
-            img: "https://m.media-amazon.com/images/I/41RUj0YHSSL._SX331_BO1,204,203,200_.jpg"
+            img: "https://images-eu.ssl-images-amazon.com/images/P/8174826718.01.LZZZZZZZ.jpg"
           }
         ]
       },
@@ -602,7 +602,7 @@ export const AFFILIATE_DATA = {
             rating: 4.6,
             reviews: 25800,
             badge: "🏆 Bestseller",
-            img: "https://m.media-amazon.com/images/I/51CRvXWvRvL._SY344_BO1,204,203,200_.jpg"
+            img: "https://images-eu.ssl-images-amazon.com/images/P/8190086006.01.LZZZZZZZ.jpg"
           },
           {
             asin: "9390711373",
@@ -614,7 +614,7 @@ export const AFFILIATE_DATA = {
             rating: 4.3,
             reviews: 3200,
             badge: "📚 Static GK",
-            img: "https://m.media-amazon.com/images/I/41bEIL7kz-L._SX331_BO1,204,203,200_.jpg"
+            img: "https://images-eu.ssl-images-amazon.com/images/P/9390711373.01.LZZZZZZZ.jpg"
           }
         ]
       }

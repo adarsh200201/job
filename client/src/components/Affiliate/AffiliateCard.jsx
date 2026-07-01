@@ -98,14 +98,14 @@ export default function AffiliateCard({ product, category = 'general', type = 'p
         position: 'relative'
       }}>
         {imgErr ? (
-          <div style={{ fontSize: '3rem' }}>🛍️</div>
+          <div style={{ fontSize: '3rem' }}>📚</div>
         ) : (
           <img
-            src={fallbackTried ? (
-              product.asin === 'B0GSMSPRGR' ? 'https://images-eu.ssl-images-amazon.com/images/P/8120321413.01.LZZZZZZZ.jpg' : 
-              product.asin === 'B0CTTMGHW8' ? 'https://images-eu.ssl-images-amazon.com/images/P/935306385X.01.LZZZZZZZ.jpg' :
-              `https://images-eu.ssl-images-amazon.com/images/P/${product.asin}.01.LZZZZZZZ.jpg`
-            ) : product.img}
+            src={
+              fallbackTried
+                ? `https://books.google.com/books/content?vid=ISBN${product.asin}&printsec=frontcover&img=1&zoom=1`
+                : `https://covers.openlibrary.org/b/isbn/${product.asin}-L.jpg?default=false`
+            }
             alt={product.title}
             loading="lazy"
             onError={() => {

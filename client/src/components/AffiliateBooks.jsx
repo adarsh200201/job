@@ -28,102 +28,106 @@ function amzLink(asin, title, author) {
 // ─────────────────────────────────────────────────────────────
 const BOOKS = {
   ssc: [
-    { title: 'Quantitative Aptitude', author: 'R.S. Aggarwal', price: '₹430', mrp: '₹695', img: 'https://m.media-amazon.com/images/I/51VU3MFWJJL._SY344_BO1,204,203,200_.jpg', asin: '8121908957', badge: '🏆 Bestseller', color: '#f59e0b' },
-    { title: "Lucent's General Knowledge", author: 'Lucent Publication', price: '₹320', mrp: '₹495', img: 'https://m.media-amazon.com/images/I/51CRvXWvRvL._SY344_BO1,204,203,200_.jpg', asin: '8190086006', badge: '🔥 Most Popular', color: '#ef4444' },
-    { title: 'SSC CGL Tier I & II — 8700+ Papers', author: 'Kiran Prakashan', price: '₹695', mrp: '₹995', img: 'https://m.media-amazon.com/images/I/41VBejAz6uL._SX331_BO1,204,203,200_.jpg', asin: '9327468042', badge: '📋 Practice Book', color: '#8b5cf6' },
-    { title: 'Verbal & Non-Verbal Reasoning', author: 'R.S. Aggarwal', price: '₹560', mrp: '₹895', img: 'https://m.media-amazon.com/images/I/41pMsKZBEeL._SX331_BO1,204,203,200_.jpg', asin: '9352534034', badge: '⭐ Top Pick', color: '#2563eb' },
-    { title: 'SSC CHSL 10+2 Level Exam Guide', author: 'RPH Editorial Board', price: '₹395', mrp: '₹595', img: 'https://m.media-amazon.com/images/I/51oVmLB9G3L._SX331_BO1,204,203,200_.jpg', asin: '9386845261', badge: '✅ Recommended', color: '#10b981' },
-    { title: 'SSC Mathematics — Rakesh Yadav', author: 'Rakesh Yadav', price: '₹480', mrp: '₹720', img: 'https://m.media-amazon.com/images/I/41UNvFRVFHL._SX331_BO1,204,203,200_.jpg', asin: '9386845163', badge: '📐 Maths Expert', color: '#0ea5e9' },
-    { title: 'SSC CGL Previous Year Papers', author: 'Arihant Experts', price: '₹350', mrp: '₹550', img: 'https://m.media-amazon.com/images/I/41vsMN5GNVL._SX331_BO1,204,203,200_.jpg', asin: '9325298821', badge: '📝 PYQ Book', color: '#d97706' },
-    { title: 'General English — SP Bakshi', author: 'S.P. Bakshi', price: '₹390', mrp: '₹595', img: 'https://m.media-amazon.com/images/I/41RUj0YHSSL._SX331_BO1,204,203,200_.jpg', asin: '8174826718', badge: '🔤 English', color: '#6366f1' },
+    { title: 'Quantitative Aptitude', author: 'R.S. Aggarwal', price: '₹430', mrp: '₹695', img: 'https://images-eu.ssl-images-amazon.com/images/P/8121908957.01.LZZZZZZZ.jpg', asin: '8121908957', badge: '🏆 Bestseller', color: '#f59e0b' },
+    { title: "Lucent's General Knowledge", author: 'Lucent Publication', price: '₹320', mrp: '₹495', img: 'https://images-eu.ssl-images-amazon.com/images/P/8190086006.01.LZZZZZZZ.jpg', asin: '8190086006', badge: '🔥 Most Popular', color: '#ef4444' },
+    { title: 'SSC CGL Tier I & II — 8700+ Papers', author: 'Kiran Prakashan', price: '₹695', mrp: '₹995', img: 'https://images-eu.ssl-images-amazon.com/images/P/9327468042.01.LZZZZZZZ.jpg', asin: '9327468042', badge: '📋 Practice Book', color: '#8b5cf6' },
+    { title: 'Verbal & Non-Verbal Reasoning', author: 'R.S. Aggarwal', price: '₹560', mrp: '₹895', img: 'https://images-eu.ssl-images-amazon.com/images/P/9352534034.01.LZZZZZZZ.jpg', asin: '9352534034', badge: '⭐ Top Pick', color: '#2563eb' },
+    { title: 'SSC CHSL 10+2 Level Exam Guide', author: 'RPH Editorial Board', price: '₹395', mrp: '₹595', img: 'https://images-eu.ssl-images-amazon.com/images/P/9386845261.01.LZZZZZZZ.jpg', asin: '9386845261', badge: '✅ Recommended', color: '#10b981' },
+    { title: 'SSC Mathematics — Rakesh Yadav', author: 'Rakesh Yadav', price: '₹480', mrp: '₹720', img: 'https://images-eu.ssl-images-amazon.com/images/P/9386845163.01.LZZZZZZZ.jpg', asin: '9386845163', badge: '📐 Maths Expert', color: '#0ea5e9' },
+    { title: 'SSC CGL Previous Year Papers', author: 'Arihant Experts', price: '₹350', mrp: '₹550', img: 'https://images-eu.ssl-images-amazon.com/images/P/9325298821.01.LZZZZZZZ.jpg', asin: '9325298821', badge: '📝 PYQ Book', color: '#d97706' },
+    { title: 'General English — SP Bakshi', author: 'S.P. Bakshi', price: '₹390', mrp: '₹595', img: 'https://images-eu.ssl-images-amazon.com/images/P/8174826718.01.LZZZZZZZ.jpg', asin: '8174826718', badge: '🔤 English', color: '#6366f1' },
   ],
   banking: [
-    { title: 'Quantitative Aptitude', author: 'R.S. Aggarwal', price: '₹430', mrp: '₹695', img: 'https://m.media-amazon.com/images/I/51VU3MFWJJL._SY344_BO1,204,203,200_.jpg', asin: '8121908957', badge: '🏆 Bestseller', color: '#f59e0b' },
-    { title: 'Objective English', author: 'S.P. Bakshi', price: '₹390', mrp: '₹595', img: 'https://m.media-amazon.com/images/I/41RUj0YHSSL._SX331_BO1,204,203,200_.jpg', asin: '8174826718', badge: '🔤 English', color: '#2563eb' },
-    { title: 'Banking & Financial Awareness', author: 'Arihant Experts', price: '₹350', mrp: '₹550', img: 'https://m.media-amazon.com/images/I/41cI7BGDH7L._SX331_BO1,204,203,200_.jpg', asin: '9325295377', badge: '🏦 Banking GK', color: '#10b981' },
-    { title: 'Data Interpretation & Analysis', author: 'Arun Sharma', price: '₹480', mrp: '₹750', img: 'https://m.media-amazon.com/images/I/51LVPKsTPqL._SX331_BO1,204,203,200_.jpg', asin: '0070678510', badge: '📊 Data Analysis', color: '#8b5cf6' },
-    { title: 'IBPS PO/MT 20 Practice Sets', author: 'Arihant Experts', price: '₹320', mrp: '₹495', img: 'https://m.media-amazon.com/images/I/41bEIL7kz-L._SX331_BO1,204,203,200_.jpg', asin: '9325794056', badge: '🎯 Mock Tests', color: '#ef4444' },
-    { title: 'SBI PO Previous Year Papers', author: 'Kiran Prakashan', price: '₹440', mrp: '₹695', img: 'https://m.media-amazon.com/images/I/41cAqg0q8rL._SX331_BO1,204,203,200_.jpg', asin: '9327469316', badge: '📋 PYQ Book', color: '#d97706' },
-    { title: 'Verbal & Non-Verbal Reasoning', author: 'R.S. Aggarwal', price: '₹560', mrp: '₹895', img: 'https://m.media-amazon.com/images/I/41pMsKZBEeL._SX331_BO1,204,203,200_.jpg', asin: '9352534034', badge: '🧠 Reasoning', color: '#0ea5e9' },
-    { title: "Lucent's General Knowledge", author: 'Lucent Publication', price: '₹320', mrp: '₹495', img: 'https://m.media-amazon.com/images/I/51CRvXWvRvL._SY344_BO1,204,203,200_.jpg', asin: '8190086006', badge: '🌍 GK', color: '#6366f1' },
+    { title: 'Quantitative Aptitude', author: 'R.S. Aggarwal', price: '₹430', mrp: '₹695', img: 'https://images-eu.ssl-images-amazon.com/images/P/8121908957.01.LZZZZZZZ.jpg', asin: '8121908957', badge: '🏆 Bestseller', color: '#f59e0b' },
+    { title: 'Objective English', author: 'S.P. Bakshi', price: '₹390', mrp: '₹595', img: 'https://images-eu.ssl-images-amazon.com/images/P/8174826718.01.LZZZZZZZ.jpg', asin: '8174826718', badge: '🔤 English', color: '#2563eb' },
+    { title: 'Banking & Financial Awareness', author: 'Arihant Experts', price: '₹350', mrp: '₹550', img: 'https://images-eu.ssl-images-amazon.com/images/P/9325295377.01.LZZZZZZZ.jpg', asin: '9325295377', badge: '🏦 Banking GK', color: '#10b981' },
+    { title: 'Data Interpretation & Analysis', author: 'Arun Sharma', price: '₹480', mrp: '₹750', img: 'https://images-eu.ssl-images-amazon.com/images/P/0070678510.01.LZZZZZZZ.jpg', asin: '0070678510', badge: '📊 Data Analysis', color: '#8b5cf6' },
+    { title: 'IBPS PO/MT 20 Practice Sets', author: 'Arihant Experts', price: '₹320', mrp: '₹495', img: 'https://images-eu.ssl-images-amazon.com/images/P/9325794056.01.LZZZZZZZ.jpg', asin: '9325794056', badge: '🎯 Mock Tests', color: '#ef4444' },
+    { title: 'SBI PO Previous Year Papers', author: 'Kiran Prakashan', price: '₹440', mrp: '₹695', img: 'https://images-eu.ssl-images-amazon.com/images/P/9327469316.01.LZZZZZZZ.jpg', asin: '9327469316', badge: '📋 PYQ Book', color: '#d97706' },
+    { title: 'Verbal & Non-Verbal Reasoning', author: 'R.S. Aggarwal', price: '₹560', mrp: '₹895', img: 'https://images-eu.ssl-images-amazon.com/images/P/9352534034.01.LZZZZZZZ.jpg', asin: '9352534034', badge: '🧠 Reasoning', color: '#0ea5e9' },
+    { title: "Lucent's General Knowledge", author: 'Lucent Publication', price: '₹320', mrp: '₹495', img: 'https://images-eu.ssl-images-amazon.com/images/P/8190086006.01.LZZZZZZZ.jpg', asin: '8190086006', badge: '🌍 GK', color: '#6366f1' },
   ],
   railway: [
-    { title: 'RRB NTPC — Kiran Prakashan', author: 'Kiran Prakashan', price: '₹550', mrp: '₹850', img: 'https://m.media-amazon.com/images/I/41VBejAz6uL._SX331_BO1,204,203,200_.jpg', asin: '9327461832', badge: '🚂 RRB NTPC', color: '#2563eb' },
-    { title: "Lucent's General Knowledge", author: 'Lucent Publication', price: '₹320', mrp: '₹495', img: 'https://m.media-amazon.com/images/I/51CRvXWvRvL._SY344_BO1,204,203,200_.jpg', asin: '8190086006', badge: '🔥 Bestseller', color: '#ef4444' },
-    { title: 'Quantitative Aptitude', author: 'R.S. Aggarwal', price: '₹430', mrp: '₹695', img: 'https://m.media-amazon.com/images/I/51VU3MFWJJL._SY344_BO1,204,203,200_.jpg', asin: '8121908957', badge: '🏆 Essential', color: '#f59e0b' },
-    { title: 'General Science for Competitive Exams', author: 'Arihant Experts', price: '₹295', mrp: '₹450', img: 'https://m.media-amazon.com/images/I/41cI7BGDH7L._SX331_BO1,204,203,200_.jpg', asin: '9351766462', badge: '🔬 Science', color: '#10b981' },
-    { title: 'RRB Group D Previous Papers', author: 'Kiran Prakashan', price: '₹420', mrp: '₹650', img: 'https://m.media-amazon.com/images/I/41bEIL7kz-L._SX331_BO1,204,203,200_.jpg', asin: '9327462854', badge: '📋 PYQ', color: '#8b5cf6' },
-    { title: 'Verbal & Non-Verbal Reasoning', author: 'R.S. Aggarwal', price: '₹560', mrp: '₹895', img: 'https://m.media-amazon.com/images/I/41pMsKZBEeL._SX331_BO1,204,203,200_.jpg', asin: '9352534034', badge: '🧠 Reasoning', color: '#6366f1' },
-    { title: 'RRB ALP Stage I & II Guide', author: 'Arihant Experts', price: '₹480', mrp: '₹750', img: 'https://m.media-amazon.com/images/I/41vsMN5GNVL._SX331_BO1,204,203,200_.jpg', asin: '9325298432', badge: '🚆 ALP Guide', color: '#0ea5e9' },
-    { title: 'General English', author: 'S.P. Bakshi', price: '₹390', mrp: '₹595', img: 'https://m.media-amazon.com/images/I/41RUj0YHSSL._SX331_BO1,204,203,200_.jpg', asin: '8174826718', badge: '🔤 English', color: '#d97706' },
+    { title: 'RRB NTPC — Kiran Prakashan', author: 'Kiran Prakashan', price: '₹550', mrp: '₹850', img: 'https://images-eu.ssl-images-amazon.com/images/P/9327461832.01.LZZZZZZZ.jpg', asin: '9327461832', badge: '🚂 RRB NTPC', color: '#2563eb' },
+    { title: "Lucent's General Knowledge", author: 'Lucent Publication', price: '₹320', mrp: '₹495', img: 'https://images-eu.ssl-images-amazon.com/images/P/8190086006.01.LZZZZZZZ.jpg', asin: '8190086006', badge: '🔥 Bestseller', color: '#ef4444' },
+    { title: 'Quantitative Aptitude', author: 'R.S. Aggarwal', price: '₹430', mrp: '₹695', img: 'https://images-eu.ssl-images-amazon.com/images/P/8121908957.01.LZZZZZZZ.jpg', asin: '8121908957', badge: '🏆 Essential', color: '#f59e0b' },
+    { title: 'General Science for Competitive Exams', author: 'Arihant Experts', price: '₹295', mrp: '₹450', img: 'https://images-eu.ssl-images-amazon.com/images/P/9351766462.01.LZZZZZZZ.jpg', asin: '9351766462', badge: '🔬 Science', color: '#10b981' },
+    { title: 'RRB Group D Previous Papers', author: 'Kiran Prakashan', price: '₹420', mrp: '₹650', img: 'https://images-eu.ssl-images-amazon.com/images/P/9327462854.01.LZZZZZZZ.jpg', asin: '9327462854', badge: '📋 PYQ', color: '#8b5cf6' },
+    { title: 'Verbal & Non-Verbal Reasoning', author: 'R.S. Aggarwal', price: '₹560', mrp: '₹895', img: 'https://images-eu.ssl-images-amazon.com/images/P/9352534034.01.LZZZZZZZ.jpg', asin: '9352534034', badge: '🧠 Reasoning', color: '#6366f1' },
+    { title: 'RRB ALP Stage I & II Guide', author: 'Arihant Experts', price: '₹480', mrp: '₹750', img: 'https://images-eu.ssl-images-amazon.com/images/P/9325298432.01.LZZZZZZZ.jpg', asin: '9325298432', badge: '🚆 ALP Guide', color: '#0ea5e9' },
+    { title: 'General English', author: 'S.P. Bakshi', price: '₹390', mrp: '₹595', img: 'https://images-eu.ssl-images-amazon.com/images/P/8174826718.01.LZZZZZZZ.jpg', asin: '8174826718', badge: '🔤 English', color: '#d97706' },
   ],
   aptitude: [
-    { title: 'Quantitative Aptitude', author: 'R.S. Aggarwal', price: '₹430', mrp: '₹695', img: 'https://m.media-amazon.com/images/I/51VU3MFWJJL._SY344_BO1,204,203,200_.jpg', asin: '8121908957', badge: '🏆 Bestseller', color: '#f59e0b' },
-    { title: 'How to Prepare for Quantitative Aptitude', author: 'Arun Sharma', price: '₹499', mrp: '₹799', img: 'https://m.media-amazon.com/images/I/51LVPKsTPqL._SX331_BO1,204,203,200_.jpg', asin: '9352606337', badge: '⭐ Top Pick', color: '#2563eb' },
-    { title: 'Magical Book on Quicker Maths', author: 'M. Tyra', price: '₹385', mrp: '₹595', img: 'https://m.media-amazon.com/images/I/41UNvFRVFHL._SX331_BO1,204,203,200_.jpg', asin: '8190458825', badge: '⚡ Tricks & Shortcuts', color: '#10b981' },
-    { title: 'Verbal & Non-Verbal Reasoning', author: 'R.S. Aggarwal', price: '₹560', mrp: '₹895', img: 'https://m.media-amazon.com/images/I/41pMsKZBEeL._SX331_BO1,204,203,200_.jpg', asin: '9352534034', badge: '🧠 Reasoning', color: '#8b5cf6' },
-    { title: 'Data Interpretation & Analysis', author: 'Arun Sharma', price: '₹480', mrp: '₹750', img: 'https://m.media-amazon.com/images/I/51LVPKsTPqL._SX331_BO1,204,203,200_.jpg', asin: '0070678510', badge: '📊 DI', color: '#ef4444' },
-    { title: 'Fast Track Objective Arithmetic', author: 'Rajesh Verma', price: '₹310', mrp: '₹480', img: 'https://m.media-amazon.com/images/I/41cI7BGDH7L._SX331_BO1,204,203,200_.jpg', asin: '9352037294', badge: '⚡ Fast Track', color: '#0ea5e9' },
-    { title: 'Analytical Reasoning', author: 'M.K. Pandey', price: '₹340', mrp: '₹525', img: 'https://m.media-amazon.com/images/I/41bEIL7kz-L._SX331_BO1,204,203,200_.jpg', asin: '8190458884', badge: '💡 Logical', color: '#d97706' },
-    { title: 'SSC Mathematics 7300+', author: 'Rakesh Yadav', price: '₹480', mrp: '₹720', img: 'https://m.media-amazon.com/images/I/41vsMN5GNVL._SX331_BO1,204,203,200_.jpg', asin: '9386845163', badge: '📐 7300+ Qs', color: '#6366f1' },
+    { title: 'Quantitative Aptitude', author: 'R.S. Aggarwal', price: '₹430', mrp: '₹695', img: 'https://images-eu.ssl-images-amazon.com/images/P/8121908957.01.LZZZZZZZ.jpg', asin: '8121908957', badge: '🏆 Bestseller', color: '#f59e0b' },
+    { title: 'How to Prepare for Quantitative Aptitude', author: 'Arun Sharma', price: '₹499', mrp: '₹799', img: 'https://images-eu.ssl-images-amazon.com/images/P/9352606337.01.LZZZZZZZ.jpg', asin: '9352606337', badge: '⭐ Top Pick', color: '#2563eb' },
+    { title: 'Magical Book on Quicker Maths', author: 'M. Tyra', price: '₹385', mrp: '₹595', img: 'https://images-eu.ssl-images-amazon.com/images/P/8190458825.01.LZZZZZZZ.jpg', asin: '8190458825', badge: '⚡ Tricks & Shortcuts', color: '#10b981' },
+    { title: 'Verbal & Non-Verbal Reasoning', author: 'R.S. Aggarwal', price: '₹560', mrp: '₹895', img: 'https://images-eu.ssl-images-amazon.com/images/P/9352534034.01.LZZZZZZZ.jpg', asin: '9352534034', badge: '🧠 Reasoning', color: '#8b5cf6' },
+    { title: 'Data Interpretation & Analysis', author: 'Arun Sharma', price: '₹480', mrp: '₹750', img: 'https://images-eu.ssl-images-amazon.com/images/P/0070678510.01.LZZZZZZZ.jpg', asin: '0070678510', badge: '📊 DI', color: '#ef4444' },
+    { title: 'Fast Track Objective Arithmetic', author: 'Rajesh Verma', price: '₹310', mrp: '₹480', img: 'https://images-eu.ssl-images-amazon.com/images/P/9352037294.01.LZZZZZZZ.jpg', asin: '9352037294', badge: '⚡ Fast Track', color: '#0ea5e9' },
+    { title: 'Analytical Reasoning', author: 'M.K. Pandey', price: '₹340', mrp: '₹525', img: 'https://images-eu.ssl-images-amazon.com/images/P/8190458884.01.LZZZZZZZ.jpg', asin: '8190458884', badge: '💡 Logical', color: '#d97706' },
+    { title: 'SSC Mathematics 7300+', author: 'Rakesh Yadav', price: '₹480', mrp: '₹720', img: 'https://images-eu.ssl-images-amazon.com/images/P/9386845163.01.LZZZZZZZ.jpg', asin: '9386845163', badge: '📐 7300+ Qs', color: '#6366f1' },
   ],
   upsc: [
-    { title: 'Indian Polity', author: 'M. Laxmikanth', price: '₹750', mrp: '₹1,195', img: 'https://m.media-amazon.com/images/I/41cAqg0q8rL._SX331_BO1,204,203,200_.jpg', asin: '9339221443', badge: '🏛️ Must Read', color: '#2563eb' },
-    { title: 'Certificate Physical & Human Geography', author: 'GC Leong', price: '₹380', mrp: '₹595', img: 'https://m.media-amazon.com/images/I/51CRvXWvRvL._SY344_BO1,204,203,200_.jpg', asin: '9352535669', badge: '🌍 Geography', color: '#10b981' },
-    { title: 'Indian Economy', author: 'Ramesh Singh', price: '₹680', mrp: '₹1,095', img: 'https://m.media-amazon.com/images/I/51LVPKsTPqL._SX331_BO1,204,203,200_.jpg', asin: '9353167175', badge: '💹 Economy', color: '#f59e0b' },
-    { title: 'Ancient India', author: 'R.S. Sharma', price: '₹295', mrp: '₹450', img: 'https://m.media-amazon.com/images/I/41VBejAz6uL._SX331_BO1,204,203,200_.jpg', asin: '9352602412', badge: '📜 History', color: '#8b5cf6' },
-    { title: 'Introduction to the Constitution of India', author: 'D.D. Basu', price: '₹420', mrp: '₹650', img: 'https://m.media-amazon.com/images/I/41vsMN5GNVL._SX331_BO1,204,203,200_.jpg', asin: '9388684486', badge: '⚖️ Constitution', color: '#ef4444' },
-    { title: 'Environment & Ecology', author: 'Majid Husain', price: '₹360', mrp: '₹565', img: 'https://m.media-amazon.com/images/I/41cI7BGDH7L._SX331_BO1,204,203,200_.jpg', asin: '9352604482', badge: '🌱 Environment', color: '#0ea5e9' },
-    { title: 'UPSC Prelims 25 Years Papers', author: 'Disha Experts', price: '₹445', mrp: '₹695', img: 'https://m.media-amazon.com/images/I/41bEIL7kz-L._SX331_BO1,204,203,200_.jpg', asin: '9390711991', badge: '📋 PYQ', color: '#d97706' },
-    { title: 'Ethics, Integrity & Aptitude', author: 'G. Subba Rao', price: '₹520', mrp: '₹820', img: 'https://m.media-amazon.com/images/I/41pMsKZBEeL._SX331_BO1,204,203,200_.jpg', asin: '9353160579', badge: '📝 GS Paper 4', color: '#6366f1' },
+    { title: 'Indian Polity', author: 'M. Laxmikanth', price: '₹750', mrp: '₹1,195', img: 'https://images-eu.ssl-images-amazon.com/images/P/9339221443.01.LZZZZZZZ.jpg', asin: '9339221443', badge: '🏛️ Must Read', color: '#2563eb' },
+    { title: 'Certificate Physical & Human Geography', author: 'GC Leong', price: '₹380', mrp: '₹595', img: 'https://images-eu.ssl-images-amazon.com/images/P/9352535669.01.LZZZZZZZ.jpg', asin: '9352535669', badge: '🌍 Geography', color: '#10b981' },
+    { title: 'Indian Economy', author: 'Ramesh Singh', price: '₹680', mrp: '₹1,095', img: 'https://images-eu.ssl-images-amazon.com/images/P/9353167175.01.LZZZZZZZ.jpg', asin: '9353167175', badge: '💹 Economy', color: '#f59e0b' },
+    { title: 'Ancient India', author: 'R.S. Sharma', price: '₹295', mrp: '₹450', img: 'https://images-eu.ssl-images-amazon.com/images/P/9352602412.01.LZZZZZZZ.jpg', asin: '9352602412', badge: '📜 History', color: '#8b5cf6' },
+    { title: 'Introduction to the Constitution of India', author: 'D.D. Basu', price: '₹420', mrp: '₹650', img: 'https://images-eu.ssl-images-amazon.com/images/P/9388684486.01.LZZZZZZZ.jpg', asin: '9388684486', badge: '⚖️ Constitution', color: '#ef4444' },
+    { title: 'Environment & Ecology', author: 'Majid Husain', price: '₹360', mrp: '₹565', img: 'https://images-eu.ssl-images-amazon.com/images/P/9352604482.01.LZZZZZZZ.jpg', asin: '9352604482', badge: '🌱 Environment', color: '#0ea5e9' },
+    { title: 'UPSC Prelims 25 Years Papers', author: 'Disha Experts', price: '₹445', mrp: '₹695', img: 'https://images-eu.ssl-images-amazon.com/images/P/9390711991.01.LZZZZZZZ.jpg', asin: '9390711991', badge: '📋 PYQ', color: '#d97706' },
+    { title: 'Ethics, Integrity & Aptitude', author: 'G. Subba Rao', price: '₹520', mrp: '₹820', img: 'https://images-eu.ssl-images-amazon.com/images/P/9353160579.01.LZZZZZZZ.jpg', asin: '9353160579', badge: '📝 GS Paper 4', color: '#6366f1' },
   ],
   english: [
-    { title: 'Objective English', author: 'S.P. Bakshi', price: '₹390', mrp: '₹595', img: 'https://m.media-amazon.com/images/I/41RUj0YHSSL._SX331_BO1,204,203,200_.jpg', asin: '8174826718', badge: '🏆 Bestseller', color: '#2563eb' },
-    { title: 'High School English Grammar & Composition', author: 'Wren & Martin', price: '₹350', mrp: '₹550', img: 'https://m.media-amazon.com/images/I/51VU3MFWJJL._SY344_BO1,204,203,200_.jpg', asin: '8121900093', badge: '📚 Classic', color: '#f59e0b' },
-    { title: 'Word Power Made Easy', author: 'Norman Lewis', price: '₹280', mrp: '₹430', img: 'https://m.media-amazon.com/images/I/51CRvXWvRvL._SY344_BO1,204,203,200_.jpg', asin: '0143424524', badge: '💬 Vocabulary', color: '#10b981' },
-    { title: 'Objective General English', author: 'R.S. Aggarwal', price: '₹310', mrp: '₹480', img: 'https://m.media-amazon.com/images/I/41pMsKZBEeL._SX331_BO1,204,203,200_.jpg', asin: '9352534069', badge: '⭐ Top Rated', color: '#8b5cf6' },
-    { title: 'How to Prepare for Verbal Ability', author: 'Arun Sharma', price: '₹440', mrp: '₹695', img: 'https://m.media-amazon.com/images/I/51LVPKsTPqL._SX331_BO1,204,203,200_.jpg', asin: '9352606329', badge: '📖 Verbal', color: '#ef4444' },
-    { title: 'Competitive English Grammar', author: 'S.C. Gupta', price: '₹245', mrp: '₹380', img: 'https://m.media-amazon.com/images/I/41cI7BGDH7L._SX331_BO1,204,203,200_.jpg', asin: '9352037618', badge: '📝 Grammar', color: '#0ea5e9' },
+    { title: 'Objective English', author: 'S.P. Bakshi', price: '₹390', mrp: '₹595', img: 'https://images-eu.ssl-images-amazon.com/images/P/8174826718.01.LZZZZZZZ.jpg', asin: '8174826718', badge: '🏆 Bestseller', color: '#2563eb' },
+    { title: 'High School English Grammar & Composition', author: 'Wren & Martin', price: '₹350', mrp: '₹550', img: 'https://images-eu.ssl-images-amazon.com/images/P/8121900093.01.LZZZZZZZ.jpg', asin: '8121900093', badge: '📚 Classic', color: '#f59e0b' },
+    { title: 'Word Power Made Easy', author: 'Norman Lewis', price: '₹280', mrp: '₹430', img: 'https://images-eu.ssl-images-amazon.com/images/P/0143424524.01.LZZZZZZZ.jpg', asin: '0143424524', badge: '💬 Vocabulary', color: '#10b981' },
+    { title: 'Objective General English', author: 'R.S. Aggarwal', price: '₹310', mrp: '₹480', img: 'https://images-eu.ssl-images-amazon.com/images/P/9352534069.01.LZZZZZZZ.jpg', asin: '9352534069', badge: '⭐ Top Rated', color: '#8b5cf6' },
+    { title: 'How to Prepare for Verbal Ability', author: 'Arun Sharma', price: '₹440', mrp: '₹695', img: 'https://images-eu.ssl-images-amazon.com/images/P/9352606329.01.LZZZZZZZ.jpg', asin: '9352606329', badge: '📖 Verbal', color: '#ef4444' },
+    { title: 'Competitive English Grammar', author: 'S.C. Gupta', price: '₹245', mrp: '₹380', img: 'https://images-eu.ssl-images-amazon.com/images/P/9352037618.01.LZZZZZZZ.jpg', asin: '9352037618', badge: '📝 Grammar', color: '#0ea5e9' },
   ],
   gk: [
-    { title: "Lucent's General Knowledge", author: 'Lucent Publication', price: '₹320', mrp: '₹495', img: 'https://m.media-amazon.com/images/I/51CRvXWvRvL._SY344_BO1,204,203,200_.jpg', asin: '8190086006', badge: '🔥 #1 GK Book', color: '#ef4444' },
-    { title: 'Manorama Year Book 2026', author: 'Mammen Mathew', price: '₹220', mrp: '₹340', img: 'https://m.media-amazon.com/images/I/41VBejAz6uL._SX331_BO1,204,203,200_.jpg', asin: '9390387698', badge: '📰 Current Affairs', color: '#2563eb' },
-    { title: 'General Knowledge 2026', author: 'Arihant Experts', price: '₹195', mrp: '₹295', img: 'https://m.media-amazon.com/images/I/41cAqg0q8rL._SX331_BO1,204,203,200_.jpg', asin: '9325298562', badge: '🌟 Annual', color: '#f59e0b' },
-    { title: 'Static General Knowledge', author: 'Disha Experts', price: '₹260', mrp: '₹400', img: 'https://m.media-amazon.com/images/I/41bEIL7kz-L._SX331_BO1,204,203,200_.jpg', asin: '9390711373', badge: '📚 Static GK', color: '#10b981' },
-    { title: 'Concise GK 2026', author: 'S. Chand', price: '₹175', mrp: '₹270', img: 'https://m.media-amazon.com/images/I/41pMsKZBEeL._SX331_BO1,204,203,200_.jpg', asin: '9352535871', badge: '💡 Concise', color: '#8b5cf6' },
-    { title: 'India Year Book 2026', author: 'Publication Division', price: '₹350', mrp: '₹540', img: 'https://m.media-amazon.com/images/I/41vsMN5GNVL._SX331_BO1,204,203,200_.jpg', asin: '9390387456', badge: '🇮🇳 Official', color: '#6366f1' },
+    { title: "Lucent's General Knowledge", author: 'Lucent Publication', price: '₹320', mrp: '₹495', img: 'https://images-eu.ssl-images-amazon.com/images/P/8190086006.01.LZZZZZZZ.jpg', asin: '8190086006', badge: '🔥 #1 GK Book', color: '#ef4444' },
+    { title: 'Manorama Year Book 2026', author: 'Mammen Mathew', price: '₹220', mrp: '₹340', img: 'https://images-eu.ssl-images-amazon.com/images/P/9390387698.01.LZZZZZZZ.jpg', asin: '9390387698', badge: '📰 Current Affairs', color: '#2563eb' },
+    { title: 'General Knowledge 2026', author: 'Arihant Experts', price: '₹195', mrp: '₹295', img: 'https://images-eu.ssl-images-amazon.com/images/P/9325298562.01.LZZZZZZZ.jpg', asin: '9325298562', badge: '🌟 Annual', color: '#f59e0b' },
+    { title: 'Static General Knowledge', author: 'Disha Experts', price: '₹260', mrp: '₹400', img: 'https://images-eu.ssl-images-amazon.com/images/P/9390711373.01.LZZZZZZZ.jpg', asin: '9390711373', badge: '📚 Static GK', color: '#10b981' },
+    { title: 'Concise GK 2026', author: 'S. Chand', price: '₹175', mrp: '₹270', img: 'https://images-eu.ssl-images-amazon.com/images/P/9352535871.01.LZZZZZZZ.jpg', asin: '9352535871', badge: '💡 Concise', color: '#8b5cf6' },
+    { title: 'India Year Book 2026', author: 'Publication Division', price: '₹350', mrp: '₹540', img: 'https://images-eu.ssl-images-amazon.com/images/P/9390387456.01.LZZZZZZZ.jpg', asin: '9390387456', badge: '🇮🇳 Official', color: '#6366f1' },
   ],
   reasoning: [
-    { title: 'Verbal & Non-Verbal Reasoning', author: 'R.S. Aggarwal', price: '₹560', mrp: '₹895', img: 'https://m.media-amazon.com/images/I/41pMsKZBEeL._SX331_BO1,204,203,200_.jpg', asin: '9352534034', badge: '🏆 Bestseller', color: '#f59e0b' },
-    { title: 'Analytical Reasoning', author: 'M.K. Pandey', price: '₹340', mrp: '₹525', img: 'https://m.media-amazon.com/images/I/41bEIL7kz-L._SX331_BO1,204,203,200_.jpg', asin: '8190458884', badge: '💡 Analytical', color: '#2563eb' },
-    { title: 'How to Prepare for Logical Reasoning', author: 'Arun Sharma', price: '₹420', mrp: '₹650', img: 'https://m.media-amazon.com/images/I/51LVPKsTPqL._SX331_BO1,204,203,200_.jpg', asin: '9352606434', badge: '⭐ Top Pick', color: '#10b981' },
-    { title: 'A Modern Approach to Verbal Reasoning', author: 'R.S. Aggarwal', price: '₹340', mrp: '₹525', img: 'https://m.media-amazon.com/images/I/41VBejAz6uL._SX331_BO1,204,203,200_.jpg', asin: '9352534018', badge: '📖 Verbal', color: '#8b5cf6' },
-    { title: 'Non-Verbal Reasoning', author: 'B.S. Sijwali', price: '₹295', mrp: '₹450', img: 'https://m.media-amazon.com/images/I/41UNvFRVFHL._SX331_BO1,204,203,200_.jpg', asin: '9352035933', badge: '🔷 Non-Verbal', color: '#ef4444' },
-    { title: 'Logical and Analytical Reasoning', author: 'A.K. Gupta', price: '₹280', mrp: '₹430', img: 'https://m.media-amazon.com/images/I/41cI7BGDH7L._SX331_BO1,204,203,200_.jpg', asin: '9386845323', badge: '🧩 Puzzles', color: '#0ea5e9' },
+    { title: 'Verbal & Non-Verbal Reasoning', author: 'R.S. Aggarwal', price: '₹560', mrp: '₹895', img: 'https://images-eu.ssl-images-amazon.com/images/P/9352534034.01.LZZZZZZZ.jpg', asin: '9352534034', badge: '🏆 Bestseller', color: '#f59e0b' },
+    { title: 'Analytical Reasoning', author: 'M.K. Pandey', price: '₹340', mrp: '₹525', img: 'https://images-eu.ssl-images-amazon.com/images/P/8190458884.01.LZZZZZZZ.jpg', asin: '8190458884', badge: '💡 Analytical', color: '#2563eb' },
+    { title: 'How to Prepare for Logical Reasoning', author: 'Arun Sharma', price: '₹420', mrp: '₹650', img: 'https://images-eu.ssl-images-amazon.com/images/P/9352606434.01.LZZZZZZZ.jpg', asin: '9352606434', badge: '⭐ Top Pick', color: '#10b981' },
+    { title: 'A Modern Approach to Verbal Reasoning', author: 'R.S. Aggarwal', price: '₹340', mrp: '₹525', img: 'https://images-eu.ssl-images-amazon.com/images/P/9352534018.01.LZZZZZZZ.jpg', asin: '9352534018', badge: '📖 Verbal', color: '#8b5cf6' },
+    { title: 'Non-Verbal Reasoning', author: 'B.S. Sijwali', price: '₹295', mrp: '₹450', img: 'https://images-eu.ssl-images-amazon.com/images/P/9352035933.01.LZZZZZZZ.jpg', asin: '9352035933', badge: '🔷 Non-Verbal', color: '#ef4444' },
+    { title: 'Logical and Analytical Reasoning', author: 'A.K. Gupta', price: '₹280', mrp: '₹430', img: 'https://images-eu.ssl-images-amazon.com/images/P/9386845323.01.LZZZZZZZ.jpg', asin: '9386845323', badge: '🧩 Puzzles', color: '#0ea5e9' },
   ],
   resume: [
-    { title: 'Cracking the Coding Interview', author: 'Gayle McDowell', price: '₹1,250', mrp: '₹1,995', img: 'https://m.media-amazon.com/images/I/41pMsKZBEeL._SX331_BO1,204,203,200_.jpg', asin: '0984782850', badge: '💻 Must Have', color: '#2563eb' },
-    { title: 'The Google Resume', author: 'Gayle McDowell', price: '₹750', mrp: '₹1,195', img: 'https://m.media-amazon.com/images/I/51LVPKsTPqL._SX331_BO1,204,203,200_.jpg', asin: '0470927623', badge: '🏆 Bestseller', color: '#f59e0b' },
-    { title: 'Knock \'em Dead Resumes', author: 'Martin Yate', price: '₹499', mrp: '₹799', img: 'https://m.media-amazon.com/images/I/41VBejAz6uL._SX331_BO1,204,203,200_.jpg', asin: '9351031381', badge: '📄 Resume Pro', color: '#10b981' },
-    { title: 'What Color Is Your Parachute?', author: 'Richard N. Bolles', price: '₹680', mrp: '₹1,050', img: 'https://m.media-amazon.com/images/I/41bEIL7kz-L._SX331_BO1,204,203,200_.jpg', asin: '1984857886', badge: '🎯 Career Guide', color: '#8b5cf6' },
-    { title: 'Never Eat Alone', author: 'Keith Ferrazzi', price: '₹580', mrp: '₹895', img: 'https://m.media-amazon.com/images/I/41cI7BGDH7L._SX331_BO1,204,203,200_.jpg', asin: '0385346654', badge: '🤝 Networking', color: '#ef4444' },
+    { title: 'Cracking the Coding Interview', author: 'Gayle McDowell', price: '₹1,250', mrp: '₹1,995', img: 'https://images-eu.ssl-images-amazon.com/images/P/0984782850.01.LZZZZZZZ.jpg', asin: '0984782850', badge: '💻 Must Have', color: '#2563eb' },
+    { title: 'The Google Resume', author: 'Gayle McDowell', price: '₹750', mrp: '₹1,195', img: 'https://images-eu.ssl-images-amazon.com/images/P/0470927623.01.LZZZZZZZ.jpg', asin: '0470927623', badge: '🏆 Bestseller', color: '#f59e0b' },
+    { title: 'Knock \'em Dead Resumes', author: 'Martin Yate', price: '₹499', mrp: '₹799', img: 'https://images-eu.ssl-images-amazon.com/images/P/9351031381.01.LZZZZZZZ.jpg', asin: '9351031381', badge: '📄 Resume Pro', color: '#10b981' },
+    { title: 'What Color Is Your Parachute?', author: 'Richard N. Bolles', price: '₹680', mrp: '₹1,050', img: 'https://images-eu.ssl-images-amazon.com/images/P/1984857886.01.LZZZZZZZ.jpg', asin: '1984857886', badge: '🎯 Career Guide', color: '#8b5cf6' },
+    { title: 'Never Eat Alone', author: 'Keith Ferrazzi', price: '₹580', mrp: '₹895', img: 'https://images-eu.ssl-images-amazon.com/images/P/0385346654.01.LZZZZZZZ.jpg', asin: '0385346654', badge: '🤝 Networking', color: '#ef4444' },
   ],
   general: [
-    { title: 'Quantitative Aptitude', author: 'R.S. Aggarwal', price: '₹430', mrp: '₹695', img: 'https://m.media-amazon.com/images/I/51VU3MFWJJL._SY344_BO1,204,203,200_.jpg', asin: '8121908957', badge: '🏆 Bestseller', color: '#f59e0b' },
-    { title: "Lucent's General Knowledge", author: 'Lucent Publication', price: '₹320', mrp: '₹495', img: 'https://m.media-amazon.com/images/I/51CRvXWvRvL._SY344_BO1,204,203,200_.jpg', asin: '8190086006', badge: '🔥 Most Popular', color: '#ef4444' },
-    { title: 'Verbal & Non-Verbal Reasoning', author: 'R.S. Aggarwal', price: '₹560', mrp: '₹895', img: 'https://m.media-amazon.com/images/I/41pMsKZBEeL._SX331_BO1,204,203,200_.jpg', asin: '9352534034', badge: '🧠 Reasoning', color: '#2563eb' },
-    { title: 'Objective English', author: 'S.P. Bakshi', price: '₹390', mrp: '₹595', img: 'https://m.media-amazon.com/images/I/41RUj0YHSSL._SX331_BO1,204,203,200_.jpg', asin: '8174826718', badge: '🔤 English', color: '#8b5cf6' },
-    { title: 'Magical Book on Quicker Maths', author: 'M. Tyra', price: '₹385', mrp: '₹595', img: 'https://m.media-amazon.com/images/I/41UNvFRVFHL._SX331_BO1,204,203,200_.jpg', asin: '8190458825', badge: '⚡ Shortcuts', color: '#10b981' },
-    { title: 'Data Interpretation', author: 'Arun Sharma', price: '₹480', mrp: '₹750', img: 'https://m.media-amazon.com/images/I/51LVPKsTPqL._SX331_BO1,204,203,200_.jpg', asin: '0070678510', badge: '📊 DI', color: '#6366f1' },
+    { title: 'Quantitative Aptitude', author: 'R.S. Aggarwal', price: '₹430', mrp: '₹695', img: 'https://images-eu.ssl-images-amazon.com/images/P/8121908957.01.LZZZZZZZ.jpg', asin: '8121908957', badge: '🏆 Bestseller', color: '#f59e0b' },
+    { title: "Lucent's General Knowledge", author: 'Lucent Publication', price: '₹320', mrp: '₹495', img: 'https://images-eu.ssl-images-amazon.com/images/P/8190086006.01.LZZZZZZZ.jpg', asin: '8190086006', badge: '🔥 Most Popular', color: '#ef4444' },
+    { title: 'Verbal & Non-Verbal Reasoning', author: 'R.S. Aggarwal', price: '₹560', mrp: '₹895', img: 'https://images-eu.ssl-images-amazon.com/images/P/9352534034.01.LZZZZZZZ.jpg', asin: '9352534034', badge: '🧠 Reasoning', color: '#2563eb' },
+    { title: 'Objective English', author: 'S.P. Bakshi', price: '₹390', mrp: '₹595', img: 'https://images-eu.ssl-images-amazon.com/images/P/8174826718.01.LZZZZZZZ.jpg', asin: '8174826718', badge: '🔤 English', color: '#8b5cf6' },
+    { title: 'Magical Book on Quicker Maths', author: 'M. Tyra', price: '₹385', mrp: '₹595', img: 'https://images-eu.ssl-images-amazon.com/images/P/8190458825.01.LZZZZZZZ.jpg', asin: '8190458825', badge: '⚡ Shortcuts', color: '#10b981' },
+    { title: 'Data Interpretation', author: 'Arun Sharma', price: '₹480', mrp: '₹750', img: 'https://images-eu.ssl-images-amazon.com/images/P/0070678510.01.LZZZZZZZ.jpg', asin: '0070678510', badge: '📊 DI', color: '#6366f1' },
   ],
 };
 
-// Fallback book image on error
+// Fallback book image on error — uses Open Library (free, no hotlink block)
 function BookCover({ src, title, color, asin }) {
-  const [errored, setErrored] = useState(false);
-  const [fallbackTried, setFallbackTried] = useState(false);
+  const [stage, setStage] = useState(0);
+  // stage 0: Open Library by ISBN, stage 1: Google Books thumbnail, stage 2: emoji fallback
+  const openLibraryUrl = `https://covers.openlibrary.org/b/isbn/${asin}-L.jpg?default=false`;
+  const googleBooksUrl = `https://books.google.com/books/content?vid=ISBN${asin}&printsec=frontcover&img=1&zoom=1`;
 
-  if (errored) {
+  const srcs = [openLibraryUrl, googleBooksUrl];
+
+  if (stage >= 2) {
     return (
       <div style={{
         width: '100%', height: '160px',
@@ -136,15 +140,9 @@ function BookCover({ src, title, color, asin }) {
   }
   return (
     <img
-      src={fallbackTried ? `https://images-eu.ssl-images-amazon.com/images/P/${asin}.01.LZZZZZZZ.jpg` : src}
+      src={srcs[stage]}
       alt={title}
-      onError={() => {
-        if (!fallbackTried) {
-          setFallbackTried(true);
-        } else {
-          setErrored(true);
-        }
-      }}
+      onError={() => setStage(s => s + 1)}
       style={{ width: '100%', height: '160px', objectFit: 'cover', borderRadius: '8px 8px 0 0', display: 'block' }}
     />
   );
