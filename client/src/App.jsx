@@ -58,6 +58,7 @@ const About = lazyWithRetry(() => import('./pages/About.jsx'));
 const Contact = lazyWithRetry(() => import('./pages/Contact.jsx'));
 const FAQ = lazyWithRetry(() => import('./pages/FAQ.jsx'));
 const Blog = lazyWithRetry(() => import('./pages/Blog.jsx'));
+const BestBooks = lazyWithRetry(() => import('./pages/BestBooks.jsx'));
 const Terms = lazyWithRetry(() => import('./pages/Terms.jsx'));
 const Disclaimer = lazyWithRetry(() => import('./pages/Disclaimer.jsx'));
 const EditorialPolicy = lazyWithRetry(() => import('./pages/EditorialPolicy.jsx'));
@@ -828,6 +829,7 @@ function AppLayout() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/blog" element={<Blog />} />
+            <Route path="/best-books" element={<BestBooks />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/disclaimer" element={<Disclaimer />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />

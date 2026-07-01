@@ -1133,5 +1133,170 @@ export const articlesData = [
       <h2>Conclusion</h2>
       <p>RRB NTPC is one of the most genuinely accessible pathways to a secure, respected central government career. The posts offer attractive salary scales, defined promotion tracks, and the stability of Indian Railways service — one of the largest employment systems in the world. A structured, consistent preparation approach — even 3 focused hours per day — is sufficient to clear the cutoff for most NTPC posts. Begin your preparation today and use this resource as your complete roadmap.</p>
     `
+  },
+  {
+    id: 16,
+    title: 'Best Books for SSC CGL 2026 — Complete Subject-Wise List by Toppers',
+    excerpt: 'A comprehensive, expert-curated list of the best books for SSC CGL 2026 covering Quantitative Aptitude, Reasoning, English, and General Awareness — with honest reviews.',
+    category: 'Exam Strategy',
+    date: 'Jul 1, 2026',
+    icon: '📚',
+    readTime: '10 min read',
+    author: 'NextJobPost Editorial Team',
+    content: `
+      <h2>Why the Right Book Makes All the Difference in SSC CGL</h2>
+      <p>Every year, over 30 lakh candidates appear for SSC CGL. Less than 1% clear the final stage. The difference between those who clear and those who don't is rarely intelligence — it is almost always preparation strategy and resource selection. Choosing the wrong book wastes months of effort. Choosing the right ones accelerates your preparation dramatically.</p>
+      <p>This guide is built on feedback from verified SSC CGL qualifiers, topper interviews, and our editorial research. We have deliberately kept the list short — because mastering fewer books thoroughly outperforms reading many books superficially every single time.</p>
+
+      <h2>Subject 1: Quantitative Aptitude</h2>
+      <h3>Quantitative Aptitude — R.S. Aggarwal (S. Chand)</h3>
+      <p><strong>Price: ₹430 | Rating: 4.5/5 | 28,000+ Amazon reviews</strong></p>
+      <p>This is the single most recommended book for SSC CGL mathematics across all forums, coaching centres, and topper testimonials. The book covers every topic in the SSC CGL Tier I and Tier II mathematics syllabus — from Number Systems and LCM/HCF through Percentages, Profit/Loss, Time & Work, Mensuration, Trigonometry, and Statistics.</p>
+      <p>What makes R.S. Aggarwal indispensable is its exercise structure: each chapter begins with solved examples showing the full working method, followed by Exercise A (basic questions), Exercise B (advanced questions), and Objective Questions in the SSC format. This progressive difficulty curve makes it suitable for both beginners building foundations and advanced candidates polishing speed and accuracy.</p>
+      <p><strong>Who should buy it:</strong> Every SSC CGL aspirant, regardless of mathematics background. This is the starting and finishing point for Quant preparation.</p>
+
+      <h3>Magical Book on Quicker Maths — M. Tyra (BSC Publishing)</h3>
+      <p><strong>Price: ₹385 | Rating: 4.3/5</strong></p>
+      <p>After completing R.S. Aggarwal, use M. Tyra's book specifically for speed. SSC CGL Tier I allows only 60 minutes for 100 questions — speed is as important as accuracy. M. Tyra teaches shortcut formulas and calculation tricks that allow you to solve Percentage, Ratio, and Simplification problems in 15–20 seconds instead of 60 seconds. At this level, saving 3 seconds per question means 5 extra minutes per section.</p>
+
+      <h2>Subject 2: General Intelligence & Reasoning</h2>
+      <h3>A Modern Approach to Verbal & Non-Verbal Reasoning — R.S. Aggarwal</h3>
+      <p><strong>Price: ₹560 | Rating: 4.4/5 | 18,500+ reviews</strong></p>
+      <p>This comprehensive two-part book covers the complete reasoning syllabus: Verbal Reasoning (Series, Analogy, Classification, Coding-Decoding, Blood Relations, Direction Sense, Seating Arrangements) and Non-Verbal Reasoning (Pattern Completion, Mirror Images, Embedded Figures, Paper Folding). For SSC CGL, Non-Verbal Reasoning carries significant marks in Tier I and is covered exhaustively here.</p>
+      <p>The book's greatest strength is its sheer volume of practice questions — over 4,000 questions across all reasoning types. This makes it a complete self-study resource without needing supplementary material.</p>
+
+      <h2>Subject 3: English Language</h2>
+      <h3>Objective General English — S.P. Bakshi (Arihant)</h3>
+      <p><strong>Price: ₹390 | Rating: 4.4/5 | 15,200+ reviews</strong></p>
+      <p>English in SSC CGL tests Reading Comprehension, Cloze Test, Fill in the Blanks, Error Spotting, Sentence Improvement, and Vocabulary. S.P. Bakshi's book addresses all of these systematically. The Grammar section is particularly strong — it explains rules with examples and provides sufficient practice exercises. The Vocabulary chapters cover synonyms, antonyms, idioms, and one-word substitutions in the SSC context.</p>
+      <p>A key advantage: the book includes previous year SSC English questions with solutions, allowing you to understand exactly what type of questions appear and at what difficulty level.</p>
+
+      <h2>Subject 4: General Awareness / GK</h2>
+      <h3>Lucent's General Knowledge</h3>
+      <p><strong>Price: ₹320 | Rating: 4.6/5 | 42,000+ reviews</strong></p>
+      <p>Lucent's GK is the undisputed #1 book for Static GK across all SSC exams. It covers Indian History, Geography, Polity, Economy, Science (Physics, Chemistry, Biology), Environment, and Computers — all in a compact, fact-dense format. Every fact is presented directly without unnecessary elaboration, making it ideal for the rapid memorisation that SSC GK requires.</p>
+      <p>Use Lucent's for Static GK. Supplement it with a current affairs app or monthly magazine (Pratiyogita Darpan) for the Dynamic GK component that covers last 6 months of events.</p>
+
+      <h2>Practice: Previous Year Papers</h2>
+      <h3>SSC CGL Tier I & II — 8700+ Chapterwise Papers (Kiran Prakashan)</h3>
+      <p><strong>Price: ₹695 | Rating: 4.3/5 | 9,200+ reviews</strong></p>
+      <p>After building concepts from the above books, practice extensively from Kiran's previous year papers compilation. This book contains over 8,700 actual SSC CGL questions from past 10+ years, arranged chapter-wise so you can practice topic by topic before attempting full mock tests. Practising real exam questions is irreplaceable — it trains you for SSC's specific question style, difficulty level, and common traps.</p>
+
+      <h2>Study Plan Combining These Books</h2>
+      <ul>
+        <li><strong>Month 1–2:</strong> R.S. Aggarwal (Quant) + R.S. Aggarwal Reasoning — one chapter per day each</li>
+        <li><strong>Month 2–3:</strong> S.P. Bakshi (English) + Lucent's GK — 30 minutes each daily</li>
+        <li><strong>Month 3–4:</strong> M. Tyra shortcuts + Kiran's PYQ papers chapter-wise</li>
+        <li><strong>Month 4–6:</strong> Full mock tests daily — analyse each mock, revise weak areas</li>
+      </ul>
+
+      <h2>Final Recommendation</h2>
+      <p>Total investment in these 5 books: approximately ₹2,400. This is the complete arsenal that has taken thousands of candidates from zero preparation to SSC CGL qualification. There is no need to buy additional books, join expensive coaching, or purchase premium test series in the early stages. Consistent daily study of these resources is sufficient to target top ranks. Browse our <a href="/best-books">complete book store</a> for the latest prices and direct Amazon purchase links.</p>
+    `
+  },
+  {
+    id: 17,
+    title: 'Best Books for IBPS PO & SBI PO 2026 — Expert Recommended List',
+    excerpt: 'The definitive guide to the best books for IBPS PO, SBI PO, and Bank Clerk exams — covering all five sections with topper-verified recommendations.',
+    category: 'Banking',
+    date: 'Jul 1, 2026',
+    icon: '🏦',
+    readTime: '9 min read',
+    author: 'NextJobPost Editorial Team',
+    content: `
+      <h2>How to Choose Books for Bank PO Exams</h2>
+      <p>Banking exams like IBPS PO, SBI PO, and IBPS Clerk are structured around five core sections: Quantitative Aptitude, Reasoning Ability, English Language, General Awareness (Banking), and Computer Knowledge. Unlike SSC where GK is static, banking GK is heavily current-affairs based — this changes your book strategy significantly.</p>
+      <p>The books recommended here are based on three filters: (1) Consistent appearance in topper interviews and banking exam forums, (2) Alignment with the current IBPS and SBI syllabus and exam pattern, and (3) Verified user feedback from candidates who cleared prelims and mains in recent cycles.</p>
+
+      <h2>Quantitative Aptitude</h2>
+      <h3>Quantitative Aptitude — R.S. Aggarwal</h3>
+      <p><strong>Price: ₹430 | Rating: 4.5/5</strong></p>
+      <p>The foundation for banking mathematics. IBPS PO Prelims tests basic arithmetic — Simplification, Number Series, Quadratic Equations, Approximation — which R.S. Aggarwal covers in depth. For Mains, the focus shifts to Data Interpretation and Data Sufficiency, which requires supplementary material.</p>
+
+      <h3>How to Prepare for Data Interpretation — Arun Sharma</h3>
+      <p><strong>Price: ₹480 | Rating: 4.4/5</strong></p>
+      <p>Data Interpretation is the highest-weightage topic in IBPS PO and SBI PO Mains — typically 30–35 marks out of 200 in the Quantitative section. Arun Sharma's DI book is the definitive resource: it covers Tables, Bar Charts, Pie Charts, Line Graphs, Caselet DI, and Mixed DI sets at progressively increasing difficulty levels up to CAT-level complexity. Clearing banking Mains without strong DI is nearly impossible, making this book essential.</p>
+
+      <h2>Reasoning Ability</h2>
+      <h3>A Modern Approach to Verbal & Non-Verbal Reasoning — R.S. Aggarwal</h3>
+      <p><strong>Price: ₹560 | Rating: 4.4/5</strong></p>
+      <p>Bank exams at Prelims level test straightforward reasoning — Inequalities, Syllogisms, Coding-Decoding, Blood Relations, Direction Sense, and simple Seating Arrangements. R.S. Aggarwal covers all of these with 4,000+ practice questions. For Mains-level complex puzzles and arrangements, supplement with online practice from Oliveboard or Testbook's question bank.</p>
+
+      <h2>English Language</h2>
+      <h3>Objective General English — S.P. Bakshi</h3>
+      <p><strong>Price: ₹390 | Rating: 4.4/5</strong></p>
+      <p>Banking English is considerably harder than SSC English, particularly at Mains level. The Reading Comprehension passages are longer, Para Jumbles are more complex, and Error Spotting requires nuanced grammar knowledge. S.P. Bakshi's book builds the foundation — grammar rules, vocabulary, and RC strategy. For Mains-level English, additionally read one English newspaper (The Hindu or Indian Express) for 20 minutes daily to build reading speed and comprehension ability.</p>
+
+      <h2>Banking & Financial Awareness</h2>
+      <h3>Banking & Financial Awareness — Arihant Experts</h3>
+      <p><strong>Price: ₹350 | Rating: 4.2/5</strong></p>
+      <p>This is where banking exams differ fundamentally from SSC. The GA section in IBPS PO and SBI PO covers: Banking Awareness (RBI functions, Monetary Policy, Banking Regulations, Financial institutions), Current Affairs (last 6 months of economy and banking news), and Static GK. Arihant's Banking Awareness book covers the static banking knowledge comprehensively — RBI history and structure, types of bank accounts, credit instruments, financial inclusion schemes, and banking terminology. Supplement with Lucent's GK for History/Geography/Polity components.</p>
+
+      <h2>Practice</h2>
+      <h3>IBPS PO/MT 20 Practice Sets — Arihant</h3>
+      <p><strong>Price: ₹320 | Rating: 4.1/5</strong></p>
+      <p>After building section-wise concepts, attempt full-length mock tests in exam conditions. Arihant's practice sets are structured exactly like actual IBPS PO Prelims and Mains, with correct sectional time limits and difficulty calibration. Each paper comes with detailed solutions explaining the approach for every question.</p>
+
+      <h2>3-Month Banking Exam Study Plan</h2>
+      <ul>
+        <li><strong>Month 1:</strong> R.S. Aggarwal (Quant: Arithmetic chapters) + R.S. Aggarwal Reasoning (Prelims topics) + S.P. Bakshi Grammar section</li>
+        <li><strong>Month 2:</strong> Arun Sharma DI (all chart types) + Arihant Banking Awareness + S.P. Bakshi Vocabulary & RC</li>
+        <li><strong>Month 3:</strong> Full mock tests every alternate day + newspaper reading daily + Lucent's GK revision</li>
+      </ul>
+
+      <p>View all book prices and buy directly on Amazon from our <a href="/best-books">Best Books page</a>.</p>
+    `
+  },
+  {
+    id: 18,
+    title: 'Best Books for RRB NTPC & Group D 2026 — Complete Preparation Guide',
+    excerpt: 'The most practical book list for RRB NTPC and Group D preparation — covering Mathematics, GK, General Science, and Reasoning with subject expert picks.',
+    category: 'Railway',
+    date: 'Jul 1, 2026',
+    icon: '🚂',
+    readTime: '8 min read',
+    author: 'NextJobPost Editorial Team',
+    content: `
+      <h2>Why Railway Exams Are Different — And What Books Actually Work</h2>
+      <p>RRB NTPC and Group D are unique among government exams because the syllabus is genuinely manageable. Unlike UPSC or IBPS Mains where depth is required, railway CBT Stage 1 tests breadth at a moderate difficulty level. This means the right book strategy is slightly different: instead of buying advanced books, focus on one good book per subject and practice extensively from previous year papers.</p>
+      <p>The books below have been specifically evaluated for their coverage of the RRB syllabus and their alignment with actual questions from 2019, 2021, 2022, and 2024 RRB NTPC and Group D exams.</p>
+
+      <h2>General Knowledge & Current Affairs</h2>
+      <h3>Lucent's General Knowledge</h3>
+      <p><strong>Price: ₹320 | Rating: 4.6/5 | 42,000+ reviews</strong></p>
+      <p>For railway exams, GK is the highest-stakes section — it is fastest to improve and carries 40 marks in NTPC CBT Stage 1. Lucent's covers every topic tested in RRB GK: Indian History (Ancient, Medieval, Modern), Indian Geography, Indian Polity (basic), Economy (basic), Science (Physics, Chemistry, Biology), and Environment. The book's compact format — facts presented without lengthy explanations — is perfect for the memorisation-heavy nature of railway GK.</p>
+      <p>One critical study tip: for railway exams, focus especially on Indian Railways history and general knowledge questions within Lucent's — RRB papers frequently include 3–5 questions specifically about Indian Railways (founding year, headquarters of zones, types of locomotives, railway zones). These are easy marks that many candidates miss by not studying railway-specific GK.</p>
+
+      <h2>Mathematics</h2>
+      <h3>Quantitative Aptitude — R.S. Aggarwal</h3>
+      <p><strong>Price: ₹430 | Rating: 4.5/5</strong></p>
+      <p>Railway mathematics is fundamentally basic arithmetic — Number System, LCM/HCF, Simplification, Percentage, Ratio & Proportion, Time & Work, Time Speed Distance, Simple & Compound Interest, and Mensuration. R.S. Aggarwal covers all of these comprehensively. For RRB NTPC, you do not need advanced Algebra or Trigonometry — the basic chapters of R.S. Aggarwal are sufficient.</p>
+      <p>Recommended study approach: Complete 3 arithmetic chapters per week from R.S. Aggarwal, then solve the corresponding chapter from Kiran's RRB NTPC previous papers to check if the difficulty matches. This cross-referencing ensures you are not over-preparing or under-preparing any topic.</p>
+
+      <h2>General Intelligence & Reasoning</h2>
+      <h3>A Modern Approach to Verbal & Non-Verbal Reasoning — R.S. Aggarwal</h3>
+      <p><strong>Price: ₹560 | Rating: 4.4/5</strong></p>
+      <p>Railway reasoning is strongly pattern-based — Series, Analogy, Classification, Coding-Decoding, Mirror Images, and Paper Folding appear consistently across all RRB exam years. R.S. Aggarwal's Non-Verbal Reasoning section is particularly valuable for railway exams because visual pattern questions (which require practice, not theory) form a significant portion of the reasoning section.</p>
+
+      <h2>General Science</h2>
+      <h3>General Science for Competitive Exams — Arihant</h3>
+      <p><strong>Price: ₹295 | Rating: 4.2/5</strong></p>
+      <p>General Science is unique to railway exams — SSC and banking don't test it separately, but RRB NTPC and Group D both include Physics, Chemistry, and Biology questions. Arihant's General Science book covers class 9 and 10 level science concepts in a question-answer format ideal for competitive exam preparation. Topics include: Laws of Motion, Optics, Electricity (Physics), Atomic Structure, Chemical Reactions, Acids/Bases/Salts (Chemistry), and Cell Biology, Human Systems, Plant Life (Biology).</p>
+
+      <h2>Previous Year Papers — Essential</h2>
+      <h3>RRB NTPC Previous Year Papers — Kiran Prakashan</h3>
+      <p><strong>Price: ₹550 | Rating: 4.3/5</strong></p>
+      <p>For railway exams specifically, previous year papers are arguably more important than any theory book. The reason: RRB repeats question types and even specific questions at a higher rate than SSC or banking exams. Candidates who solve 5+ years of previous papers report seeing nearly identical questions in the actual exam. Kiran's compilation is the most comprehensive — covering 2016 through 2024 papers from multiple RRB zones, giving you over 3,000 actual exam questions to practice.</p>
+
+      <h2>4-Month RRB NTPC Study Plan</h2>
+      <ul>
+        <li><strong>Month 1:</strong> Lucent's GK (Indian History + Geography) + R.S. Aggarwal Quant (basic arithmetic) + R.S. Aggarwal Reasoning (Series + Analogy + Classification)</li>
+        <li><strong>Month 2:</strong> Lucent's GK (Polity + Economy + Science) + R.S. Aggarwal Quant (remaining chapters) + Arihant General Science</li>
+        <li><strong>Month 3:</strong> Kiran's PYQ papers chapter-wise + R.S. Aggarwal Reasoning (Non-Verbal + remaining topics)</li>
+        <li><strong>Month 4:</strong> Full mock tests 3× per week + Current affairs revision + Weak area targeted practice</li>
+      </ul>
+
+      <p>All books above are available on Amazon India with verified reviews. View current prices and buy from our <a href="/best-books">Best Books for Railway Exams</a> page.</p>
+    `
   }
 ];
