@@ -21,7 +21,7 @@ import React, { useState } from 'react';
 // ─────────────────────────────────────────
 // 🔑 PUT YOUR AMAZON ASSOCIATE TAG HERE
 // ─────────────────────────────────────────
-const ASSOCIATE_TAG = 'nextjobpost-21'; // ← CHANGE THIS after Amazon approves you
+const ASSOCIATE_TAG = 'nextjobpost-21'; // ✅ Amazon Associates ID — confirmed live
 
 function buildLink(asin) {
   return `https://www.amazon.in/dp/${asin}?tag=${ASSOCIATE_TAG}`;
