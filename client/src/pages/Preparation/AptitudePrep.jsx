@@ -1117,6 +1117,11 @@ export default function AptitudePrep() {
         </div>
       </div>
 
+      {/* 📚 Book Store Module — top placement */}
+      <div style={{ maxWidth: 1100, margin: '1rem auto 0', padding: '0 1.5rem' }}>
+        <AffiliateBooks category="aptitude" />
+      </div>
+
       {/* ── Body ── */}
       <div style={{ maxWidth: selectedTopic ? 1200 : 860, margin: '0 auto', padding: '1.5rem 1.5rem' }}>
         {selectedTopic ? (
@@ -1471,14 +1476,6 @@ export default function AptitudePrep() {
       </div>
 
       {aiQ && <AITutor question={aiQ} onClose={() => setAiQ(null)} />}
-
-      {/* Amazon Affiliate Book Recommendations */}
-      <div style={{ padding: '0 1rem 2rem' }}>
-        <AffiliateBooks
-          category="aptitude"
-          title="📚 Best Books for Aptitude & Reasoning — Our Top Picks"
-        />
-      </div>
 
       </div>
     </PrepLayout>

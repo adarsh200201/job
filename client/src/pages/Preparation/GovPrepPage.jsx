@@ -189,6 +189,11 @@ export default function GovPrepPage() {
         </div>
       )}
 
+      {/* 📚 Book Store Module — top placement */}
+      <div style={{ maxWidth: 1100, margin: '1.5rem auto 0', padding: '0 1rem' }}>
+        <AffiliateBooks category={selectedExam === 'Banking' ? 'banking' : selectedExam === 'Railway' ? 'railway' : selectedExam === 'UPSC' ? 'upsc' : 'ssc'} />
+      </div>
+
       <div style={{ maxWidth: selectedExam ? 1200 : 860, margin: '1.5rem auto 0', padding: '0 1rem 2rem' }}>
         {selectedExam && (
           <div style={{ 
@@ -413,14 +418,6 @@ export default function GovPrepPage() {
       </div>
 
       {aiQ && <AITutor question={aiQ} onClose={() => setAiQ(null)} />}
-
-      {/* Amazon Affiliate Book Recommendations */}
-      <div style={{ padding: '0 1rem 2rem' }}>
-        <AffiliateBooks
-          category={selectedExam === 'Banking' ? 'banking' : selectedExam === 'Railway' ? 'railway' : 'ssc'}
-          title="📚 Top Books for This Exam — Recommended by Our Team"
-        />
-      </div>
 
       </div>
     </PrepLayout>
