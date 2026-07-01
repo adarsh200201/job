@@ -30,6 +30,14 @@
       "dest": "https://nextjobpost-backend.onrender.com/$1"
     },
     {
+      "src": "/robots.txt",
+      "dest": "https://nextjobpost-backend.onrender.com/robots.txt"
+    },
+    {
+      "src": "/ads.txt",
+      "dest": "https://nextjobpost-backend.onrender.com/ads.txt"
+    },
+    {
       "src": "/(.*)",
       "dest": "/index.html"
     }

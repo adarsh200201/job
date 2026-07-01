@@ -8,12 +8,15 @@ const adminAuth = require('../middleware/adminAuth');
 const fs = require('fs');
 const path = require('path');
 
-// Helper to get base URL
+// Helper to get base URL (proxy-aware for Vercel/Cloudflare requests)
 const getBaseUrl = (req) => {
-  if (process.env.CLIENT_ORIGIN && process.env.CLIENT_ORIGIN !== '*') {
-    return process.env.CLIENT_ORIGIN.split(',')[0].trim();
+  const host = req.get('x-forwarded-host') || req.get('host') || 'nextjobpost.in';
+  const protocol = req.get('x-forwarded-proto') || req.protocol || 'https';
+  
+  if (host.includes('localhost') || host.includes('127.0.0.1')) {
+    return `${protocol}://${host}`;
   }
-  return `${req.protocol}://${req.get('host')}`;
+  return `https://${host}`;
 };
 
 // Helper to parse mega categories dynamically from client config to avoid CommonJS/ESM require conflicts
