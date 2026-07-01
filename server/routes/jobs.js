@@ -17,4 +17,10 @@ router.post('/', ctrl.createJob);
 router.put('/:id', ctrl.updateJob);
 router.delete('/:id', ctrl.deleteJob);
 
+// Admin: flush in-memory job cache (call after direct DB edits)
+router.post('/cache-clear', (req, res) => {
+  ctrl.bustJobsCache();
+  res.json({ success: true, message: 'Job cache cleared' });
+});
+
 module.exports = router;

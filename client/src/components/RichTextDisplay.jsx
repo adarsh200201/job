@@ -6,12 +6,26 @@ export default function RichTextDisplay({ content }) {
 
   // HTML sanitization - remove scripts, event handlers, inline styles, and data attributes
   const sanitizeHTML = (html) => {
-    const div = document.createElement('div');
-    div.innerHTML = html;
+    // Pre-scrub: strip <button>, <icon> tags and all <a> href links as raw text before DOM parsing
+    let cleaned = html
+      .replace(/<button[\s\S]*?<\/button>/gi, '')
+      .replace(/<icon[\s\S]*?<\/icon>/gi, '')
+      .replace(/<a\b[^>]*>(.*?)<\/a>/gi, '$1')  // strip <a> tags but keep their text
+      .replace(/https?:\/\/[^\s<"'>]+/gi, '')   // strip bare URLs entirely
+      .replace(/\s{2,}/g, ' ')
+      .trim();
 
-    // Remove script tags and event handlers
-    const scripts = div.querySelectorAll('script');
-    scripts.forEach(script => script.remove());
+    const div = document.createElement('div');
+    div.innerHTML = cleaned;
+
+    // Remove script, button, icon tags from DOM as well (belt-and-suspenders)
+    div.querySelectorAll('script, button, icon').forEach(el => el.remove());
+
+    // Remove all anchor tags — replace with their text content so no links are exposed
+    div.querySelectorAll('a').forEach(a => {
+      const text = document.createTextNode(a.textContent || '');
+      a.parentNode && a.parentNode.replaceChild(text, a);
+    });
 
     // Clean up all elements
     const allElements = div.querySelectorAll('*');
@@ -71,85 +85,7 @@ export default function RichTextDisplay({ content }) {
       }
     });
 
-    // 4. Replace any occurrences of "Apply Online" with "Apply Now" in text nodes and anchors
-    const anchors = Array.from(div.querySelectorAll('a'));
-    anchors.forEach(a => {
-      const href = a.getAttribute('href') || '';
-
-      // Helper: check if a URL is structurally valid (has a real domain with TLD)
-      const isValidUrl = (url) => {
-        if (!url) return false;
-        // Reject HTML-contaminated hrefs (URL-encoded tags)
-        if (url.includes('%3C') || url.includes('%3E') || url.includes('%22')) return false;
-        try {
-          const parsed = new URL(url);
-          // Must have a real hostname with at least one dot and a TLD segment
-          // e.g. "https://.in/..." has hostname ".in" which is invalid
-          const host = parsed.hostname;
-          const parts = host.split('.');
-          // Reject if hostname starts with dot, has no real domain, or is too short
-          if (!host || host.startsWith('.') || parts.length < 2 || parts[0] === '') return false;
-          // Reject known tracker/shortlink/aggregator domains
-          const blockedDomains = [
-            'pdlink.in', 'bit.ly', 'tinyurl.com', 'ow.ly', 'goo.gl', 'short.ly',
-            'rebrand.ly', 'cutt.ly', 't.co', 'buff.ly', 'dlvr.it',
-            'internshala.com', 'internshals.com', 'naukri.com', 'shine.com',
-            'monster.com', 'timesjobs.com', 'freshersworld.com', 'placementindia.com',
-            'govtjobsalert.in', 'sarkariresult.com', 'rojgarresult.com', 'freejobalert.com',
-            'freshershunt.in', 'fresherslive.com', 'freshersvoice.com', 'offcampusjobs4u.in',
-            'youth4work.com', 'ambitionbox.com', 'glassdoor.com', 'glassdoor.co.in',
-            'indeed.com', 'indeed.co.in', 'foundthejob.com', 'internships.com', 'internshipss.com', 'offcampusjobs4u.com', 'placementkit.in', 'placementkit.com', 'walkindrive.com', 'fresherearth.com', 'fresherearth.in',
-            'offcampusjobs4u.com', 'placementkit.in', 'placementkit.com', 'walkindrive.com', 'fresherearth.com', 'fresherearth.in',
-          ];
-          if (blockedDomains.some(d => host === d || host.endsWith('.' + d))) return false;
-          return true;
-        } catch {
-          return false;
-        }
-      };
-
-      // Redirect WhatsApp and Telegram links to official channels
-      if (href.includes('whatsapp.com') || href.includes('wa.me')) {
-        a.setAttribute('href', 'https://chat.whatsapp.com/LVpuUJluTpUEdIc4daAemQ');
-        a.setAttribute('target', '_blank');
-        a.setAttribute('rel', 'noopener noreferrer');
-      } else if (href.includes('t.me') || href.includes('telegram.me') || href.includes('telegram.dog')) {
-        a.setAttribute('href', 'https://t.me/nextjobpost');
-        a.setAttribute('target', '_blank');
-        a.setAttribute('rel', 'noopener noreferrer');
-      } else if ((href.includes('govtjobsalert.in') || href.includes('sarkariresult.com')) && !href.toLowerCase().endsWith('.pdf')) {
-        // Strip competitor domain non-PDF links entirely
-        a.remove();
-      } else if (!href || !isValidUrl(href)) {
-        // Remove broken/empty/invalid hrefs entirely
-        a.remove();
-      } else {
-        // All valid external links: open in new tab safely
-        a.setAttribute('target', '_blank');
-        a.setAttribute('rel', 'noopener noreferrer nofollow');
-      }
-
-      if (a.parentNode) {
-        if (a.textContent.trim().toLowerCase() === 'apply online') {
-          a.textContent = 'Apply Now';
-        }
-        
-        // Do not disclose raw URLs in visible anchor text (AdSense/copyright safety)
-        const textContent = a.textContent.trim();
-        const isRawUrl = /^(?:https?:\/\/|www\.)[^\s]+$|^(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(?:\/[^\s]*)?$/i.test(textContent);
-        if (isRawUrl) {
-          if (href.includes('whatsapp.com') || href.includes('wa.me')) {
-            a.textContent = 'Join WhatsApp Channel';
-          } else if (href.includes('t.me') || href.includes('telegram.me')) {
-            a.textContent = 'Join Telegram Channel';
-          } else if (href.includes('youtube.com') || href.includes('youtu.be')) {
-            a.textContent = 'Watch Video Guide';
-          } else {
-            a.textContent = 'Apply Now';
-          }
-        }
-      }
-    });
+    // 4. Replace any occurrences of "Apply Online" with "Apply Now" in text nodes
 
     const BLOCKED_URL_PATTERN = /https?:\/\/(?:\.in|\.com|\.org|\.net|\.co|\.info|\.us|\.xyz|[^\s]*\.(?:pdlink\.in|bit\.ly|tinyurl\.com|ow\.ly|goo\.gl|internshala\.com|internshals\.com|naukri\.com|shine\.com|monster\.com|timesjobs\.com|freshersworld\.com|govtjobsalert\.in|sarkariresult\.com|rojgarresult\.com|freejobalert\.com|freshershunt\.in|fresherslive\.com|freshersvoice\.com|offcampusjobs4u\.in|youth4work\.com|ambitionbox\.com|glassdoor\.com|glassdoor\.co.in|indeed\.com|indeed\.co.in|foundthejob\.com))[^\s]*/gi;
     const walk = document.createTreeWalker(div, NodeFilter.SHOW_TEXT, null, false);
