@@ -8,6 +8,7 @@ import RecentJobs from '../components/RecentJobs.jsx';
 import JoinUpdates from '../components/JoinUpdates.jsx';
 import { JobCardSkeleton } from '../components/SkeletonLoader.jsx';
 import SidebarAd from '../components/SidebarAd.jsx';
+import AffiliateBooks from '../components/AffiliateBooks.jsx';
 import { MEGA_CATEGORIES } from '../utils/categoryConfig.js';
 import SidebarCategories from '../components/SidebarCategories.jsx';
 import SidebarCareerHub from '../components/SidebarCareerHub.jsx';
@@ -614,6 +615,20 @@ export default function GovtJobsCategory({ categoryKey }) {
                 )}
               </div>
             )}
+
+            {/* Affiliate Book Recommendations */}
+            <div className="mt-4">
+              <AffiliateBooks
+                category={
+                  categoryKey === 'ssc-jobs' ? 'ssc'
+                  : categoryKey === 'banking-jobs' ? 'banking'
+                  : categoryKey === 'railway-jobs' ? 'railway'
+                  : 'general'
+                }
+                title="📚 Recommended Books for This Category"
+              />
+            </div>
+
           </section>
         </div>
 

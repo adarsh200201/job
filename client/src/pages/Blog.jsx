@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { articlesData } from '../data/articlesData.js';
+import AffiliateBooks from '../components/AffiliateBooks.jsx';
 
 function getRelatedArticles(currentArticle, all) {
   return all
@@ -99,6 +100,18 @@ export default function Blog() {
                   Explore Job Listings 🚀
                 </Link>
               </div>
+
+              {/* Affiliate Book Recommendations */}
+              <AffiliateBooks
+                category={
+                  activeArticle.category === 'Exam Strategy' || activeArticle.category === 'Government Jobs' ? 'ssc'
+                  : activeArticle.category === 'Banking' ? 'banking'
+                  : activeArticle.category === 'Railway' ? 'railway'
+                  : activeArticle.category === 'Resume Writing' ? 'resume'
+                  : 'general'
+                }
+                title="📚 Books Our Readers Love — Affiliate Picks"
+              />
 
               {/* Related Articles */}
               {relatedArticles.length > 0 && (

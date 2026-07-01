@@ -3,6 +3,7 @@ import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import AITutor from '../../components/Preparation/AITutor.jsx';
 import { getFormulasForTopic, getDSQuestionsForTopic } from './aptitudeData.js';
 import PrepLayout from '../../components/Preparation/PrepLayout.jsx';
+import AffiliateBooks from '../../components/AffiliateBooks.jsx';
 import api from '../../api/index.js';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:4000';
@@ -1470,6 +1471,15 @@ export default function AptitudePrep() {
       </div>
 
       {aiQ && <AITutor question={aiQ} onClose={() => setAiQ(null)} />}
+
+      {/* Amazon Affiliate Book Recommendations */}
+      <div style={{ padding: '0 1rem 2rem' }}>
+        <AffiliateBooks
+          category="aptitude"
+          title="📚 Best Books for Aptitude & Reasoning — Our Top Picks"
+        />
+      </div>
+
       </div>
     </PrepLayout>
   );
