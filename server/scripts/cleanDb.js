@@ -173,6 +173,10 @@ const sanitizeTextForCompetitors = (text) => {
 
   let val = text;
   
+  // 0. Remove button and icon tags entirely (e.g. LinkedIn public job details scraper remnants)
+  val = val.replace(/<button[^>]*>[\s\S]*?<\/button>/gi, '');
+  val = val.replace(/<icon[^>]*>[\s\S]*?<\/icon>/gi, '');
+  
   // 1. Remove competitor/shortlink URLs
   val = val.replace(competitorPattern, '');
   
@@ -267,7 +271,8 @@ const enrichJobTitleAndCompany = (rawTitle, rawCompany, jobDescription, isGov) =
   finalTitle = finalTitle.replace(/\s+/g, ' ').trim();
   
   if (companyCleaned && companyCleaned.length > 2) {
-    const doubleCompanyRegex = new RegExp(`^(${companyCleaned})\\s+\\1\\b`, 'i');
+    const escapedCompany = companyCleaned.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const doubleCompanyRegex = new RegExp(`^(${escapedCompany})\\s+\\1\\b`, 'i');
     finalTitle = finalTitle.replace(doubleCompanyRegex, '$1');
   }
 

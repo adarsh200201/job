@@ -464,6 +464,10 @@ const sanitizeTextForCompetitors = (text) => {
 
   let val = text;
   
+  // 0. Remove button and icon tags entirely (e.g. LinkedIn public job details scraper remnants)
+  val = val.replace(/<button[^>]*>[\s\S]*?<\/button>/gi, '');
+  val = val.replace(/<icon[^>]*>[\s\S]*?<\/icon>/gi, '');
+  
   // 1. Remove competitor/shortlink URLs
   val = val.replace(competitorPattern, '');
   
