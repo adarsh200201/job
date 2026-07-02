@@ -6,10 +6,19 @@ export default function RichTextDisplay({ content }) {
 
   // HTML sanitization - remove scripts, event handlers, inline styles, and data attributes
   const sanitizeHTML = (html) => {
-    // Pre-scrub: strip <button>, <icon> tags and all <a> href links as raw text before DOM parsing
+    // Pre-scrub: strip <button>, <icon> tags (both raw and escaped) and all <a> href links as raw text before DOM parsing
     let cleaned = html
+      .replace(/&lt;button[\s\S]*?&lt;\/button&gt;/gi, '')
+      .replace(/&lt;icon[\s\S]*?&lt;\/icon&gt;/gi, '')
+      .replace(/&lt;button[\s\S]*?&gt;[\s\S]*?&lt;\/button&gt;/gi, '')
+      .replace(/&lt;icon[\s\S]*?&gt;[\s\S]*?&lt;\/icon&gt;/gi, '')
       .replace(/<button[\s\S]*?<\/button>/gi, '')
       .replace(/<icon[\s\S]*?<\/icon>/gi, '')
+      .replace(/show-more-less-html__button-more/gi, '')
+      .replace(/show-more-less-html__button-less/gi, '')
+      .replace(/show-more-less-html__button/gi, '')
+      .replace(/public_jobs_show-more-html-btn/gi, '')
+      .replace(/public_jobs_show-less-html-btn/gi, '')
       .replace(/<a\b[^>]*>(.*?)<\/a>/gi, '$1')  // strip <a> tags but keep their text
       .replace(/https?:\/\/[^\s<"'>]+/gi, '')   // strip bare URLs entirely
       .replace(/\s{2,}/g, ' ')
