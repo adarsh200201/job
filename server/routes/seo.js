@@ -678,16 +678,29 @@ router.get('/bot-render/:path*', async (req, res) => {
     
     console.log(`🤖 [BotRender] Serving crawler bot request for path: /${normalizedPath}`);
     
-    // 1. Fetch HTML template from Vercel deployment
+    // 1. Fetch HTML template from the requested frontend domain dynamically
     let template = '';
+    const originHost = req.headers['x-forwarded-host'] || req.headers['host'] || 'nextjobpost.in';
+    const originUrl = originHost.includes('localhost') || originHost.includes('127.0.0.1')
+      ? `http://${originHost}/index.html`
+      : `https://${originHost}/index.html`;
+
     try {
-      const resp = await axios.get('https://job-peach-three.vercel.app/index.html', {
+      const resp = await axios.get(originUrl, {
         headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
       });
       template = resp.data;
     } catch (err) {
-      console.error('Failed to fetch template from Vercel, using fallback:', err.message);
-      template = `<!doctype html><html><head><title>NextJobPost</title><meta name="description" content="NextJobPost"></head><body><div id="root"></div></body></html>`;
+      console.error(`Failed to fetch template from ${originUrl}, trying production fallback:`, err.message);
+      try {
+        const resp = await axios.get('https://nextjobpost.in/index.html', {
+          headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+        });
+        template = resp.data;
+      } catch (errFallback) {
+        console.error('All template fetches failed, using hardcoded fallback:', errFallback.message);
+        template = `<!doctype html><html><head><title>NextJobPost</title><meta name="description" content="NextJobPost"></head><body><div id="root"></div></body></html>`;
+      }
     }
 
     let seoTitle = 'NextJobPost - Latest Fresher Jobs & Internships';
