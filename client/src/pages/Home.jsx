@@ -556,7 +556,7 @@ export default function Home() {
             <div style={{ marginTop: showRecommendations ? '1.5rem' : '0' }}>
               {loading && jobs.length === 0 && (
                 <>
-                  {[...Array(3)].map((_, i) => (
+                  {[...Array(6)].map((_, i) => (
                     <JobCardSkeleton key={`skeleton-${i}`} />
                   ))}
                 </>
@@ -705,180 +705,180 @@ export default function Home() {
               <div className="homepage-updates-sections" style={{ marginTop: '2.5rem', display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
                 
                 {/* 1. Latest Exam Results */}
-                {(results.length > 0 || updatesLoading) && (
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '2px solid #e2e8f0', paddingBottom: '0.5rem' }}>
-                      <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span>📢</span> Latest Exam Results
-                      </h3>
-                      <Link to="/results" className="btn btn-sm btn-outline-primary" style={{ fontSize: '0.8rem', fontWeight: 700, borderRadius: '20px', padding: '0.25rem 0.75rem' }}>
-                        View All →
-                      </Link>
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                      {updatesLoading ? (
-                        <>
-                          <JobCardSkeleton />
-                          <JobCardSkeleton />
-                        </>
-                      ) : (
-                        results.map((job) => (
-                          <JobDetailCard key={job._id} job={job} />
-                        ))
-                      )}
-                    </div>
-                    {!updatesLoading && resultsTotalCount > results.length && (
-                      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1.25rem' }}>
-                        <button
-                          onClick={loadMoreResults}
-                          disabled={loadingResultsMore}
-                          className="btn btn-outline-primary"
-                          style={{
-                            borderRadius: '20px',
-                            padding: '0.4rem 1.5rem',
-                            fontSize: '0.85rem',
-                            fontWeight: '700',
-                            transition: 'all 0.15s ease'
-                          }}
-                        >
-                          {loadingResultsMore ? 'Loading...' : `Load More (${resultsTotalCount - results.length} remaining)`}
-                        </button>
-                      </div>
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '2px solid #e2e8f0', paddingBottom: '0.5rem' }}>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span>📢</span> Latest Exam Results
+                    </h3>
+                    <Link to="/results" className="btn btn-sm btn-outline-primary" style={{ fontSize: '0.8rem', fontWeight: 700, borderRadius: '20px', padding: '0.25rem 0.75rem' }}>
+                      View All →
+                    </Link>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    {updatesLoading ? (
+                      <>
+                        <JobCardSkeleton />
+                        <JobCardSkeleton />
+                      </>
+                    ) : results.length > 0 ? (
+                      results.map((job) => (
+                        <JobDetailCard key={job._id} job={job} />
+                      ))
+                    ) : (
+                      <p className="text-muted" style={{ fontSize: '0.88rem', margin: '0.5rem 0' }}>No recent results available.</p>
                     )}
                   </div>
-                )}
+                  {!updatesLoading && resultsTotalCount > results.length && (
+                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1.25rem' }}>
+                      <button
+                        onClick={loadMoreResults}
+                        disabled={loadingResultsMore}
+                        className="btn btn-outline-primary"
+                        style={{
+                          borderRadius: '20px',
+                          padding: '0.4rem 1.5rem',
+                          fontSize: '0.85rem',
+                          fontWeight: '700',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        {loadingResultsMore ? 'Loading...' : `Load More (${resultsTotalCount - results.length} remaining)`}
+                      </button>
+                    </div>
+                  )}
+                </div>
 
                 {/* 2. Latest Admit Cards */}
-                {(admitCards.length > 0 || updatesLoading) && (
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '2px solid #e2e8f0', paddingBottom: '0.5rem' }}>
-                      <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span>🪪</span> Latest Admit Cards
-                      </h3>
-                      <Link to="/admit-cards" className="btn btn-sm btn-outline-primary" style={{ fontSize: '0.8rem', fontWeight: 700, borderRadius: '20px', padding: '0.25rem 0.75rem' }}>
-                        View All →
-                      </Link>
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                      {updatesLoading ? (
-                        <>
-                          <JobCardSkeleton />
-                          <JobCardSkeleton />
-                        </>
-                      ) : (
-                        admitCards.map((job) => (
-                          <JobDetailCard key={job._id} job={job} />
-                        ))
-                      )}
-                    </div>
-                    {!updatesLoading && admitCardsTotalCount > admitCards.length && (
-                      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1.25rem' }}>
-                        <button
-                          onClick={loadMoreAdmitCards}
-                          disabled={loadingAdmitMore}
-                          className="btn btn-outline-primary"
-                          style={{
-                            borderRadius: '20px',
-                            padding: '0.4rem 1.5rem',
-                            fontSize: '0.85rem',
-                            fontWeight: '700',
-                            transition: 'all 0.15s ease'
-                          }}
-                        >
-                          {loadingAdmitMore ? 'Loading...' : `Load More (${admitCardsTotalCount - admitCards.length} remaining)`}
-                        </button>
-                      </div>
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '2px solid #e2e8f0', paddingBottom: '0.5rem' }}>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span>🪪</span> Latest Admit Cards
+                    </h3>
+                    <Link to="/admit-cards" className="btn btn-sm btn-outline-primary" style={{ fontSize: '0.8rem', fontWeight: 700, borderRadius: '20px', padding: '0.25rem 0.75rem' }}>
+                      View All →
+                    </Link>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    {updatesLoading ? (
+                      <>
+                        <JobCardSkeleton />
+                        <JobCardSkeleton />
+                      </>
+                    ) : admitCards.length > 0 ? (
+                      admitCards.map((job) => (
+                        <JobDetailCard key={job._id} job={job} />
+                      ))
+                    ) : (
+                      <p className="text-muted" style={{ fontSize: '0.88rem', margin: '0.5rem 0' }}>No recent admit cards available.</p>
                     )}
                   </div>
-                )}
+                  {!updatesLoading && admitCardsTotalCount > admitCards.length && (
+                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1.25rem' }}>
+                      <button
+                        onClick={loadMoreAdmitCards}
+                        disabled={loadingAdmitMore}
+                        className="btn btn-outline-primary"
+                        style={{
+                          borderRadius: '20px',
+                          padding: '0.4rem 1.5rem',
+                          fontSize: '0.85rem',
+                          fontWeight: '700',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        {loadingAdmitMore ? 'Loading...' : `Load More (${admitCardsTotalCount - admitCards.length} remaining)`}
+                      </button>
+                    </div>
+                  )}
+                </div>
 
                 {/* 3. Latest Answer Keys */}
-                {(answerKeys.length > 0 || updatesLoading) && (
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '2px solid #e2e8f0', paddingBottom: '0.5rem' }}>
-                      <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span>🗝️</span> Latest Answer Keys
-                      </h3>
-                      <Link to="/answer-keys" className="btn btn-sm btn-outline-primary" style={{ fontSize: '0.8rem', fontWeight: 700, borderRadius: '20px', padding: '0.25rem 0.75rem' }}>
-                        View All →
-                      </Link>
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                      {updatesLoading ? (
-                        <>
-                          <JobCardSkeleton />
-                          <JobCardSkeleton />
-                        </>
-                      ) : (
-                        answerKeys.map((job) => (
-                          <JobDetailCard key={job._id} job={job} />
-                        ))
-                      )}
-                    </div>
-                    {!updatesLoading && answerKeysTotalCount > answerKeys.length && (
-                      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1.25rem' }}>
-                        <button
-                          onClick={loadMoreAnswerKeys}
-                          disabled={loadingAnswerMore}
-                          className="btn btn-outline-primary"
-                          style={{
-                            borderRadius: '20px',
-                            padding: '0.4rem 1.5rem',
-                            fontSize: '0.85rem',
-                            fontWeight: '700',
-                            transition: 'all 0.15s ease'
-                          }}
-                        >
-                          {loadingAnswerMore ? 'Loading...' : `Load More (${answerKeysTotalCount - answerKeys.length} remaining)`}
-                        </button>
-                      </div>
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '2px solid #e2e8f0', paddingBottom: '0.5rem' }}>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span>🗝️</span> Latest Answer Keys
+                    </h3>
+                    <Link to="/answer-keys" className="btn btn-sm btn-outline-primary" style={{ fontSize: '0.8rem', fontWeight: 700, borderRadius: '20px', padding: '0.25rem 0.75rem' }}>
+                      View All →
+                    </Link>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    {updatesLoading ? (
+                      <>
+                        <JobCardSkeleton />
+                        <JobCardSkeleton />
+                      </>
+                    ) : answerKeys.length > 0 ? (
+                      answerKeys.map((job) => (
+                        <JobDetailCard key={job._id} job={job} />
+                      ))
+                    ) : (
+                      <p className="text-muted" style={{ fontSize: '0.88rem', margin: '0.5rem 0' }}>No recent answer keys available.</p>
                     )}
                   </div>
-                )}
+                  {!updatesLoading && answerKeysTotalCount > answerKeys.length && (
+                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1.25rem' }}>
+                      <button
+                        onClick={loadMoreAnswerKeys}
+                        disabled={loadingAnswerMore}
+                        className="btn btn-outline-primary"
+                        style={{
+                          borderRadius: '20px',
+                          padding: '0.4rem 1.5rem',
+                          fontSize: '0.85rem',
+                          fontWeight: '700',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        {loadingAnswerMore ? 'Loading...' : `Load More (${answerKeysTotalCount - answerKeys.length} remaining)`}
+                      </button>
+                    </div>
+                  )}
+                </div>
 
                 {/* 4. Latest Exam Syllabus */}
-                {(syllabus.length > 0 || updatesLoading) && (
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '2px solid #e2e8f0', paddingBottom: '0.5rem' }}>
-                      <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span>📚</span> Latest Exam Syllabus
-                      </h3>
-                      <Link to="/syllabus" className="btn btn-sm btn-outline-primary" style={{ fontSize: '0.8rem', fontWeight: 700, borderRadius: '20px', padding: '0.25rem 0.75rem' }}>
-                        View All →
-                      </Link>
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                      {updatesLoading ? (
-                        <>
-                          <JobCardSkeleton />
-                          <JobCardSkeleton />
-                        </>
-                      ) : (
-                        syllabus.map((job) => (
-                          <JobDetailCard key={job._id} job={job} />
-                        ))
-                      )}
-                    </div>
-                    {!updatesLoading && syllabusTotalCount > syllabus.length && (
-                      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1.25rem' }}>
-                        <button
-                          onClick={loadMoreSyllabus}
-                          disabled={loadingSyllabusMore}
-                          className="btn btn-outline-primary"
-                          style={{
-                            borderRadius: '20px',
-                            padding: '0.4rem 1.5rem',
-                            fontSize: '0.85rem',
-                            fontWeight: '700',
-                            transition: 'all 0.15s ease'
-                          }}
-                        >
-                          {loadingSyllabusMore ? 'Loading...' : `Load More (${syllabusTotalCount - syllabus.length} remaining)`}
-                        </button>
-                      </div>
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '2px solid #e2e8f0', paddingBottom: '0.5rem' }}>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span>📚</span> Latest Exam Syllabus
+                    </h3>
+                    <Link to="/syllabus" className="btn btn-sm btn-outline-primary" style={{ fontSize: '0.8rem', fontWeight: 700, borderRadius: '20px', padding: '0.25rem 0.75rem' }}>
+                      View All →
+                    </Link>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    {updatesLoading ? (
+                      <>
+                        <JobCardSkeleton />
+                        <JobCardSkeleton />
+                      </>
+                    ) : syllabus.length > 0 ? (
+                      syllabus.map((job) => (
+                        <JobDetailCard key={job._id} job={job} />
+                      ))
+                    ) : (
+                      <p className="text-muted" style={{ fontSize: '0.88rem', margin: '0.5rem 0' }}>No recent syllabus updates available.</p>
                     )}
                   </div>
-                )}
+                  {!updatesLoading && syllabusTotalCount > syllabus.length && (
+                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1.25rem' }}>
+                      <button
+                        onClick={loadMoreSyllabus}
+                        disabled={loadingSyllabusMore}
+                        className="btn btn-outline-primary"
+                        style={{
+                          borderRadius: '20px',
+                          padding: '0.4rem 1.5rem',
+                          fontSize: '0.85rem',
+                          fontWeight: '700',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        {loadingSyllabusMore ? 'Loading...' : `Load More (${syllabusTotalCount - syllabus.length} remaining)`}
+                      </button>
+                    </div>
+                  )}
+                </div>
 
                 {/* 5. Career Blog Articles */}
                 <div>
