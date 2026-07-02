@@ -667,4 +667,157 @@ router.post('/api/seo/run-audit', adminAuth, async (req, res) => {
   });
 });
 
+const axios = require('axios');
+
+// Bot pre-renderer for dynamic rendering (SEO and Google AdSense compliance)
+router.get('/bot-render/:path*', async (req, res) => {
+  try {
+    const rawPath = req.params.path || '';
+    // Normalize path by stripping leading/trailing slashes
+    const normalizedPath = rawPath.replace(/^\/+|\/+$/g, '');
+    
+    console.log(`🤖 [BotRender] Serving crawler bot request for path: /${normalizedPath}`);
+    
+    // 1. Fetch HTML template from Vercel deployment
+    let template = '';
+    try {
+      const resp = await axios.get('https://job-peach-three.vercel.app/index.html', {
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+      });
+      template = resp.data;
+    } catch (err) {
+      console.error('Failed to fetch template from Vercel, using fallback:', err.message);
+      template = `<!doctype html><html><head><title>NextJobPost</title><meta name="description" content="NextJobPost"></head><body><div id="root"></div></body></html>`;
+    }
+
+    let seoTitle = 'NextJobPost - Latest Fresher Jobs & Internships';
+    let seoDesc = 'Find the latest off-campus job drives, internships, and career opportunities for freshers in India. Apply to top IT, Software, and Tech roles.';
+    let seoBody = '';
+
+    // 2. Route classification
+    if (normalizedPath.startsWith('books/')) {
+      // Book detail route
+      const slug = normalizedPath.substring(6); // strip 'books/'
+      
+      // Load books database
+      let books = [];
+      try {
+        const booksPath = path.resolve(__dirname, '../../client/src/data/books.json');
+        if (fs.existsSync(booksPath)) {
+          books = JSON.parse(fs.readFileSync(booksPath, 'utf8'));
+        }
+      } catch (e) { /* skip */ }
+      
+      if (books.length === 0) {
+        try {
+          const resp = await axios.get('https://job-peach-three.vercel.app/src/data/books.json');
+          books = resp.data;
+        } catch (e) { /* skip */ }
+      }
+      
+      const book = books.find(b => b.slug === slug);
+      if (book) {
+        seoTitle = `${book.title} | Handpicked Prep Books | NextJobPost`;
+        seoDesc = `${book.title} by ${book.author}. ${book.description ? book.description.substring(0, 150) : ''}`;
+        
+        const whyRecommendHtml = (book.whyRecommend || []).map(w => `<li>${w}</li>`).join('');
+        seoBody = `
+          <div style="font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
+            <h1>${book.title}</h1>
+            <h2>Author: ${book.author}</h2>
+            <p><strong>Category:</strong> ${book.category}</p>
+            <p><strong>Price:</strong> ₹${book.price} (MRP: ₹${book.oldPrice || ''})</p>
+            <p><strong>Rating:</strong> ${book.rating}★ (${book.reviews || 0} reviews)</p>
+            <hr />
+            <h3>Book Description:</h3>
+            <p>${book.description || ''}</p>
+            <h3>Why We Recommend:</h3>
+            <ul>${whyRecommendHtml}</ul>
+            <p>Buy on Amazon: <a href="https://www.amazon.in/dp/${book.asin}?tag=nextjobpost-21">https://www.amazon.in/dp/${book.asin}</a></p>
+          </div>
+        `;
+      }
+    } else if (normalizedPath.startsWith('books')) {
+      // General books listing route
+      seoTitle = 'Handpicked Preparation Books for Jobs & competitive Exams | NextJobPost';
+      seoDesc = 'Browse handpicked preparation books for coding interviews, aptitude tests, government exams, and career building.';
+      seoBody = `
+        <div style="font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
+          <h1>Handpicked Preparation Books</h1>
+          <p>Find the best preparation books recommended by top professionals and exam toppers.</p>
+        </div>
+      `;
+    } else {
+      // Default: Check if path matches a job slug in the database
+      try {
+        const job = await Job.findOne({ slug: normalizedPath });
+        if (job) {
+          seoTitle = `${job.title} | ${job.company} Recruitment Drive 2026`;
+          seoDesc = `Apply for the ${job.title} job position at ${job.company} in ${job.location || 'India'}. Required experience: ${job.experience || 'Freshers'}. Apply online directly on the official hiring portal.`;
+          
+          const reqsHtml = (job.requirements || []).map(r => `<li>${r}</li>`).join('');
+          const respsHtml = (job.responsibilities || []).map(r => `<li>${r}</li>`).join('');
+          const skillsHtml = (job.skills || []).map(s => `<span style="background:#f1f5f9; padding:4px 8px; border-radius:4px; margin-right:5px; font-size:12px;">${s}</span>`).join(' ');
+          
+          seoBody = `
+            <div style="font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; line-height: 1.6;">
+              <h1 style="color: #2563eb; margin-bottom: 5px;">${job.title}</h1>
+              <h2 style="margin-top: 0; color: #475569;">${job.company}</h2>
+              <p><strong>Location:</strong> ${job.location || 'India'}</p>
+              <p><strong>Job Type:</strong> ${job.type || 'Full-Time'}</p>
+              <p><strong>Experience:</strong> ${job.experience || 'Freshers / Experienced'}</p>
+              <p><strong>Education:</strong> ${job.education || 'Graduate'}</p>
+              <p><strong>Salary Package:</strong> ${job.salary || 'Best in Industry'}</p>
+              
+              <div style="margin: 15px 0;">
+                <strong>Skills Required:</strong>
+                <div style="margin-top: 5px;">${skillsHtml}</div>
+              </div>
+              
+              <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;" />
+              
+              <h3>Job Description:</h3>
+              <div>${job.jobDescription || ''}</div>
+              
+              ${reqsHtml ? `<h3>Requirements & Qualifications:</h3><ul>${reqsHtml}</ul>` : ''}
+              ${respsHtml ? `<h3>Responsibilities & Key Tasks:</h3><ul>${respsHtml}</ul>` : ''}
+              
+              <div style="margin-top: 30px; background: #eff6ff; padding: 15px; border-radius: 8px; border: 1px solid #bfdbfe;">
+                <h3 style="margin-top: 0;">How to Apply:</h3>
+                <p>Submit your application directly to the hiring employer's portal using the verified link below:</p>
+                <a href="${job.applyLink}" style="display: inline-block; background: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold;">Apply Direct Online</a>
+              </div>
+            </div>
+          `;
+        }
+      } catch (err) {
+        console.error('Error fetching job details for bot render:', err.message);
+      }
+    }
+
+    // 3. Inject SEO metadata and body content into template
+    let rendered = template;
+    
+    // Replace <title> tag
+    rendered = rendered.replace(/<title>[\s\S]*?<\/title>/i, `<title>${seoTitle}</title>`);
+    
+    // Replace description meta tag if it exists, otherwise insert it
+    if (rendered.includes('name="description"')) {
+      rendered = rendered.replace(/<meta[^>]*name="description"[^>]*content="[^"]*"[^>]*>/i, `<meta name="description" content="${seoDesc}" />`);
+    } else {
+      rendered = rendered.replace(/<\/head>/i, `<meta name="description" content="${seoDesc}" />\n</head>`);
+    }
+    
+    // Replace <div id="root"> content
+    if (seoBody) {
+      rendered = rendered.replace(/<div id="root">[\s\S]*?<\/div>/i, `<div id="root">${seoBody}</div>`);
+    }
+    
+    res.send(rendered);
+  } catch (err) {
+    console.error('Error in bot renderer:', err);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
 module.exports = router;
