@@ -2,6 +2,7 @@ const QueueJob = require('../models/QueueJob');
 const FailedQueueJob = require('../models/FailedQueueJob');
 const SeenJob = require('../models/SeenJob');
 const LinkedinGovtPost = require('../models/LinkedinGovtPost');
+const Job = require('../models/Job');
 
 // 1. Add job to queue
 exports.addJob = async (req, res) => {
@@ -39,26 +40,59 @@ exports.addJob = async (req, res) => {
   }
 };
 
-// 2. Atomically retrieve and delete up to `limit` jobs (prioritizes private jobs)
+// 2. Atomically retrieve and delete up to `limit` jobs (aims for 80% private, 20% govt daily ratio)
 exports.getJobsBatch = async (req, res) => {
   try {
     const limit = parseInt(req.query.limit || req.body.limit || 1, 10);
     const jobs = [];
 
-    // Atomically find and delete limit number of jobs using findOneAndDelete to prevent race conditions
+    // Calculate how many jobs of each type have been posted today
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const privateCount = await Job.countDocuments({ isGovernment: false, createdAt: { $gte: startOfDay } });
+    const govtCount = await Job.countDocuments({ isGovernment: true, createdAt: { $gte: startOfDay } });
+    const totalToday = privateCount + govtCount;
+
+    // We target 20% government jobs daily.
+    // If we have posted today, and the current government ratio is less than 20%, we prefer a government job.
+    let preferGovernment = false;
+    if (totalToday > 0) {
+      const currentGovtRatio = govtCount / totalToday;
+      if (currentGovtRatio < 0.20) {
+        preferGovernment = true;
+      }
+    }
+
     for (let i = 0; i < limit; i++) {
-      // 1. Try to fetch private jobs first (isGovernment = false)
-      let job = await QueueJob.findOneAndDelete(
-        { isGovernment: false },
-        { sort: { priority: -1, timestamp: 1 } }
-      );
-      
-      // 2. If no private jobs, fetch government jobs
-      if (!job) {
+      let job = null;
+
+      if (preferGovernment) {
+        // Try to fetch government job first
         job = await QueueJob.findOneAndDelete(
           { isGovernment: true },
           { sort: { priority: -1, timestamp: 1 } }
         );
+        // Fallback to private job if no govt jobs are in queue
+        if (!job) {
+          job = await QueueJob.findOneAndDelete(
+            { isGovernment: false },
+            { sort: { priority: -1, timestamp: 1 } }
+          );
+        }
+      } else {
+        // Try to fetch private job first
+        job = await QueueJob.findOneAndDelete(
+          { isGovernment: false },
+          { sort: { priority: -1, timestamp: 1 } }
+        );
+        // Fallback to government job if no private jobs are in queue
+        if (!job) {
+          job = await QueueJob.findOneAndDelete(
+            { isGovernment: true },
+            { sort: { priority: -1, timestamp: 1 } }
+          );
+        }
       }
 
       if (job) {
@@ -71,6 +105,15 @@ exports.getJobsBatch = async (req, res) => {
           timestamp: job.timestamp,
           retries: job.retries
         });
+        
+        // Dynamically toggle preference for the next item in the batch (if limit > 1)
+        if (job.isGovernment) {
+          preferGovernment = false;
+        } else {
+          const tempTotal = totalToday + jobs.length;
+          const tempGovtCount = govtCount + jobs.filter(j => j.is_government).length;
+          preferGovernment = (tempGovtCount / tempTotal) < 0.20;
+        }
       } else {
         break; // Queue is fully empty
       }
