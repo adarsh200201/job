@@ -813,6 +813,10 @@ router.get('/bot-render/:path*', async (req, res) => {
       rendered = rendered.replace(/<div id="root">[\s\S]*?<\/div>/i, `<div id="root">${seoBody}</div>`);
     }
     
+    // Strip React entry scripts for bots so they don't boot up the heavy JS bundle
+    rendered = rendered.replace(/<script\b[^>]*src="\/src\/main\.jsx"[^>]*><\/script>/gi, '');
+    rendered = rendered.replace(/<script\b[^>]*type="module"[^>]*>[\s\S]*?<\/script>/gi, '');
+    
     res.send(rendered);
   } catch (err) {
     console.error('Error in bot renderer:', err);

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 
 export default function PrepLayout({ children, headerContent }) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -131,8 +132,36 @@ export default function PrepLayout({ children, headerContent }) {
     </>
   );
 
+  // Dynamic SEO configurations based on pathname
+  let seoTitle = 'Free Placement Preparation Hub — Aptitude, DSA & Technical MCQs | NextJobPost';
+  let seoDesc = 'Access free interview and exam preparation resources. Practice mock tests, DSA coding questions, technical interview Q&A, and aptitude questions.';
+
+  if (location.pathname === '/preparation/technical') {
+    seoTitle = 'Technical Interview Questions & Coding MCQs Prep | NextJobPost';
+    seoDesc = 'Prepare for technical rounds with practice questions and detailed explanations on Java, JavaScript, Python, SQL, React, OS, and computer networks.';
+  } else if (location.pathname === '/preparation/mock-tests') {
+    seoTitle = 'Free Online Mock Tests & Placement Practice Papers | NextJobPost';
+    seoDesc = 'Take free mock tests for campus placements and competitive exams. Practice quantitative aptitude, verbal ability, and logical reasoning tests.';
+  } else if (location.pathname === '/preparation/gov') {
+    seoTitle = 'Government Exam Preparation Portal — GK & English | NextJobPost';
+    seoDesc = 'Get free study material and GK/English mock questions for SSC, Banking, Railway, UPSC, and state government recruitment exams.';
+  } else if (location.pathname === '/preparation/dsa') {
+    seoTitle = 'Data Structures & Algorithms (DSA) Interview Prep | NextJobPost';
+    seoDesc = 'Master DSA coding interview patterns. Practice array, string, linked list, tree, graph, and dynamic programming questions with optimal solutions.';
+  } else if (location.pathname === '/preparation/aptitude') {
+    seoTitle = 'Quantitative Aptitude & Reasoning Prep for Placements | NextJobPost';
+    seoDesc = 'Practice quantitative aptitude and logical reasoning questions. Solve shortcut tricks and mock papers for company recruitment tests.';
+  } else if (location.pathname === '/preparation/company') {
+    seoTitle = 'Company-Wise Interview Preparation Guides & Placement Papers | NextJobPost';
+    seoDesc = 'Prepare for specific product and service companies like TCS, Infosys, Wipro, Accenture, Amazon, and Google with previous placement papers.';
+  }
+
   return (
     <div className="hub-outer-container">
+      <Helmet>
+        <title>{seoTitle}</title>
+        <meta name="description" content={seoDesc} />
+      </Helmet>
       <style>{`
         .hub-outer-container {
           display: flex;

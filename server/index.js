@@ -119,7 +119,14 @@ app.use(inputSanitizer);
 // Prerender middleware for SEO crawler bots (Option 1)
 const prerenderNode = require('prerender-node');
 if (process.env.PRERENDER_TOKEN) {
-  app.use(prerenderNode.set('prerenderToken', process.env.PRERENDER_TOKEN));
+  const prerenderMiddleware = prerenderNode.set('prerenderToken', process.env.PRERENDER_TOKEN);
+  app.use((req, res, next) => {
+    // Bypass Prerender.io for API and custom bot-render routes to prevent infinite loop
+    if (req.path.startsWith('/bot-render') || req.path.startsWith('/api') || req.path.startsWith('/uploads')) {
+      return next();
+    }
+    prerenderMiddleware(req, res, next);
+  });
 } else {
   // eslint-disable-next-line no-console
   console.warn('⚠️  PRERENDER_TOKEN not set in server env — crawlers might not be optimized via Prerender.io.');
