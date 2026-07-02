@@ -1,0 +1,912 @@
+[
+  {
+    "slug": "human-edge-in-the-ai-age",
+    "asin": "0143461419",
+    "title": "Human Edge in the AI Age",
+    "subtitle": "Eight Timeless Mantras for Success",
+    "author": "Nitin Seth",
+    "category": "career",
+    "price": 359,
+    "oldPrice": 699,
+    "rating": 4.4,
+    "reviews": 1200,
+    "publisher": "Penguin Portfolio",
+    "publishedDate": "2024-03-20",
+    "language": "English",
+    "formats": [
+      "Hardcover",
+      "Kindle Edition",
+      "Audiobook"
+    ],
+    "discountPercent": 49,
+    "badge": "must-buy",
+    "priceLastCheckedAt": "2026-07-02",
+    "description": "Human Edge in the AI Age provides a roadmap for professionals and students trying to navigate the complex disruptions of artificial intelligence. It emphasizes that while AI is automating technical tasks, the human elements like leadership, empathy, creativity, and strategic thinking are more valuable than ever. Nitin Seth outlines eight practical mantras that help readers build a strong personal brand, master continuous learning, and remain indispensable in a technology-driven workforce.",
+    "whyRecommend": [
+      "Explains the exact career skills that AI cannot automate, giving you a competitive edge.",
+      "Offers a structured framework to build adaptability and continuous learning habits.",
+      "Written by a top global business leader with deep experience in digital transformation."
+    ],
+    "relatedSlugs": [
+      "cracking-the-coding-interview",
+      "word-power-made-easy"
+    ],
+    "isbn": "0143461419"
+  },
+  {
+    "slug": "cracking-the-coding-interview",
+    "asin": "0984782850",
+    "title": "Cracking the Coding Interview",
+    "subtitle": "189 Programming Questions and Solutions",
+    "author": "Gayle Laakmann McDowell",
+    "category": "interview",
+    "price": 799,
+    "oldPrice": 1995,
+    "rating": 4.4,
+    "reviews": 22400,
+    "publisher": "CareerCup",
+    "publishedDate": "2015-07-01",
+    "language": "English",
+    "formats": [
+      "Paperback",
+      "Kindle Edition"
+    ],
+    "discountPercent": 60,
+    "badge": "must-buy",
+    "priceLastCheckedAt": "2026-07-02",
+    "description": "This is the undisputed bible for technical interview preparation at top software engineering firms. It covers 189 programming questions ranging from basic algorithms and data structures to system design and brain teasers. The author, a former software engineer and interviewer at Google, Microsoft, and Apple, provides detailed walkthroughs and optimal solutions in Java for every single problem.",
+    "whyRecommend": [
+      "Provides 189 real interview questions asked by top tech giants like Google, Amazon, and Meta.",
+      "Breaks down complex data structures and algorithms into easy-to-understand concepts.",
+      "Includes essential advice on soft skills and behavioral questions for software engineers."
+    ],
+    "relatedSlugs": [
+      "designing-data-intensive-applications",
+      "human-edge-in-the-ai-age"
+    ],
+    "isbn": "0984782850"
+  },
+  {
+    "slug": "designing-data-intensive-applications",
+    "asin": "9368089043",
+    "title": "Designing Data-Intensive Applications",
+    "subtitle": "The Big Ideas Behind Reliable, Scalable, and Maintainable Systems",
+    "author": "Martin Kleppmann",
+    "category": "tech",
+    "price": 1950,
+    "oldPrice": 3499,
+    "rating": 4.7,
+    "reviews": 14500,
+    "publisher": "O'Reilly Media",
+    "publishedDate": "2017-03-16",
+    "language": "English",
+    "formats": [
+      "Paperback",
+      "Kindle Edition"
+    ],
+    "discountPercent": 44,
+    "badge": "editor-pick",
+    "priceLastCheckedAt": "2026-07-02",
+    "description": "If you are preparing for system design interviews or want to build robust software systems at scale, this book is an absolute necessity. Martin Kleppmann thoroughly details the fundamental concepts of data storage, processing, and retrieval. It compares relational databases with NoSQL stores, analyzes replication and sharding strategies, and explains the trade-offs of modern distributed systems.",
+    "whyRecommend": [
+      "The most recommended resource globally for mastering system design rounds.",
+      "Compares databases, caching tools, and message queues in a highly objective manner.",
+      "Equips you with the architectural knowledge needed to design systems that handle millions of users."
+    ],
+    "relatedSlugs": [
+      "cracking-the-coding-interview",
+      "human-edge-in-the-ai-age"
+    ],
+    "isbn": "9368089043"
+  },
+  {
+    "slug": "quantitative-aptitude-rs-aggarwal",
+    "asin": "8121908957",
+    "title": "Quantitative Aptitude for Competitive Examinations",
+    "subtitle": "Fully Solved Guide for SSC, Banking, and Placement Exams",
+    "author": "R.S. Aggarwal",
+    "category": "aptitude",
+    "price": 200,
+    "oldPrice": 695,
+    "rating": 3.4,
+    "reviews": 28400,
+    "publisher": "S. Chand Publishing",
+    "publishedDate": "2020-01-01",
+    "language": "English",
+    "formats": [
+      "Paperback"
+    ],
+    "discountPercent": 71,
+    "badge": "bestseller",
+    "priceLastCheckedAt": "2026-07-02",
+    "description": "Quantitative Aptitude is the foundation book for almost all major competitive exams in India, including SSC CGL, Bank PO, Railways, and campus placements. It covers a vast range of mathematical topics from number systems, percentage, and profit & loss to advanced geometry and data interpretation.",
+    "whyRecommend": [
+      "Covers over 5,500 practice questions with detailed, step-by-step solutions.",
+      "The absolute standard for aptitude test prep in India for the last two decades.",
+      "Includes shortcut formulas and speed math tricks that are crucial for cracking exams."
+    ],
+    "relatedSlugs": [
+      "verbal-non-verbal-reasoning-rs-aggarwal",
+      "lucent-general-knowledge"
+    ],
+    "isbn": "8121908957"
+  },
+  {
+    "slug": "verbal-non-verbal-reasoning-rs-aggarwal",
+    "asin": "9352534034",
+    "title": "A Modern Approach to Verbal & Non-Verbal Reasoning",
+    "subtitle": "Comprehensive Guide for Logical Reasoning Test Prep",
+    "author": "R.S. Aggarwal",
+    "category": "aptitude",
+    "price": 560,
+    "oldPrice": 895,
+    "rating": 4.4,
+    "reviews": 18500,
+    "publisher": "S. Chand Publishing",
+    "publishedDate": "2018-05-10",
+    "language": "English",
+    "formats": [
+      "Paperback"
+    ],
+    "discountPercent": 37,
+    "badge": "editor-pick",
+    "priceLastCheckedAt": "2026-07-02",
+    "description": "This book is the definitive guide for mastering the logical reasoning section of competitive examinations. It is split into two major parts: Verbal Reasoning (analogy, classification, series, coding-decoding, blood relations, and puzzles) and Non-Verbal Reasoning (mirror images, paper folding, cubes and dice, and pattern completion).",
+    "whyRecommend": [
+      "Complete coverage of both verbal and non-verbal reasoning patterns.",
+      "Highly structured chapters starting from basic concepts to advanced puzzle configurations.",
+      "Contains thousands of solved examples and practice questions directly matching current exam patterns."
+    ],
+    "relatedSlugs": [
+      "quantitative-aptitude-rs-aggarwal",
+      "lucent-general-knowledge"
+    ],
+    "isbn": "9352534034"
+  },
+  {
+    "slug": "word-power-made-easy",
+    "asin": "0143424524",
+    "title": "Word Power Made Easy",
+    "subtitle": "The Complete Handbook for Building a Superior Vocabulary",
+    "author": "Norman Lewis",
+    "category": "govt",
+    "price": 150,
+    "oldPrice": 299,
+    "rating": 4.7,
+    "reviews": 42000,
+    "publisher": "Anchor Books",
+    "publishedDate": "2014-06-01",
+    "language": "English",
+    "formats": [
+      "Paperback",
+      "Kindle Edition"
+    ],
+    "discountPercent": 50,
+    "badge": "bestseller",
+    "priceLastCheckedAt": "2026-07-02",
+    "description": "Word Power Made Easy is a highly effective, time-tested guide for improving your English vocabulary. Rather than asking readers to memorize lists of words, Norman Lewis explains word roots, prefixes, and suffixes. This etymological approach allows readers to deduce the meaning of unfamiliar words instantly.",
+    "whyRecommend": [
+      "Teaches word roots so you can figure out the meaning of thousands of words you haven't seen before.",
+      "Crucial for high scores in the English sections of SSC, Banking, GRE, and CAT exams.",
+      "Interactive exercises and tests keep you engaged and track your progress daily."
+    ],
+    "relatedSlugs": [
+      "objective-general-english-sp-bakshi",
+      "lucent-general-knowledge"
+    ],
+    "isbn": "0143424524"
+  },
+  {
+    "slug": "objective-general-english-sp-bakshi",
+    "asin": "8174826718",
+    "title": "Objective General English",
+    "subtitle": "Grammar, Vocabulary & Comprehension Practice Workbook",
+    "author": "S.P. Bakshi",
+    "category": "govt",
+    "price": 390,
+    "oldPrice": 595,
+    "rating": 5,
+    "reviews": 15200,
+    "publisher": "Arihant Publications",
+    "publishedDate": "2014-04-15",
+    "language": "English",
+    "formats": [
+      "Paperback"
+    ],
+    "discountPercent": 34,
+    "badge": "editor-pick",
+    "priceLastCheckedAt": "2026-07-02",
+    "description": "Objective General English is a highly comprehensive workbook designed to prepare students for the English grammar and comprehension sections of competitive examinations. It is divided into three key parts: Foundation Module, Verbal Ability, and Practical Grammar.",
+    "whyRecommend": [
+      "Excellent explanation of grammar rules with clear examples and exceptions.",
+      "Wide range of fill-in-the-blanks, error detection, and paragraph completion questions.",
+      "Perfect for candidates preparing for SSC CGL, Banking, and NDA English papers."
+    ],
+    "relatedSlugs": [
+      "word-power-made-easy",
+      "lucent-general-knowledge"
+    ],
+    "isbn": "8174826718"
+  },
+  {
+    "slug": "lucent-general-knowledge",
+    "asin": "8174820070",
+    "title": "Lucent's General Knowledge",
+    "subtitle": "Static General Knowledge Reference Guide",
+    "author": "Lucent Publication",
+    "category": "govt",
+    "price": 320,
+    "oldPrice": 495,
+    "rating": 4.6,
+    "reviews": 42100,
+    "publisher": "Lucent Publications",
+    "publishedDate": "2023-01-10",
+    "language": "English",
+    "formats": [
+      "Paperback"
+    ],
+    "discountPercent": 35,
+    "badge": "bestseller",
+    "priceLastCheckedAt": "2026-07-02",
+    "description": "Lucent's General Knowledge is widely regarded as the ultimate guide for static GK preparation in India. It compiles essential facts and summaries across history, geography, Indian polity, constitution, economy, general science (physics, chemistry, biology), and miscellaneous topics.",
+    "whyRecommend": [
+      "The absolute benchmark for static GK and science facts for competitive exams in India.",
+      "Presents information in structured tables and bullet points for fast revision.",
+      "Covers a massive range of subjects including history, polity, geography, and general science."
+    ],
+    "relatedSlugs": [
+      "indian-polity-m-laxmikanth",
+      "word-power-made-easy"
+    ],
+    "isbn": "8174820070"
+  },
+  {
+    "slug": "indian-polity-m-laxmikanth",
+    "asin": "9353166950",
+    "title": "Indian Polity",
+    "subtitle": "The Definitive Guide for Civil Services Examinations",
+    "author": "M. Laxmikanth",
+    "category": "govt",
+    "price": 640,
+    "oldPrice": 1195,
+    "rating": 4.3,
+    "reviews": 34200,
+    "publisher": "McGraw Hill India",
+    "publishedDate": "2023-07-25",
+    "language": "English",
+    "formats": [
+      "Paperback",
+      "Kindle Edition"
+    ],
+    "discountPercent": 46,
+    "badge": "must-buy",
+    "priceLastCheckedAt": "2026-07-02",
+    "description": "M. Laxmikanth's Indian Polity is the undisputed textbook for civil services aspirants and state commission candidates. The book covers the entire structure, functioning, and history of the Indian political system, constitutional provisions, union-state relations, constitutional bodies, and judicial systems.",
+    "whyRecommend": [
+      "Known as the 'Bible of Indian Polity' for civil services and government job exams.",
+      "Includes previous years' prelims and mains questions with detailed explanations.",
+      "Excellent formatting with colored tables, notes, and indexes for quick reference."
+    ],
+    "relatedSlugs": [
+      "lucent-general-knowledge",
+      "word-power-made-easy"
+    ],
+    "isbn": "9353166950"
+  },
+  {
+    "slug": "knock-em-dead-resumes",
+    "asin": "9351031381",
+    "title": "Knock 'em Dead Resumes",
+    "subtitle": "A Killer Resume Gets More Job Interviews",
+    "author": "Martin Yate",
+    "category": "resume",
+    "price": 198,
+    "oldPrice": 799,
+    "rating": 4.6,
+    "reviews": 4200,
+    "publisher": "Adams Media",
+    "publishedDate": "2016-10-15",
+    "language": "English",
+    "formats": [
+      "Paperback",
+      "Kindle Edition"
+    ],
+    "discountPercent": 75,
+    "badge": "editor-pick",
+    "priceLastCheckedAt": "2026-07-02",
+    "description": "Written by a top career consultant, Knock 'em Dead Resumes offers a step-by-step framework to draft professional resumes that pass applicant tracking systems (ATS). The book details how to target resumes to specific job descriptions, select active power verbs, and highlight measurable achievements.",
+    "whyRecommend": [
+      "Teaches you how to optimize your resume with keywords to beat modern ATS systems.",
+      "Includes real-world before-and-after resume templates that you can copy directly.",
+      "Shows how to turn boring job descriptions into achievement-oriented action points."
+    ],
+    "relatedSlugs": [
+      "human-edge-in-the-ai-age",
+      "cracking-the-coding-interview"
+    ],
+    "isbn": "9351031381"
+  },
+  {
+    "slug": "beyond-cracking-the-coding-interview",
+    "asin": "9355424485",
+    "title": "Beyond Cracking the Coding Interview",
+    "subtitle": "Pass Tough Coding Interviews, Get Noticed, and Negotiate Successfully",
+    "author": "Gayle Laakmann McDowell",
+    "category": "interview",
+    "price": 1500,
+    "oldPrice": 2025,
+    "rating": 4.4,
+    "reviews": 282,
+    "publisher": "Careerforge",
+    "publishedDate": "",
+    "language": "English",
+    "formats": [
+      "Paperback"
+    ],
+    "discountPercent": 26,
+    "badge": "editor-pick",
+    "priceLastCheckedAt": "2026-07-02",
+    "description": "The definitive next-step after Cracking the Coding Interview. Covers negotiation tactics, behavioral rounds, how to stand out at FAANG companies, and strategies to navigate today's tougher hiring climate with real examples and scripts.",
+    "whyRecommend": [
+      "Covers negotiation scripts and behavioral interview strategies that CTCI misses.",
+      "Written by Gayle McDowell — the original author of Cracking the Coding Interview.",
+      "Rated 4.4★ by 280+ verified buyers on Amazon India."
+    ],
+    "relatedSlugs": [
+      "cracking-the-coding-interview",
+      "dynamic-programming-for-coding-interviews-a-bottom-up-approach-to"
+    ],
+    "isbn": "9355424485"
+  },
+  {
+    "slug": "dynamic-programming-for-coding-interviews",
+    "asin": "1946556696",
+    "title": "Dynamic Programming for Coding Interviews",
+    "subtitle": "A Bottom-Up Approach to Problem Solving",
+    "author": "Meenakshi & Kamal Rawat",
+    "category": "interview",
+    "price": 359,
+    "oldPrice": 399,
+    "rating": 4.4,
+    "reviews": 245,
+    "publisher": "Notion Press",
+    "publishedDate": "",
+    "language": "English",
+    "formats": [
+      "Paperback"
+    ],
+    "discountPercent": 10,
+    "badge": "editor-pick",
+    "priceLastCheckedAt": "2026-07-02",
+    "description": "The clearest guide to mastering dynamic programming — one of the most feared interview topics. Explains DP from scratch using a bottom-up approach, with step-by-step solutions to 50+ classic LeetCode-style problems.",
+    "whyRecommend": [
+      "Teaches DP with intuitive bottom-up thinking, not confusing recursion-first approaches.",
+      "Covers all major DP patterns: knapsack, LCS, matrix chain, coin change, and more.",
+      "Available at ₹359 — one of the best-value interview prep books on Amazon India."
+    ],
+    "relatedSlugs": [
+      "cracking-the-coding-interview",
+      "beyond-cracking-the-coding-interview-pass-tough-coding-interviews"
+    ],
+    "isbn": "1946556696"
+  },
+  {
+    "slug": "system-design-interview-volume-1",
+    "asin": "9355427190",
+    "title": "System Design Interview: An Insider's Guide — Volume 1",
+    "subtitle": "Step-by-Step Design of Real-World Systems",
+    "author": "Alex Xu",
+    "category": "interview",
+    "price": 1400,
+    "oldPrice": 1890,
+    "rating": 4.4,
+    "reviews": 247,
+    "publisher": "Byte Code LLC",
+    "publishedDate": "",
+    "language": "English",
+    "formats": [
+      "Paperback"
+    ],
+    "discountPercent": 26,
+    "badge": "editor-pick",
+    "priceLastCheckedAt": "2026-07-02",
+    "description": "The industry standard for system design interview preparation. Alex Xu walks through 15+ large-scale system problems — rate limiters, URL shorteners, web crawlers, notification services, and distributed caches — with detailed diagrams.",
+    "whyRecommend": [
+      "Rated 4.4★ by 245+ readers — most widely referenced system design prep book globally.",
+      "Covers every classic system design question asked at Google, Meta, Amazon, and Microsoft.",
+      "Full-colour diagrams make complex distributed systems easy to understand and draw in interviews."
+    ],
+    "relatedSlugs": [
+      "cracking-the-coding-interview",
+      "beyond-cracking-the-coding-interview-pass-tough-coding-interviews"
+    ],
+    "isbn": "9355427190"
+  },
+  {
+    "slug": "system-design-interview-2-volume-set",
+    "asin": "9355426844",
+    "title": "System Design Interview: 2-Volume Complete Set",
+    "subtitle": "An Insider's Guide — Volumes 1 & 2",
+    "author": "Alex Xu",
+    "category": "interview",
+    "price": 3075,
+    "oldPrice": 3225,
+    "rating": 4.4,
+    "reviews": 270,
+    "publisher": "Byte Code LLC",
+    "publishedDate": "",
+    "language": "English",
+    "formats": [
+      "Paperback"
+    ],
+    "discountPercent": 5,
+    "badge": "editor-pick",
+    "priceLastCheckedAt": "2026-07-02",
+    "description": "The complete 2-volume System Design Interview set by Alex Xu. Volume 1 covers foundational distributed systems; Volume 2 advances to proximity services, real-time gaming, payment systems, and digital wallet design.",
+    "whyRecommend": [
+      "Covers 30+ real-world system design problems across both volumes.",
+      "Volume 2 includes advanced topics like Yelp-style proximity search and Uber surge pricing.",
+      "Best value bundle for anyone seriously preparing for senior software engineering interviews."
+    ],
+    "relatedSlugs": [
+      "cracking-the-coding-interview",
+      "beyond-cracking-the-coding-interview-pass-tough-coding-interviews"
+    ],
+    "isbn": "9355426844"
+  },
+  {
+    "slug": "ultimate-python-programming",
+    "asin": "935551655X",
+    "title": "Ultimate Python Programming",
+    "subtitle": "Learn Python with 650+ Programs, 900+ Practice Questions, and 5 Projects",
+    "author": "Dr. Pooja Rattan",
+    "category": "tech",
+    "price": 615,
+    "oldPrice": 699,
+    "rating": 4.8,
+    "reviews": 65,
+    "publisher": "BPB Publications",
+    "publishedDate": "",
+    "language": "English",
+    "formats": [
+      "Paperback"
+    ],
+    "discountPercent": 12,
+    "badge": "editor-pick",
+    "priceLastCheckedAt": "2026-07-02",
+    "description": "The most comprehensive Python programming book for beginners to intermediate learners. Covers core Python, OOP, file handling, databases, Django basics, and data science libraries with 650+ working programs and 5 full-scale projects.",
+    "whyRecommend": [
+      "Rated 4.8★ — one of the highest-rated Python books currently on Amazon India.",
+      "Includes 900+ practice questions with solutions for placement exam preparation.",
+      "Covers both Python basics and advanced topics like decorators, generators, and async programming."
+    ],
+    "relatedSlugs": [
+      "designing-data-intensive-applications",
+      "microservices-design-patterns-with-java-70-patterns-for-designing"
+    ],
+    "isbn": "935551655X"
+  },
+  {
+    "slug": "microservices-design-patterns-java",
+    "asin": "9355517009",
+    "title": "Microservices Design Patterns with Java",
+    "subtitle": "70+ Patterns for Designing, Building, and Deploying Microservices",
+    "author": "Anupama Murthy",
+    "category": "tech",
+    "price": 723,
+    "oldPrice": 899,
+    "rating": 4.4,
+    "reviews": 28,
+    "publisher": "BPB Publications",
+    "publishedDate": "",
+    "language": "English",
+    "formats": [
+      "Paperback"
+    ],
+    "discountPercent": 20,
+    "badge": "editor-pick",
+    "priceLastCheckedAt": "2026-07-02",
+    "description": "A hands-on guide to 70+ microservices design patterns used by Netflix, Amazon, and Uber. Covers service mesh, API gateway, circuit breaker, saga, CQRS, event sourcing, and cloud-native deployment patterns with Java code examples.",
+    "whyRecommend": [
+      "Covers 70+ battle-tested patterns used at world-class tech companies.",
+      "Includes Docker, Kubernetes, and service mesh patterns essential for modern backend roles.",
+      "Practical Java code examples make abstract patterns immediately applicable to real projects."
+    ],
+    "relatedSlugs": [
+      "designing-data-intensive-applications",
+      "ultimate-python-programming-learn-python-with-650-programs-900-pr"
+    ],
+    "isbn": "9355517009"
+  },
+  {
+    "slug": "java-8-to-21-new-features",
+    "asin": "9355513925",
+    "title": "Java 8 to 21: New Features for Professional Programmers",
+    "subtitle": "Master Modern Java from Lambdas to Virtual Threads",
+    "author": "Dr. Venkat Subramaniam",
+    "category": "tech",
+    "price": 682,
+    "oldPrice": 799,
+    "rating": 4.4,
+    "reviews": 25,
+    "publisher": "BPB Publications",
+    "publishedDate": "",
+    "language": "English",
+    "formats": [
+      "Paperback"
+    ],
+    "discountPercent": 15,
+    "badge": "editor-pick",
+    "priceLastCheckedAt": "2026-07-02",
+    "description": "Covers every major Java version from 8 to 21 including lambdas, streams, optional, records, sealed classes, pattern matching, and virtual threads (Project Loom). Essential for Java developers preparing for interviews at product companies.",
+    "whyRecommend": [
+      "Single book covering all Java versions from 8 to 21 — no need to buy multiple references.",
+      "Virtual threads and pattern matching chapters are directly relevant to top Java interview questions.",
+      "Written by a Java champion and widely used in corporate Java training programs."
+    ],
+    "relatedSlugs": [
+      "designing-data-intensive-applications",
+      "ultimate-python-programming-learn-python-with-650-programs-900-pr"
+    ],
+    "isbn": "9355513925"
+  },
+  {
+    "slug": "atomic-habits",
+    "asin": "1847942490",
+    "title": "Atomic Habits",
+    "subtitle": "An Easy & Proven Way to Build Good Habits & Break Bad Ones",
+    "author": "James Clear",
+    "category": "career",
+    "price": 399,
+    "oldPrice": 799,
+    "rating": 4.6,
+    "reviews": 145000,
+    "publisher": "Penguin Random House",
+    "publishedDate": "2018-10-16",
+    "language": "English",
+    "formats": [
+      "Paperback",
+      "Kindle Edition",
+      "Audiobook"
+    ],
+    "discountPercent": 50,
+    "badge": "bestseller",
+    "description": "James Clear's Atomic Habits is the definitive guide to building good habits and breaking bad ones. Using a framework called the Four Laws of Behavior Change, Clear shows how tiny 1% improvements compound over time to create remarkable results. One of the best-selling self-improvement books of all time.",
+    "whyRecommend": [
+      "Over 15 million copies sold worldwide — one of the best-selling books of this decade.",
+      "Backed by science: the Four Laws framework is used by Olympic athletes and Fortune 500 CEOs.",
+      "Teaches exactly how to redesign your environment to make good habits automatic."
+    ],
+    "relatedSlugs": [
+      "human-edge-in-the-ai-age",
+      "deep-work"
+    ],
+    "priceLastCheckedAt": "2026-07-02",
+    "isbn": "1847942490"
+  },
+  {
+    "slug": "deep-work",
+    "asin": "0349411905",
+    "title": "Deep Work",
+    "subtitle": "Rules for Focused Success in a Distracted World",
+    "author": "Cal Newport",
+    "category": "career",
+    "price": 329,
+    "oldPrice": 699,
+    "rating": 4.5,
+    "reviews": 68000,
+    "publisher": "Piatkus",
+    "publishedDate": "2016-01-05",
+    "language": "English",
+    "formats": [
+      "Paperback",
+      "Kindle Edition"
+    ],
+    "discountPercent": 53,
+    "badge": "must-buy",
+    "description": "Cal Newport argues that the ability to focus without distraction is the new superpower of the knowledge economy. Deep Work teaches you how to train your brain to do cognitively demanding work without social media interruptions — the skill that separates top performers from average ones.",
+    "whyRecommend": [
+      "Provides a proven daily schedule framework for achieving 4+ hours of uninterrupted deep focus.",
+      "Directly applicable to software engineers, writers, designers, and anyone doing complex knowledge work.",
+      "Cal Newport has been practicing these techniques himself for over a decade — this is lived experience, not theory."
+    ],
+    "relatedSlugs": [
+      "atomic-habits",
+      "human-edge-in-the-ai-age"
+    ],
+    "priceLastCheckedAt": "2026-07-02",
+    "isbn": "1455586692"
+  },
+  {
+    "slug": "zero-to-one",
+    "asin": "0753555190",
+    "title": "Zero to One",
+    "subtitle": "Notes on Startups, or How to Build the Future",
+    "author": "Peter Thiel",
+    "category": "career",
+    "price": 299,
+    "oldPrice": 599,
+    "rating": 4.4,
+    "reviews": 52000,
+    "publisher": "Currency",
+    "publishedDate": "2014-09-16",
+    "language": "English",
+    "formats": [
+      "Paperback",
+      "Kindle Edition"
+    ],
+    "discountPercent": 50,
+    "badge": "must-buy",
+    "description": "PayPal co-founder Peter Thiel reveals the secret to building a business that creates entirely new value rather than copying existing ideas. Going from zero to one — creating something genuinely new — is rarer and harder than copying, but it's the only path to real innovation and lasting monopoly-like success.",
+    "whyRecommend": [
+      "Peter Thiel built PayPal, Palantir, and was the first outside investor in Facebook — this is elite thinking.",
+      "Challenges conventional wisdom about competition and monopoly in ways that permanently change how you see business.",
+      "Essential reading for product managers, entrepreneurs, and engineers who want to build truly impactful products."
+    ],
+    "relatedSlugs": [
+      "the-lean-startup",
+      "human-edge-in-the-ai-age"
+    ],
+    "priceLastCheckedAt": "2026-07-02",
+    "isbn": "0804139021"
+  },
+  {
+    "slug": "the-lean-startup",
+    "asin": "0307887898",
+    "title": "The Lean Startup",
+    "subtitle": "How Constant Innovation Creates Radically Successful Businesses",
+    "author": "Eric Ries",
+    "category": "career",
+    "price": 349,
+    "oldPrice": 699,
+    "rating": 4.3,
+    "reviews": 41000,
+    "publisher": "Portfolio Penguin",
+    "publishedDate": "2011-09-13",
+    "language": "English",
+    "formats": [
+      "Paperback",
+      "Kindle Edition"
+    ],
+    "discountPercent": 50,
+    "badge": "editor-pick",
+    "description": "Eric Ries introduces the Build-Measure-Learn feedback loop that powers the most successful modern startups. The Lean Startup methodology has been adopted by companies ranging from early-stage startups to established enterprises like GE and Toyota to accelerate innovation and reduce waste.",
+    "whyRecommend": [
+      "The Build-Measure-Learn framework is now standard curriculum at top MBA programs worldwide.",
+      "Explains validated learning and minimum viable product concepts used by every modern tech startup.",
+      "Essential for product managers, founders, and anyone working in fast-paced tech environments."
+    ],
+    "relatedSlugs": [
+      "zero-to-one",
+      "human-edge-in-the-ai-age"
+    ],
+    "priceLastCheckedAt": "2026-07-02",
+    "isbn": "0307887898"
+  },
+  {
+    "slug": "fast-track-arithmetic-rajesh-verma",
+    "asin": "9311123439",
+    "title": "Fast Track Arithmetic",
+    "subtitle": "Comprehensive Shortcuts & Tricks for Competitive Exams",
+    "author": "Rajesh Verma",
+    "category": "aptitude",
+    "price": 310,
+    "oldPrice": 495,
+    "rating": 4.4,
+    "reviews": 22000,
+    "publisher": "Arihant Publications",
+    "publishedDate": "2019-01-01",
+    "language": "English",
+    "formats": [
+      "Paperback"
+    ],
+    "discountPercent": 37,
+    "badge": "bestseller",
+    "description": "The most popular arithmetic shortcut book for SSC CGL, Bank PO, Railways, and campus placements. Covers all arithmetic topics with Vedic math tricks, speed formulas, and thousands of practice questions with step-by-step solutions.",
+    "whyRecommend": [
+      "Shortcut methods that help you solve arithmetic problems 3× faster than standard approaches.",
+      "Covers all arithmetic topics tested in SSC CGL, Bank PO, IBPS, and campus placement tests.",
+      "Used by thousands of exam toppers — one of the highest-selling aptitude books in India."
+    ],
+    "relatedSlugs": [
+      "quantitative-aptitude-rs-aggarwal",
+      "verbal-non-verbal-reasoning-rs-aggarwal"
+    ],
+    "priceLastCheckedAt": "2026-07-02",
+    "isbn": "9311123439"
+  },
+  {
+    "slug": "quicker-maths-m-tyra",
+    "asin": "9383746475",
+    "title": "Quicker Maths",
+    "subtitle": "Magical Book on Speed Mathematics for Competitive Exams",
+    "author": "M. Tyra",
+    "category": "aptitude",
+    "price": 475,
+    "oldPrice": 750,
+    "rating": 4.5,
+    "reviews": 31000,
+    "publisher": "BSC Publishing",
+    "publishedDate": "2020-01-01",
+    "language": "English",
+    "formats": [
+      "Paperback"
+    ],
+    "discountPercent": 37,
+    "badge": "bestseller",
+    "description": "The legendary speed math book that has helped thousands crack SSC and banking exams. Teaches Vedic math techniques, mental calculation shortcuts, and rapid problem-solving methods for complex arithmetic. Endorsed by countless banking exam toppers.",
+    "whyRecommend": [
+      "Teaches you to solve complex arithmetic calculations mentally in under 10 seconds.",
+      "Covers all speed math tricks relevant to IBPS PO, SBI PO, SSC CGL, and CAT exams.",
+      "Rated 4.5★ by over 31,000+ readers — one of India's highest-reviewed aptitude books."
+    ],
+    "relatedSlugs": [
+      "fast-track-arithmetic-rajesh-verma",
+      "quantitative-aptitude-rs-aggarwal"
+    ],
+    "priceLastCheckedAt": "2026-07-02",
+    "isbn": "9383746475"
+  },
+  {
+    "slug": "analytical-reasoning-mk-pandey",
+    "asin": "9383746181",
+    "title": "Analytical Reasoning",
+    "subtitle": "Complete Guide to Logical & Analytical Reasoning for Competitive Exams",
+    "author": "M.K. Pandey",
+    "category": "aptitude",
+    "price": 440,
+    "oldPrice": 695,
+    "rating": 4.4,
+    "reviews": 19000,
+    "publisher": "BSC Publishing",
+    "publishedDate": "2019-06-01",
+    "language": "English",
+    "formats": [
+      "Paperback"
+    ],
+    "discountPercent": 37,
+    "badge": "must-buy",
+    "description": "The go-to book for cracking analytical reasoning sections of SSC, banking, CLAT, and MBA entrance exams. Covers linear and circular seating arrangements, blood relations, syllogisms, direction sense, inequality, and complex multi-step logical puzzles.",
+    "whyRecommend": [
+      "Covers every reasoning pattern tested in SSC CGL, IBPS, CAT, XAT, CLAT, and UPSC CSAT.",
+      "Step-by-step solutions and logic explanations make even complex puzzle sets easy to master.",
+      "Rated 4.4★ by 19,000+ students — consistently recommended by bank and SSC exam toppers."
+    ],
+    "relatedSlugs": [
+      "verbal-non-verbal-reasoning-rs-aggarwal",
+      "quantitative-aptitude-rs-aggarwal"
+    ],
+    "priceLastCheckedAt": "2026-07-02",
+    "isbn": "9383746181"
+  },
+  {
+    "slug": "spectrum-modern-history-india",
+    "asin": "9385161040",
+    "title": "Spectrum's A Brief History of Modern India",
+    "subtitle": "For Civil Services and Other State Examinations",
+    "author": "Rajiv Ahir",
+    "category": "govt",
+    "price": 420,
+    "oldPrice": 675,
+    "rating": 4.5,
+    "reviews": 38000,
+    "publisher": "Spectrum Books",
+    "publishedDate": "2023-01-01",
+    "language": "English",
+    "formats": [
+      "Paperback"
+    ],
+    "discountPercent": 38,
+    "badge": "must-buy",
+    "description": "India's most trusted modern history book for UPSC Civil Services prelims and mains. Rajiv Ahir covers the complete arc of India's freedom struggle from 1857 Revolt through independence, with socio-religious reform movements, governor-generals, and constitutional developments.",
+    "whyRecommend": [
+      "The undisputed #1 book for Modern Indian History in UPSC and state PSC examinations.",
+      "Includes previous years' UPSC prelims questions mapped chapter-by-chapter for targeted practice.",
+      "Concise, table-based formatting makes it ideal for quick revision before the prelims exam."
+    ],
+    "relatedSlugs": [
+      "indian-polity-m-laxmikanth",
+      "lucent-general-knowledge"
+    ],
+    "priceLastCheckedAt": "2026-07-02",
+    "isbn": "9385161040"
+  },
+  {
+    "slug": "indian-economy-ramesh-singh",
+    "asin": "9353160707",
+    "title": "Indian Economy",
+    "subtitle": "For Civil Services and Other Competitive Examinations",
+    "author": "Ramesh Singh",
+    "category": "govt",
+    "price": 599,
+    "oldPrice": 950,
+    "rating": 4.3,
+    "reviews": 24000,
+    "publisher": "McGraw Hill India",
+    "publishedDate": "2023-08-01",
+    "language": "English",
+    "formats": [
+      "Paperback"
+    ],
+    "discountPercent": 37,
+    "badge": "editor-pick",
+    "description": "The most comprehensive Indian Economy book for UPSC and state PSC examinations. Ramesh Singh covers macroeconomics, fiscal and monetary policy, banking and financial sector, agriculture, industry, planning, and India's global economic position — with extensive newspaper-linked current affairs notes.",
+    "whyRecommend": [
+      "The go-to economy textbook recommended by almost every UPSC topper and coaching institute.",
+      "Updated every year with latest Budget provisions, RBI policies, and economic survey highlights.",
+      "Covers both theoretical concepts and practical applications relevant to prelims and mains answers."
+    ],
+    "relatedSlugs": [
+      "indian-polity-m-laxmikanth",
+      "spectrum-modern-history-india"
+    ],
+    "priceLastCheckedAt": "2026-07-02",
+    "isbn": "9353160707"
+  },
+  {
+    "slug": "never-eat-alone",
+    "asin": "0385512058",
+    "title": "Never Eat Alone",
+    "subtitle": "And Other Secrets to Success, One Relationship at a Time",
+    "author": "Keith Ferrazzi",
+    "category": "resume",
+    "price": 449,
+    "oldPrice": 899,
+    "rating": 4.4,
+    "reviews": 16000,
+    "publisher": "Currency",
+    "publishedDate": "2014-06-05",
+    "language": "English",
+    "formats": [
+      "Paperback",
+      "Kindle Edition"
+    ],
+    "discountPercent": 50,
+    "badge": "editor-pick",
+    "description": "Keith Ferrazzi reveals that career success is fundamentally about relationships, not just skills. Never Eat Alone teaches you how to build a genuine network of supporters, mentors, and collaborators — and how to give generously to your network before you ever need to ask for favors.",
+    "whyRecommend": [
+      "One of the most practical books on networking — teaches authentic relationship-building, not manipulation.",
+      "Keith Ferrazzi went from poverty to CEO by mastering the strategies in this book himself.",
+      "Essential reading for anyone entering the job market or transitioning to a new career."
+    ],
+    "relatedSlugs": [
+      "knock-em-dead-resumes",
+      "human-edge-in-the-ai-age"
+    ],
+    "priceLastCheckedAt": "2026-07-02",
+    "isbn": "0385512058"
+  },
+  {
+    "slug": "what-color-is-your-parachute",
+    "asin": "1984861204",
+    "title": "What Color Is Your Parachute?",
+    "subtitle": "Your Guide to a Lifetime of Meaningful Work and Career Success",
+    "author": "Richard N. Bolles",
+    "category": "resume",
+    "price": 799,
+    "oldPrice": 1499,
+    "rating": 4.3,
+    "reviews": 28000,
+    "publisher": "Ten Speed Press",
+    "publishedDate": "2022-08-23",
+    "language": "English",
+    "formats": [
+      "Paperback",
+      "Kindle Edition"
+    ],
+    "discountPercent": 47,
+    "badge": "must-buy",
+    "description": "The world's #1 career guide, updated annually and used by millions worldwide. What Color Is Your Parachute helps job seekers identify their unique skills, find work aligned with their values, master job hunting tactics, write a powerful resume, and negotiate salary confidently.",
+    "whyRecommend": [
+      "Over 10 million copies sold — the most-read career guide on the planet since 1970.",
+      "The Flower Exercise inside is one of the most effective self-assessment tools ever created.",
+      "Covers salary negotiation, informational interviews, and digital job hunting for the modern era."
+    ],
+    "relatedSlugs": [
+      "never-eat-alone",
+      "knock-em-dead-resumes"
+    ],
+    "priceLastCheckedAt": "2026-07-02",
+    "isbn": "1984861204"
+  }
+]

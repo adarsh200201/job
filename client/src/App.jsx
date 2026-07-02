@@ -85,6 +85,8 @@ const ProgrammaticSEOJobsPage = lazyWithRetry(() => import('./pages/Programmatic
 const TopicHubPage = lazyWithRetry(() => import('./pages/TopicHubPage.jsx'));
 const JobsCalendar = lazyWithRetry(() => import('./pages/JobsCalendar.jsx'));
 const CurrentAffairsHub = lazyWithRetry(() => import('./pages/CurrentAffairsHub.jsx'));
+const Books = lazyWithRetry(() => import('./pages/Books.jsx'));
+const BookDetails = lazyWithRetry(() => import('./pages/BookDetails.jsx'));
 
 // Loading fallback
 function LoadingFallback() {
@@ -601,6 +603,16 @@ function AppLayout() {
 
                 <NavDropdown label="More" items={moreItems} to="#" mega={true} />
 
+                <li style={{ listStyle: 'none' }}>
+                  <NavLink
+                    to="/books"
+                    className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+                    style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+                  >
+                    Books
+                  </NavLink>
+                </li>
+
                 <li style={{ listStyle: 'none', display: 'flex', alignItems: 'center', position: 'relative', marginLeft: '6px' }}>
                   {showSearch && (
                     <form
@@ -783,6 +795,9 @@ function AppLayout() {
               <NavLink to="/exam-dates" className={({ isActive }) => `mobile-menu-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
                 ⏰ Sarkari Exam Dates
               </NavLink>
+              <NavLink to="/books" className={({ isActive }) => `mobile-menu-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
+                📚 Books
+              </NavLink>
 
               <NavLink to="/student-career-center" className={({ isActive }) => `mobile-menu-link ${isActive ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
                 📝 Practice Tests
@@ -830,6 +845,8 @@ function AppLayout() {
             <Route path="/faq" element={<FAQ />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/best-books" element={<BestBooks />} />
+            <Route path="/books" element={<Books />} />
+            <Route path="/books/:slug" element={<BookDetails />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/disclaimer" element={<Disclaimer />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />

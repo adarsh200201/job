@@ -2755,6 +2755,13 @@ main.container {
   left: 1.5rem;
 }
 
+@media (min-width: 1024px) {
+  .floating-btn.floating-left {
+    left: auto;
+    right: 5rem;
+  }
+}
+
 .floating-btn.floating-right {
   right: 1.5rem;
   background: #0ea5e9;

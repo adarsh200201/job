@@ -118,16 +118,15 @@ const BOOKS = {
   ],
 };
 
-// Fallback book image on error — uses Open Library (free, no hotlink block)
+// Fallback book image on error — uses Google Books directly (free, no hotlink block)
 function BookCover({ src, title, color, asin }) {
   const [stage, setStage] = useState(0);
-  // stage 0: Open Library by ISBN, stage 1: Google Books thumbnail, stage 2: emoji fallback
-  const openLibraryUrl = `https://covers.openlibrary.org/b/isbn/${asin}-L.jpg?default=false`;
+  // stage 0: Google Books thumbnail, stage 1: emoji fallback
   const googleBooksUrl = `https://books.google.com/books/content?vid=ISBN${asin}&printsec=frontcover&img=1&zoom=1`;
 
-  const srcs = [openLibraryUrl, googleBooksUrl];
+  const srcs = [googleBooksUrl];
 
-  if (stage >= 2) {
+  if (stage >= 1) {
     return (
       <div style={{
         width: '100%', height: '160px',

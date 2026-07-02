@@ -101,19 +101,11 @@ export default function AffiliateCard({ product, category = 'general', type = 'p
           <div style={{ fontSize: '3rem' }}>📚</div>
         ) : (
           <img
-            src={
-              fallbackTried
-                ? `https://books.google.com/books/content?vid=ISBN${product.asin}&printsec=frontcover&img=1&zoom=1`
-                : `https://covers.openlibrary.org/b/isbn/${product.asin}-L.jpg?default=false`
-            }
+            src={`https://books.google.com/books/content?vid=ISBN${product.asin}&printsec=frontcover&img=1&zoom=1`}
             alt={product.title}
             loading="lazy"
             onError={() => {
-              if (!fallbackTried) {
-                setFallbackTried(true);
-              } else {
-                setImgErr(true);
-              }
+              setImgErr(true);
             }}
             style={{
               maxHeight: '160px',
