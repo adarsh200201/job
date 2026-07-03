@@ -67,6 +67,25 @@ function scheduleAutoCleanup() {
   console.log('🕒 [AutoCleanup] Scheduled — runs every 12 hours');
 }
 
+/* ─── Bot Awake Pinger (pings bot health endpoint to keep it awake on Render Free Tier) ─── */
+async function pingBotService() {
+  try {
+    const axios = require('axios');
+    const response = await axios.get('https://nextjobpost-bot.onrender.com/health', { timeout: 10000 });
+    console.log(`🤖 [BotPinger] Successfully pinged bot service health check: ${response.status}`);
+  } catch (err) {
+    console.error(`⚠️  [BotPinger] Failed to ping bot service:`, err.message);
+  }
+}
+
+function scheduleBotPinger() {
+  // Ping once after 15 seconds, then every 5 minutes (300,000 ms)
+  setTimeout(pingBotService, 15000);
+  setInterval(pingBotService, 5 * 60 * 1000);
+  console.log('🕒 [BotPinger] Scheduled to ping nextjobpost-bot every 5 minutes');
+}
+
+
 const app = express();
 const PORT = process.env.PORT || 4000;
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:3000';
@@ -188,6 +207,7 @@ connectDB()
     await seedPrepData();
     await seedCurrentAffairsIfNeeded();
     scheduleAutoCleanup();
+    scheduleBotPinger();
   })
   .catch((err) => {
     // eslint-disable-next-line no-console
