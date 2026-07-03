@@ -27,7 +27,7 @@ export default function BookDetails() {
   const navigate = useNavigate();
 
   // Find book in local database (must be declared before hooks that use it)
-  const book = booksData.find(b => b.slug === slug);
+  const book = booksData.find(b => b.slug.toLowerCase() === slug.toLowerCase());
 
   const [imgErr, setImgErr] = useState(false);
   const [imgSrc, setImgSrc] = useState('');
@@ -166,7 +166,7 @@ export default function BookDetails() {
                   
                   {/* Format chips */}
                   <div className="d-flex flex-wrap gap-1.5 justify-content-center">
-                    {book.formats.map((fmt, i) => (
+                    {(book.formats || ["Paperback", "Kindle Edition"]).map((fmt, i) => (
                       <span key={i} className="badge bg-secondary-subtle text-secondary-emphasis fs-8 px-2.5 py-1.5">
                         💾 {fmt}
                       </span>
@@ -198,7 +198,7 @@ export default function BookDetails() {
                   )}
 
                   <p className="text-muted fs-7 mb-3">
-                    by <span className="fw-bold text-dark">{book.author}</span> • Published: {book.publishedDate}
+                    by <span className="fw-bold text-dark">{book.author}</span>{book.publishedDate ? ` • Published: ${book.publishedDate}` : ''}
                   </p>
 
                   {/* Star Ratings */}
@@ -224,9 +224,9 @@ export default function BookDetails() {
                         </span>
                       )}
                     </div>
-                    {book.discountPercent > 0 && (
+                    {(book.discountPercent || book.discount || 0) > 0 && (
                       <span className="badge bg-success shadow-sm fs-8 py-2 px-3">
-                        Save {book.discountPercent}%
+                        Save {book.discountPercent || book.discount}%
                       </span>
                     )}
                   </div>
@@ -243,7 +243,7 @@ export default function BookDetails() {
                       🛒 Buy Print Edition on Amazon
                     </a>
                     
-                    {book.formats.includes("Kindle Edition") && (
+                    {(book.formats || []).includes("Kindle Edition") && (
                       <a
                         href={getFormatAffiliateLink(book.asin, "Kindle")}
                         target="_blank"
@@ -265,19 +265,19 @@ export default function BookDetails() {
                   <div className="col">
                     <div className="p-3 bg-light rounded-3">
                       <span className="d-block fs-8 text-muted fw-semibold">Publisher</span>
-                      <span className="fw-bold fs-7 text-dark">{book.publisher}</span>
+                      <span className="fw-bold fs-7 text-dark">{book.publisher || 'N/A'}</span>
                     </div>
                   </div>
                   <div className="col">
                     <div className="p-3 bg-light rounded-3">
                       <span className="d-block fs-8 text-muted fw-semibold">Language</span>
-                      <span className="fw-bold fs-7 text-dark">{book.language}</span>
+                      <span className="fw-bold fs-7 text-dark">{book.language || 'English'}</span>
                     </div>
                   </div>
                   <div className="col">
                     <div className="p-3 bg-light rounded-3">
                       <span className="d-block fs-8 text-muted fw-semibold">Published Date</span>
-                      <span className="fw-bold fs-7 text-dark">{book.publishedDate}</span>
+                      <span className="fw-bold fs-7 text-dark">{book.publishedDate || 'N/A'}</span>
                     </div>
                   </div>
                   <div className="col">
@@ -289,7 +289,7 @@ export default function BookDetails() {
                   <div className="col">
                     <div className="p-3 bg-light rounded-3">
                       <span className="d-block fs-8 text-muted fw-semibold">Available Formats</span>
-                      <span className="fw-bold fs-7 text-dark">{book.formats.join(', ')}</span>
+                      <span className="fw-bold fs-7 text-dark">{(book.formats || ["Paperback", "Kindle Edition"]).join(', ')}</span>
                     </div>
                   </div>
                   <div className="col">
@@ -320,7 +320,7 @@ export default function BookDetails() {
                 <span>⭐</span> Why we recommend it
               </h3>
               <div className="d-flex flex-column gap-3">
-                {book.whyRecommend.map((rec, i) => (
+                {(book.whyRecommend || []).map((rec, i) => (
                   <div key={i} className="d-flex align-items-start gap-2.5">
                     <span className="text-success fs-5">✓</span>
                     <span className="fs-7.5 fw-medium text-dark-emphasis">{rec}</span>

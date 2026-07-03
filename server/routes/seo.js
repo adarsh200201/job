@@ -136,7 +136,8 @@ router.get('/sitemap.xml', (req, res) => {
     'sitemap-jobs.xml',
     'sitemap-results.xml',
     'sitemap-admitcards.xml',
-    'sitemap-preparation.xml'
+    'sitemap-preparation.xml',
+    'sitemap-books.xml'
   ];
   
   for (const file of files) {
@@ -399,6 +400,57 @@ router.get('/sitemap-preparation.xml', (req, res) => {
   
   res.header('Content-Type', 'application/xml');
   res.status(200).send(xml);
+});
+
+// 7. Books Sitemap
+router.get('/sitemap-books.xml', async (req, res) => {
+  try {
+    const baseUrl = getBaseUrl(req);
+    
+    // Load books database
+    let books = [];
+    try {
+      const booksPath = path.resolve(__dirname, '../../client/src/data/books.json');
+      if (fs.existsSync(booksPath)) {
+        books = JSON.parse(fs.readFileSync(booksPath, 'utf8'));
+      }
+    } catch (e) { /* skip */ }
+    
+    if (books.length === 0) {
+      try {
+        const resp = await axios.get('https://job-peach-three.vercel.app/src/data/books.json');
+        books = resp.data;
+      } catch (e) { /* skip */ }
+    }
+
+    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+    
+    // Add main books listing page
+    xml += '  <url>\n';
+    xml += `    <loc>${baseUrl}/books</loc>\n`;
+    xml += '    <changefreq>daily</changefreq>\n';
+    xml += '    <priority>0.8</priority>\n';
+    xml += '  </url>\n';
+
+    // Add individual book detail pages
+    for (const book of books) {
+      if (!book.slug) continue;
+      xml += '  <url>\n';
+      xml += `    <loc>${baseUrl}/books/${book.slug}</loc>\n`;
+      xml += '    <changefreq>weekly</changefreq>\n';
+      xml += '    <priority>0.6</priority>\n';
+      xml += '  </url>\n';
+    }
+    
+    xml += '</urlset>';
+    
+    res.header('Content-Type', 'application/xml');
+    res.status(200).send(xml);
+  } catch (err) {
+    console.error('Error generating books sitemap:', err);
+    res.status(500).send('Error generating sitemap');
+  }
 });
 
 router.get('/robots.txt', (req, res) => {

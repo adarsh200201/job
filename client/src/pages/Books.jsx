@@ -452,10 +452,10 @@ export default function Books() {
                         )}
 
                         {/* Save % Ribbon */}
-                        {book.discountPercent > 0 && (
+                        {(book.discountPercent || book.discount || 0) > 0 && (
                           <span className="position-absolute badge rounded bg-success shadow-sm"
                                 style={{ top: '10px', right: '10px', fontSize: '0.65rem', fontWeight: '700', padding: '4px 8px', zIndex: 5 }}>
-                            ↓{book.discountPercent}% OFF
+                            ↓{book.discountPercent || book.discount}% OFF
                           </span>
                         )}
 
