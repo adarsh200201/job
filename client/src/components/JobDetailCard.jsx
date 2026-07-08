@@ -134,7 +134,37 @@ function JobDetailCard({ job: rawJob }) {
   }
 
   return (
-    <article ref={elementRef} className={`jc-card ${job.isGovernment ? 'govt-card' : ''}`} style={{ borderLeft: job.isGovernment ? '4px solid #ff9933' : '4px solid #7c3aed' }}>
+    <article ref={elementRef} className={`jc-card ${job.isGovernment ? 'govt-card' : ''} guide-card-animation`} style={{ borderLeft: job.isGovernment ? '4px solid #ff9933' : '4px solid #7c3aed' }}>
+      <style>{`
+        @keyframes fadeInUpCard {
+          from {
+            opacity: 0;
+            transform: translateY(18px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        .guide-card-animation {
+          animation: fadeInUpCard 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+          transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease !important;
+        }
+        
+        .guide-card-animation:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 16px 24px -10px rgba(0, 0, 0, 0.08), 0 4px 12px -5px rgba(0, 0, 0, 0.03) !important;
+          border-color: #6366f130 !important;
+        }
+
+        .jc-btn-view-details {
+          transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease !important;
+        }
+        .jc-btn-view-details:hover {
+          transform: translateX(4px);
+        }
+      `}</style>
       {isMobile ? (
         <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
           {/* Content area with padding */}

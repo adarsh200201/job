@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import ScrollReveal from './ScrollReveal.jsx';
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Skill-based preparation strategy lookup
@@ -355,229 +357,293 @@ export default function DynamicJobGuide({ job, themeColor }) {
 
   return (
     <div style={{ marginTop: '2rem' }}>
+      {/* ── Injection of custom premium animations ── */}
+      <style>{`
+        @keyframes fadeInUpGuide {
+          from {
+            opacity: 0;
+            transform: translateY(28px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        .guide-section-anim {
+          animation: fadeInUpGuide 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+        
+        .guide-sec-1 { animation-delay: 0.05s; }
+        .guide-sec-2 { animation-delay: 0.15s; }
+        .guide-sec-3 { animation-delay: 0.25s; }
+        .guide-sec-4 { animation-delay: 0.35s; }
+        .guide-sec-5 { animation-delay: 0.45s; }
+        
+        .hover-slide-r {
+          transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease !important;
+        }
+        .hover-slide-r:hover {
+          transform: translateX(8px);
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05) !important;
+          border-color: ${color}45 !important;
+        }
+
+        .career-stage-chip {
+          transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .career-stage-chip:hover {
+          transform: translateY(-3px) scale(1.02);
+          box-shadow: 0 4px 12px ${color}25;
+        }
+
+        .faq-panel-anim {
+          animation: slideDownFaq 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+        @keyframes slideDownFaq {
+          from { opacity: 0; transform: translateY(-8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
 
       {/* ── CAREER GROWTH PATH ── */}
-      <div style={sectionStyle}>
-        <h2 style={headerStyle}>
-          <span>🚀</span> Career Growth &amp; Promotion Pathway
-        </h2>
-        <p style={{ color: '#475569', fontSize: '0.94rem', lineHeight: '1.75', marginBottom: '1.25rem' }}>
-          {careerPath.timeline}
-        </p>
-        {/* Visual stages */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.25rem', alignItems: 'center' }}>
-          {careerPath.stages.map((stage, i) => (
-            <React.Fragment key={stage}>
-              <div style={{
-                background: i === 0 ? color : `${color}18`,
-                color: i === 0 ? '#fff' : color,
-                border: `1.5px solid ${color}40`,
-                borderRadius: '8px',
-                padding: '0.45rem 0.85rem',
-                fontWeight: '700',
-                fontSize: '0.82rem',
-                whiteSpace: 'nowrap'
-              }}>
-                {stage}
-              </div>
-              {i < careerPath.stages.length - 1 && (
-                <span style={{ color: '#94a3b8', fontWeight: '800', fontSize: '1rem' }}>→</span>
-              )}
-            </React.Fragment>
-          ))}
+      <ScrollReveal direction="up" delay={0.05}>
+        <div style={sectionStyle}>
+          <h2 style={headerStyle}>
+            <span>🚀</span> Career Growth &amp; Promotion Pathway
+          </h2>
+          <p style={{ color: '#475569', fontSize: '0.94rem', lineHeight: '1.75', marginBottom: '1.25rem' }}>
+            {careerPath.timeline}
+          </p>
+          {/* Visual stages */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.25rem', alignItems: 'center' }}>
+            {careerPath.stages.map((stage, i) => (
+              <React.Fragment key={stage}>
+                <div className="career-stage-chip" style={{
+                  background: i === 0 ? color : `${color}18`,
+                  color: i === 0 ? '#fff' : color,
+                  border: `1.5px solid ${color}40`,
+                  borderRadius: '8px',
+                  padding: '0.45rem 0.85rem',
+                  fontWeight: '700',
+                  fontSize: '0.82rem',
+                  whiteSpace: 'nowrap',
+                  cursor: 'default'
+                }}>
+                  {stage}
+                </div>
+                {i < careerPath.stages.length - 1 && (
+                  <span style={{ color: '#94a3b8', fontWeight: '800', fontSize: '1rem' }}>→</span>
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+          <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '1rem 1.25rem' }}>
+            <div style={{ fontWeight: '700', color: '#1e293b', fontSize: '0.88rem', marginBottom: '0.35rem' }}>💼 Benefits &amp; Perks</div>
+            <p style={{ color: '#475569', fontSize: '0.88rem', lineHeight: '1.7', margin: 0 }}>{careerPath.benefits}</p>
+          </div>
         </div>
-        <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '1rem 1.25rem' }}>
-          <div style={{ fontWeight: '700', color: '#1e293b', fontSize: '0.88rem', marginBottom: '0.35rem' }}>💼 Benefits &amp; Perks</div>
-          <p style={{ color: '#475569', fontSize: '0.88rem', lineHeight: '1.7', margin: 0 }}>{careerPath.benefits}</p>
-        </div>
-      </div>
+      </ScrollReveal>
 
       {/* ── SKILLS-BASED PREPARATION STRATEGY ── */}
       {prepSkills.length > 0 && (
+        <ScrollReveal direction="up" delay={0.1}>
+          <div style={sectionStyle}>
+            <h2 style={headerStyle}>
+              <span>📖</span> Preparation Strategy for This Role
+            </h2>
+            <p style={{ color: '#475569', fontSize: '0.94rem', lineHeight: '1.75', marginBottom: '1.25rem' }}>
+              Based on the skills and competencies required for <strong>{job.title}</strong>, here is your targeted preparation roadmap:
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              {prepSkills.map(([key, skill]) => (
+                <div key={key} style={{ background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+                  <div style={{
+                    background: `${color}12`,
+                    borderBottom: `1px solid ${color}25`,
+                    padding: '0.75rem 1.1rem',
+                    fontWeight: '800',
+                    fontSize: '0.9rem',
+                    color: color
+                  }}>
+                    🎯 {skill.label} Preparation
+                  </div>
+                  <ul style={{ margin: 0, padding: '1rem 1.25rem 0.5rem', paddingLeft: '2rem', color: '#475569', fontSize: '0.88rem', lineHeight: '1.8' }}>
+                    {skill.tips.map((tip, i) => <li key={i} style={{ marginBottom: '0.35rem' }}>{tip}</li>)}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+        </ScrollReveal>
+      )}
+
+      {/* ── REQUIRED DOCUMENTS CHECKLIST ── */}
+      <ScrollReveal direction="up" delay={0.15}>
         <div style={sectionStyle}>
           <h2 style={headerStyle}>
-            <span>📖</span> Preparation Strategy for This Role
+            <span>📋</span> Application Documents Checklist
           </h2>
-          <p style={{ color: '#475569', fontSize: '0.94rem', lineHeight: '1.75', marginBottom: '1.25rem' }}>
-            Based on the skills and competencies required for <strong>{job.title}</strong>, here is your targeted preparation roadmap:
+          <p style={{ color: '#475569', fontSize: '0.94rem', lineHeight: '1.75', marginBottom: '1rem' }}>
+            Prepare the following documents before starting your application to avoid interruptions:
           </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            {prepSkills.map(([key, skill]) => (
-              <div key={key} style={{ background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
-                <div style={{
-                  background: `${color}12`,
-                  borderBottom: `1px solid ${color}25`,
-                  padding: '0.75rem 1.1rem',
-                  fontWeight: '800',
-                  fontSize: '0.9rem',
-                  color: color
-                }}>
-                  🎯 {skill.label} Preparation
-                </div>
-                <ul style={{ margin: 0, padding: '1rem 1.25rem 0.5rem', paddingLeft: '2rem', color: '#475569', fontSize: '0.88rem', lineHeight: '1.8' }}>
-                  {skill.tips.map((tip, i) => <li key={i} style={{ marginBottom: '0.35rem' }}>{tip}</li>)}
-                </ul>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.65rem' }}>
+            {[
+              { icon: '📄', doc: '10th class mark sheet & certificate (original + self-attested copy)' },
+              { icon: '📄', doc: '12th class mark sheet & certificate (original + self-attested copy)' },
+              { icon: '🎓', doc: 'Graduation / Post-graduation degree certificate (original + copy)' },
+              { icon: '🪪', doc: 'Government photo ID: Aadhaar card, PAN card, or Passport' },
+              { icon: '🖼️', doc: 'Recent passport-size photographs (white/blue background, JPEG, 20–50KB)' },
+              { icon: '✍️', doc: 'Scanned signature (black ink on white paper, 10–30KB)' },
+              ...(job.isGovernment ? [
+                { icon: '📜', doc: 'Caste / Category certificate from competent authority (if applicable)' },
+                { icon: '🏠', doc: 'Domicile / Residence certificate (for state government posts)' },
+                { icon: '♿', doc: 'PwD certificate from medical board (if claiming disability relaxation)' },
+              ] : [
+                { icon: '📃', doc: 'Updated resume / CV (PDF format, maximum 2MB)' },
+                { icon: '💼', doc: 'Previous employer experience letters (if applicable)' },
+                { icon: '🏆', doc: 'Skill certifications relevant to the role (AWS, Google, Coursera, etc.)' },
+              ]),
+            ].map(({ icon, doc }) => (
+              <div key={doc} className="hover-slide-r" style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '0.6rem',
+                padding: '0.65rem 0.85rem',
+                background: '#f8fafc',
+                borderRadius: '8px',
+                border: '1px solid #e2e8f0',
+                fontSize: '0.84rem',
+                color: '#374151',
+                lineHeight: '1.5'
+              }}>
+                <span style={{ flexShrink: 0 }}>{icon}</span>
+                <span>{doc}</span>
               </div>
             ))}
           </div>
         </div>
-      )}
-
-      {/* ── REQUIRED DOCUMENTS CHECKLIST ── */}
-      <div style={sectionStyle}>
-        <h2 style={headerStyle}>
-          <span>📋</span> Application Documents Checklist
-        </h2>
-        <p style={{ color: '#475569', fontSize: '0.94rem', lineHeight: '1.75', marginBottom: '1rem' }}>
-          Prepare the following documents before starting your application to avoid interruptions:
-        </p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.65rem' }}>
-          {[
-            { icon: '📄', doc: '10th class mark sheet & certificate (original + self-attested copy)' },
-            { icon: '📄', doc: '12th class mark sheet & certificate (original + self-attested copy)' },
-            { icon: '🎓', doc: 'Graduation / Post-graduation degree certificate (original + copy)' },
-            { icon: '🪪', doc: 'Government photo ID: Aadhaar card, PAN card, or Passport' },
-            { icon: '🖼️', doc: 'Recent passport-size photographs (white/blue background, JPEG, 20–50KB)' },
-            { icon: '✍️', doc: 'Scanned signature (black ink on white paper, 10–30KB)' },
-            ...(job.isGovernment ? [
-              { icon: '📜', doc: 'Caste / Category certificate from competent authority (if applicable)' },
-              { icon: '🏠', doc: 'Domicile / Residence certificate (for state government posts)' },
-              { icon: '♿', doc: 'PwD certificate from medical board (if claiming disability relaxation)' },
-            ] : [
-              { icon: '📃', doc: 'Updated resume / CV (PDF format, maximum 2MB)' },
-              { icon: '💼', doc: 'Previous employer experience letters (if applicable)' },
-              { icon: '🏆', doc: 'Skill certifications relevant to the role (AWS, Google, Coursera, etc.)' },
-            ]),
-          ].map(({ icon, doc }) => (
-            <div key={doc} style={{
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: '0.6rem',
-              padding: '0.65rem 0.85rem',
-              background: '#f8fafc',
-              borderRadius: '8px',
-              border: '1px solid #e2e8f0',
-              fontSize: '0.84rem',
-              color: '#374151',
-              lineHeight: '1.5'
-            }}>
-              <span style={{ flexShrink: 0 }}>{icon}</span>
-              <span>{doc}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+      </ScrollReveal>
 
       {/* ── COMMON MISTAKES ── */}
-      <div style={sectionStyle}>
-        <h2 style={headerStyle}>
-          <span>⚠️</span> Common Application Mistakes to Avoid
-        </h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          {mistakes.map((mistake, i) => (
-            <div key={i} style={{
-              display: 'flex',
-              gap: '0.75rem',
-              alignItems: 'flex-start',
-              padding: '0.85rem 1rem',
-              background: '#fef9f0',
-              border: '1px solid #fed7aa',
-              borderRadius: '10px'
-            }}>
-              <span style={{ flexShrink: 0, fontWeight: '900', fontSize: '0.9rem', color: '#d97706', marginTop: '1px' }}>{i + 1}.</span>
-              <p style={{ margin: 0, color: '#92400e', fontSize: '0.9rem', lineHeight: '1.65' }}>{mistake}</p>
-            </div>
-          ))}
+      <ScrollReveal direction="up" delay={0.2}>
+        <div style={sectionStyle}>
+          <h2 style={headerStyle}>
+            <span>⚠️</span> Common Application Mistakes to Avoid
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {mistakes.map((mistake, i) => (
+              <div key={i} className="hover-slide-r" style={{
+                display: 'flex',
+                gap: '0.75rem',
+                alignItems: 'flex-start',
+                padding: '0.85rem 1rem',
+                background: '#fef9f0',
+                border: '1px solid #fed7aa',
+                borderRadius: '10px'
+              }}>
+                <span style={{ flexShrink: 0, fontWeight: '900', fontSize: '0.9rem', color: '#d97706', marginTop: '1px' }}>{i + 1}.</span>
+                <p style={{ margin: 0, color: '#92400e', fontSize: '0.9rem', lineHeight: '1.65' }}>{mistake}</p>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      </ScrollReveal>
 
       {/* ── DYNAMIC FAQs ── */}
-      <div style={sectionStyle}>
-        <h2 style={headerStyle}>
-          <span>❓</span> Frequently Asked Questions
-        </h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          {faqs.map((faq, i) => (
-            <div
-              key={i}
-              style={{
-                border: `1px solid ${openFaq === i ? color + '50' : '#e2e8f0'}`,
-                borderRadius: '10px',
-                overflow: 'hidden',
-                transition: 'border-color 0.2s'
-              }}
-            >
-              <button
-                onClick={() => setOpenFaq(openFaq === i ? null : i)}
+      <ScrollReveal direction="up" delay={0.25}>
+        <div style={sectionStyle}>
+          <h2 style={headerStyle}>
+            <span>❓</span> Frequently Asked Questions
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {faqs.map((faq, i) => (
+              <div
+                key={i}
+                className="hover-slide-r"
                 style={{
-                  width: '100%',
-                  background: openFaq === i ? `${color}08` : '#f8fafc',
-                  border: 'none',
-                  padding: '1rem 1.1rem',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  gap: '0.75rem',
-                  transition: 'background 0.2s'
+                  border: `1px solid ${openFaq === i ? color + '50' : '#e2e8f0'}`,
+                  borderRadius: '10px',
+                  overflow: 'hidden',
+                  transition: 'border-color 0.2s, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                  cursor: 'pointer'
                 }}
               >
-                <span style={{ fontWeight: '700', color: '#1e293b', fontSize: '0.93rem', lineHeight: '1.4' }}>
-                  {faq.q}
-                </span>
-                <span style={{
-                  flexShrink: 0,
-                  color: color,
-                  fontWeight: '900',
-                  fontSize: '1.2rem',
-                  transform: openFaq === i ? 'rotate(45deg)' : 'rotate(0deg)',
-                  transition: 'transform 0.2s'
-                }}>
-                  +
-                </span>
-              </button>
-              {openFaq === i && (
-                <div style={{ padding: '0.85rem 1.1rem 1rem', borderTop: '1px solid #e2e8f0', background: '#fff' }}>
-                  <p style={{ margin: 0, color: '#475569', fontSize: '0.9rem', lineHeight: '1.75' }}>{faq.a}</p>
-                </div>
-              )}
-            </div>
-          ))}
+                <button
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  style={{
+                    width: '100%',
+                    background: openFaq === i ? `${color}08` : '#f8fafc',
+                    border: 'none',
+                    padding: '1rem 1.1rem',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    gap: '0.75rem',
+                    transition: 'background 0.2s'
+                  }}
+                >
+                  <span style={{ fontWeight: '700', color: '#1e293b', fontSize: '0.93rem', lineHeight: '1.4' }}>
+                    {faq.q}
+                  </span>
+                  <span style={{
+                    flexShrink: 0,
+                    color: color,
+                    fontWeight: '900',
+                    fontSize: '1.2rem',
+                    transform: openFaq === i ? 'rotate(45deg)' : 'rotate(0deg)',
+                    transition: 'transform 0.2s'
+                  }}>
+                    +
+                  </span>
+                </button>
+                {openFaq === i && (
+                  <div className="faq-panel-anim" style={{ padding: '0.85rem 1.1rem 1rem', borderTop: '1px solid #e2e8f0', background: '#fff' }}>
+                    <p style={{ margin: 0, color: '#475569', fontSize: '0.9rem', lineHeight: '1.75' }}>{faq.a}</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      </ScrollReveal>
 
       {/* ── FACT-CHECKING BADGE ── */}
-      <div style={{
-        background: 'linear-gradient(135deg, #f0fdf4, #ecfdf5)',
-        border: '1px solid #86efac',
-        borderRadius: '14px',
-        padding: '1.25rem 1.5rem',
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: '1rem',
-        marginBottom: '1.75rem',
-        flexWrap: 'wrap'
-      }}>
-        <div style={{ fontSize: '2rem', flexShrink: 0 }}>✅</div>
-        <div>
-          <div style={{ fontWeight: '800', color: '#166534', fontSize: '0.95rem', marginBottom: '0.3rem' }}>
-            Verified &amp; Fact-Checked by NextJobPost Editorial Team
-          </div>
-          <p style={{ color: '#166534', fontSize: '0.86rem', lineHeight: '1.65', margin: '0 0 0.5rem' }}>
-            This notification has been cross-verified against the official recruitment source. Application and PDF links have been tested and redirect to official portals only. All eligibility, salary, and date details have been extracted directly from the official notification document.
-          </p>
-          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-            <Link to="/fact-checking-policy" style={{ color: '#15803d', fontWeight: '700', fontSize: '0.82rem', textDecoration: 'underline' }}>
-              Our Fact-Checking Process →
-            </Link>
-            <Link to="/correction-policy" style={{ color: '#15803d', fontWeight: '700', fontSize: '0.82rem', textDecoration: 'underline' }}>
-              Report an Inaccuracy
-            </Link>
+      <ScrollReveal direction="up" delay={0.3}>
+        <div style={{
+          background: 'linear-gradient(135deg, #f0fdf4, #ecfdf5)',
+          border: '1px solid #86efac',
+          borderRadius: '14px',
+          padding: '1.25rem 1.5rem',
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: '1rem',
+          marginBottom: '1.75rem',
+          flexWrap: 'wrap'
+        }}>
+          <div style={{ fontSize: '2rem', flexShrink: 0 }}>✅</div>
+          <div>
+            <div style={{ fontWeight: '800', color: '#166534', fontSize: '0.95rem', marginBottom: '0.3rem' }}>
+              Verified &amp; Fact-Checked by NextJobPost Editorial Team
+            </div>
+            <p style={{ color: '#166534', fontSize: '0.86rem', lineHeight: '1.65', margin: '0 0 0.5rem' }}>
+              This notification has been cross-verified against the official recruitment source. Application and PDF links have been tested and redirect to official portals only. All eligibility, salary, and date details have been extracted directly from the official notification document.
+            </p>
+            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+              <Link to="/fact-checking-policy" style={{ color: '#15803d', fontWeight: '700', fontSize: '0.82rem', textDecoration: 'underline' }}>
+                Our Fact-Checking Process →
+              </Link>
+              <Link to="/correction-policy" style={{ color: '#15803d', fontWeight: '700', fontSize: '0.82rem', textDecoration: 'underline' }}>
+                Report an Inaccuracy
+              </Link>
+            </div>
           </div>
         </div>
-      </div>
+      </ScrollReveal>
 
     </div>
   );
 }
+
