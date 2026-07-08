@@ -24,14 +24,14 @@ const SKILL_PREP_MAP = {
       'Learn Python decorators, generators, context managers, and metaclasses for advanced positions.',
       'Study NumPy and Pandas for data manipulation if applying for data/ML roles.',
       'Build at least 2 end-to-end projects using Flask or FastAPI for backend positions.',
-      'Review Python's asyncio, threading, and multiprocessing for performance-critical roles.',
+      'Review Python\'s asyncio, threading, and multiprocessing for performance-critical roles.',
     ]
   },
   javascript: {
     label: 'JavaScript',
     tips: [
       'Master ES6+ features: arrow functions, destructuring, spread/rest, optional chaining, and Promises.',
-      'Understand JavaScript's event loop, call stack, and asynchronous patterns (async/await).',
+      'Understand JavaScript\'s event loop, call stack, and asynchronous patterns (async/await).',
       'Practice DOM manipulation and browser APIs extensively.',
       'Learn module bundlers: Webpack, Vite, and esbuild basics.',
       'Study JavaScript design patterns — Module, Revealing Module, Observer, and Singleton.',
@@ -41,7 +41,7 @@ const SKILL_PREP_MAP = {
     label: 'React',
     tips: [
       'Master React hooks thoroughly: useState, useEffect, useContext, useReducer, useMemo, and useCallback.',
-      'Understand React's virtual DOM diffing algorithm and reconciliation process.',
+      'Understand React\'s virtual DOM diffing algorithm and reconciliation process.',
       'Practice state management with Context API, Redux Toolkit, and Zustand.',
       'Build and deploy a production-quality project using React + API integration.',
       'Learn React performance optimization: React.memo, lazy loading, Suspense, and code splitting.',
