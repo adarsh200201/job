@@ -7,6 +7,8 @@ import RichTextDisplay from './RichTextDisplay.jsx';
 import api from '../api/index.js';
 import { getImageUrl } from '../utils/imageUtils.js';
 import { trackApplyJobClicked, trackJobImpression, trackJobCardClicked } from '../utils/analytics.js';
+import { getJobUrl } from '../utils/urlHelper.js';
+
 
 function excerpt(text, n = 160) {
   if (!text) return '';
@@ -169,7 +171,7 @@ function JobDetailCard({ job: rawJob }) {
 
               {/* Title */}
               <h2 className="jc-title" style={{ fontSize: '1.25rem', margin: '0.1rem 0', fontWeight: '700', lineHeight: '1.3' }}>
-                <Link to={`/${job.slug}`} target="_blank" rel="noopener noreferrer" className="jc-title-link">
+                <Link to={getJobUrl(job)} target="_blank" rel="noopener noreferrer" className="jc-title-link">
                   {job.title}
                 </Link>
               </h2>
@@ -254,7 +256,7 @@ function JobDetailCard({ job: rawJob }) {
           {/* Bottom Actions Row */}
           <div style={{ display: 'flex', gap: '0.75rem', padding: '0.25rem 1.1rem 1rem 1.1rem', width: '100%' }}>
             <Link 
-              to={`/${job.slug}`} 
+              to={getJobUrl(job)} 
               target="_blank" 
               rel="noopener noreferrer" 
               className="jc-btn-view-details"
@@ -313,7 +315,7 @@ function JobDetailCard({ job: rawJob }) {
 
             {/* Title */}
             <h2 className="jc-title" style={{ fontSize: '1.25rem', margin: '0.1rem 0', fontWeight: '700', lineHeight: '1.3' }}>
-              <Link to={`/${job.slug}`} target="_blank" rel="noopener noreferrer" className="jc-title-link">
+              <Link to={getJobUrl(job)} target="_blank" rel="noopener noreferrer" className="jc-title-link">
                 {job.title}
               </Link>
             </h2>
@@ -395,7 +397,7 @@ function JobDetailCard({ job: rawJob }) {
             {job.applyLink && (
               <a href={job.applyLink} onClick={handleApply} target="_blank" rel="noopener noreferrer" className="jc-btn-apply-pill" style={{ width: '100%', justifyContent: 'center' }}>Apply</a>
             )}
-            <Link to={`/${job.slug}`} target="_blank" rel="noopener noreferrer" className="jc-btn-view-details" style={{ width: '100%', justifyContent: 'center' }}>View details</Link>
+            <Link to={getJobUrl(job)} target="_blank" rel="noopener noreferrer" className="jc-btn-view-details" style={{ width: '100%', justifyContent: 'center' }}>View details</Link>
           </div>
         </div>
       )}

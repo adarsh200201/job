@@ -19,6 +19,9 @@ import {
 } from '../utils/analytics.js';
 import SidebarAd from '../components/SidebarAd.jsx';
 import SidebarCareerHub from '../components/SidebarCareerHub.jsx';
+import DynamicJobGuide from '../components/DynamicJobGuide.jsx';
+import { getJobUrl } from '../utils/urlHelper.js';
+
 
 function extractVacancy(title) {
   if (!title) return 'As per notification';
@@ -55,7 +58,7 @@ const AlsoReadCard = ({ relatedJob, themeColor = '#dc3545' }) => {
         fontSize: '0.82rem',
         fontWeight: '700'
       }}>Also read ---</span>
-      <Link to={`/${relatedJob.slug}`} className="d-flex align-items-center gap-3 text-decoration-none text-dark">
+      <Link to={getJobUrl(relatedJob)} className="d-flex align-items-center gap-3 text-decoration-none text-dark">
         {relatedJob.image && (
           <img 
             src={getImageUrl(relatedJob.image)} 
@@ -1544,13 +1547,13 @@ export default function JobDetails() {
                         </span>
                       </div>
                       <h4 style={{ fontSize: '0.95rem', fontWeight: '700', marginBottom: '6px', lineHeight: '1.3' }}>
-                        <Link to={`/${relatedJob.slug}`} className="text-decoration-none text-dark">
+                        <Link to={getJobUrl(relatedJob)} className="text-decoration-none text-dark">
                           {relatedJob.title}
                         </Link>
                       </h4>
                       <p className="text-muted small mb-2">{relatedJob.location || 'India'}</p>
                       <Link 
-                        to={`/${relatedJob.slug}`} 
+                        to={getJobUrl(relatedJob)} 
                         className="btn btn-sm fw-bold" 
                         style={{ 
                           fontSize: '0.8rem', 
@@ -1578,6 +1581,13 @@ export default function JobDetails() {
               </div>
             </div>
           )}
+
+          {/* ─────────────────────────────────────────
+              DYNAMIC EDUCATIONAL SECTIONS
+              Uniquely generated per job — adds 1000+
+              words of original, high-value guidance
+              ───────────────────────────────────────── */}
+          <DynamicJobGuide job={job} themeColor={themeColor} />
 
         </div>
 
@@ -2483,14 +2493,14 @@ export default function JobDetails() {
                           </span>
                         </div>
                         <h4 style={{ fontSize: '0.95rem', fontWeight: '700', marginBottom: '6px', lineHeight: '1.3' }}>
-                          <Link to={`/${relatedJob.slug}`} className="text-decoration-none text-dark">
+                          <Link to={getJobUrl(relatedJob)} className="text-decoration-none text-dark">
                             {relatedJob.title}
                           </Link>
                         </h4>
                         <p className="text-muted small mb-3">{relatedJob.location || 'India'}</p>
                       </div>
                       <Link 
-                        to={`/${relatedJob.slug}`} 
+                        to={getJobUrl(relatedJob)} 
                         className="btn btn-sm fw-bold" 
                         style={{ 
                           fontSize: '0.8rem', 

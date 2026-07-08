@@ -167,6 +167,11 @@ router.get('/sitemap-pages.xml', async (req, res) => {
       '/terms',
       '/disclaimer',
       '/privacy',
+      '/editorial-policy',
+      '/dmca-policy',
+      '/fact-checking-policy',
+      '/correction-policy',
+      '/sourcing-policy',
       '/resume-builder',
       '/student-career-center',
       '/salaries',
@@ -813,7 +818,69 @@ router.get('/bot-render/:path*', async (req, res) => {
         </div>
       `;
     } else {
-      // Default: Check if path matches a job slug in the database
+      // Static page SEO meta lookup for known pages
+      const staticPageMeta = {
+        'about': {
+          title: 'About NextJobPost.in – India\'s Trusted Government Job Notification Platform',
+          desc: 'Learn about NextJobPost\'s mission to provide verified, free, and instant government job notifications to millions of job seekers across India.'
+        },
+        'contact': {
+          title: 'Contact NextJobPost – Report Issues, Job Listing Requests & Support',
+          desc: 'Reach out to the NextJobPost team for listing corrections, job posting requests, technical support, or general enquiries.'
+        },
+        'editorial-policy': {
+          title: 'Editorial Policy | NextJobPost.in – Content Standards & Guidelines',
+          desc: 'Read NextJobPost\'s editorial standards covering content verification, sourcing guidelines, accuracy commitments, and update policies.'
+        },
+        'fact-checking-policy': {
+          title: 'Fact-Checking Policy | NextJobPost.in – How We Verify Job Information',
+          desc: 'Learn how NextJobPost verifies every government and private job notification through our 4-step fact-checking process before publishing.'
+        },
+        'correction-policy': {
+          title: 'Correction & Update Policy | NextJobPost.in – How We Fix Errors',
+          desc: 'Understand how NextJobPost handles content corrections, vacancy updates, and date changes — with resolution timelines and a process to report inaccuracies.'
+        },
+        'sourcing-policy': {
+          title: 'Sourcing & Data Collection Policy | NextJobPost.in – Where We Get Job Data',
+          desc: 'Full transparency on where NextJobPost sources all government and private job data — from official portals to anti-scam controls and archiving practices.'
+        },
+        'privacy': {
+          title: 'Privacy Policy | NextJobPost.in',
+          desc: 'Read how NextJobPost collects, uses, and protects your personal data in compliance with Indian privacy laws.'
+        },
+        'terms': {
+          title: 'Terms & Conditions | NextJobPost.in',
+          desc: 'Review the terms of use governing your access to NextJobPost and our job notification services.'
+        },
+        'disclaimer': {
+          title: 'Disclaimer | NextJobPost.in',
+          desc: 'Read the official disclaimer for NextJobPost – an independent job information portal, not affiliated with any government body.'
+        },
+        'dmca-policy': {
+          title: 'DMCA Policy | NextJobPost.in',
+          desc: 'NextJobPost DMCA and copyright policy — how to report content that violates your copyright.'
+        },
+        'faq': {
+          title: 'Frequently Asked Questions | NextJobPost.in',
+          desc: 'Find answers to common questions about NextJobPost – how we verify listings, our free access policy, notification alerts, and more.'
+        },
+        'blog': {
+          title: 'Career Blog – Job Search Tips, Resume Guides & Interview Prep | NextJobPost',
+          desc: 'Expert career advice, job search strategies, resume writing tips, and interview preparation guides on the NextJobPost Career Blog.'
+        },
+        'preparation': {
+          title: 'Preparation Hub – Exam Prep, Mock Tests & Career Guides | NextJobPost',
+          desc: 'Your all-in-one preparation hub for government and private job competitive exams — aptitude, reasoning, GK, technical, and DSA practice.'
+        },
+      };
+
+      const metaEntry = staticPageMeta[normalizedPath];
+      if (metaEntry) {
+        seoTitle = metaEntry.title;
+        seoDesc = metaEntry.desc;
+        seoBody = `<div style="font-family: sans-serif; max-width: 900px; margin: 0 auto; padding: 24px; line-height: 1.7;"><h1>${metaEntry.title}</h1><p>${metaEntry.desc}</p><p>Visit <a href="https://nextjobpost.in/${normalizedPath}">nextjobpost.in/${normalizedPath}</a> for the full content.</p></div>`;
+      } else {
+        // Default: Check if path matches a job slug in the database
       try {
         const job = await Job.findOne({ slug: normalizedPath });
         if (job) {
@@ -858,6 +925,7 @@ router.get('/bot-render/:path*', async (req, res) => {
       } catch (err) {
         console.error('Error fetching job details for bot render:', err.message);
       }
+      } // end else (not a static page)
     }
 
     // 3. Inject SEO metadata and body content into template

@@ -1,6 +1,7 @@
 import React, { useMemo, memo } from 'react';
 import { Link } from 'react-router-dom';
 import { getImageUrl } from '../utils/imageUtils.js';
+import { getJobUrl } from '../utils/urlHelper.js';
 
 function timeAgo(dateStr) {
   const date = new Date(dateStr);
@@ -17,7 +18,8 @@ const PostCard = memo(({ job }) => {
   const ago = useMemo(() => timeAgo(job.createdAt), [job.createdAt]);
 
   return (
-    <Link to={`/${job.slug}`} className="rj-card">
+    <Link to={getJobUrl(job)} className="rj-card">
+
       <div className="rj-img-wrap">
         {job.image ? (
           <img

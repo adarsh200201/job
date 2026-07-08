@@ -63,6 +63,9 @@ const Terms = lazyWithRetry(() => import('./pages/Terms.jsx'));
 const Disclaimer = lazyWithRetry(() => import('./pages/Disclaimer.jsx'));
 const EditorialPolicy = lazyWithRetry(() => import('./pages/EditorialPolicy.jsx'));
 const DMCAPolicy = lazyWithRetry(() => import('./pages/DMCAPolicy.jsx'));
+const FactCheckingPolicy = lazyWithRetry(() => import('./pages/FactCheckingPolicy.jsx'));
+const CorrectionPolicy = lazyWithRetry(() => import('./pages/CorrectionPolicy.jsx'));
+const SourcingPolicy = lazyWithRetry(() => import('./pages/SourcingPolicy.jsx'));
 const Login = lazyWithRetry(() => import('./pages/Login.jsx'));
 const SignUp = lazyWithRetry(() => import('./pages/SignUp.jsx'));
 const AuthCallback = lazyWithRetry(() => import('./pages/AuthCallback.jsx'));
@@ -852,6 +855,9 @@ function AppLayout() {
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/editorial-policy" element={<EditorialPolicy />} />
             <Route path="/dmca-policy" element={<DMCAPolicy />} />
+            <Route path="/fact-checking-policy" element={<FactCheckingPolicy />} />
+            <Route path="/correction-policy" element={<CorrectionPolicy />} />
+            <Route path="/sourcing-policy" element={<SourcingPolicy />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
@@ -875,8 +881,15 @@ function AppLayout() {
               <Route key={cat} path={`/${cat}`} element={<GovtJobsCategory categoryKey={cat} />} />
             ))}
 
+            {/* Clean, SEO-optimized Job/Career Guides URL structure */}
+            <Route path="/careers/:slug" element={<DynamicRouteWrapper />} />
+            <Route path="/government-jobs/:slug" element={<DynamicRouteWrapper />} />
+            <Route path="/job-guides/:slug" element={<DynamicRouteWrapper />} />
+            <Route path="/jobs/:slug" element={<DynamicRouteWrapper />} />
+
             {/* Job detail catch-all */}
             <Route path="/:slug" element={<DynamicRouteWrapper />} />
+
           </Routes>
         </Suspense>
       </main>

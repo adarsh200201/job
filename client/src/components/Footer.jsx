@@ -400,6 +400,12 @@ export default function Footer() {
             <Link to="/editorial-policy">Editorial Policy</Link>
             <span className="footer-link-divider">|</span>
             <Link to="/dmca-policy">DMCA Policy</Link>
+            <span className="footer-link-divider">|</span>
+            <Link to="/fact-checking-policy">Fact Checking</Link>
+            <span className="footer-link-divider">|</span>
+            <Link to="/correction-policy">Correction Policy</Link>
+            <span className="footer-link-divider">|</span>
+            <Link to="/sourcing-policy">Sourcing Process</Link>
           </div>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { getJobUrl } from '../utils/urlHelper.js';
 
 export default function JobCard({ job }) {
   return (
@@ -13,10 +14,11 @@ export default function JobCard({ job }) {
         </div>
         <span className="mb-3 align-self-start badge bg-info-subtle text-info-emphasis">{job.type}</span>
         <div className="mt-auto d-flex gap-2">
-          <Link to={`/job/${job.slug}`} className="btn btn-outline-secondary btn-sm">Details</Link>
+          <Link to={getJobUrl(job)} className="btn btn-outline-secondary btn-sm">Details</Link>
           <a className="btn btn-primary btn-sm" href={job.applyLink} target="_blank" rel="noopener noreferrer">Apply</a>
         </div>
       </div>
     </div>
   );
 }
+
