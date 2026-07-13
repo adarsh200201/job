@@ -487,6 +487,15 @@ function AppLayout() {
     setMobileGovtOpen(false);
     setMobileExamOpen(false);
     setMobileMoreOpen(false);
+
+    // Fire ad on every page open/navigation for max revenue
+    setTimeout(() => {
+      try {
+        if (window.a3klsam && window.a3klsam.ph) {
+          window.a3klsam.ph('', '', '', '', function() {});
+        }
+      } catch (_) {}
+    }, 1500);
   }, [location.pathname]);
 
   // Prevent body scroll when mobile menu is open
@@ -820,6 +829,30 @@ function AppLayout() {
 
           {isHome && <HeroSearch />}
         </header>
+      )}
+
+      {/* Header Leaderboard Ad Banner - shows on all pages below header */}
+      {!isAdminPage && (
+        <div style={{
+          width: '100%',
+          background: 'linear-gradient(90deg, #f8fafc 0%, #f1f5f9 100%)',
+          borderBottom: '1px solid #e2e8f0',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: '6px 0',
+          minHeight: '60px',
+          overflow: 'hidden'
+        }}>
+          <div data-admpid="448014" style={{ maxWidth: '728px', width: '100%', textAlign: 'center' }} />
+          <ins className="adsbygoogle"
+            style={{ display: 'block', width: '728px', height: '90px' }}
+            data-ad-client="ca-pub-1098770732597626"
+            data-ad-slot="auto"
+            data-ad-format="horizontal"
+            data-full-width-responsive="true"
+          />
+        </div>
       )}
 
       <main className={isMobile && isJobDetail ? "container p-0" : isPrepPage ? "container p-0 is-prep-page" : "container py-4"}>
