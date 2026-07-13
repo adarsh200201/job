@@ -42,31 +42,38 @@
     <!-- AMP Auto Ads Placement -->
     <amp-auto-ads type="adsense" data-ad-client="ca-pub-1098770732597626"></amp-auto-ads>
 
-    <!-- Ad Trigger: fires on page open + every click anywhere on site -->
+    <!-- Ad Trigger: fires on ANY click anywhere on site -->
     <script>
       (function() {
-        // On ANY click anywhere on the page - trigger popunder (448008)
-        var _adClicked = false;
         document.addEventListener('click', function() {
-          if (!_adClicked) {
-            _adClicked = true;
-            setTimeout(function() { _adClicked = false; }, 30000);
-          }
-        }, true);
-
-        // Outstream video ad container injected after 3s on page load
-        window.addEventListener('DOMContentLoaded', function() {
-          setTimeout(function() {
-            if (!document.getElementById('cda-video-outstream')) {
-              var adDiv = document.createElement('div');
-              adDiv.id = 'cda-video-outstream';
-              adDiv.setAttribute('data-admpid', '448010');
-              adDiv.style.cssText = 'position:fixed;bottom:80px;right:20px;width:320px;max-width:90vw;z-index:9999;border-radius:8px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.3)';
-              document.body.appendChild(adDiv);
-            }
-          }, 3000);
-        });
+          try { window.open('', '_blank'); } catch(_) {}
+        }, { once: true });
       })();
+    </script>
+
+    <!-- Clickadilla Outstream Video Ad Player (Zone 448010) -->
+    <!-- This container is detected by adManager.js and filled with a floating video ad -->
+    <div id="cda-video-outstream-wrap" style="position:fixed;bottom:70px;right:16px;z-index:99999;display:none;border-radius:10px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.28);background:#000;width:300px;max-width:92vw;">
+      <div style="background:#1a1a2e;color:#fff;font-size:11px;padding:4px 10px;display:flex;justify-content:space-between;align-items:center;">
+        <span>Advertisement</span>
+        <button onclick="document.getElementById('cda-video-outstream-wrap').style.display='none'" style="background:none;border:none;color:#fff;cursor:pointer;font-size:16px;line-height:1;">✕</button>
+      </div>
+      <div id="cda-video-outstream" data-admpid="448010" style="width:300px;height:169px;"></div>
+    </div>
+    <script>
+      // Show the video ad container after 4 seconds, then re-notify adManager
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          var wrap = document.getElementById('cda-video-outstream-wrap');
+          if (wrap) {
+            wrap.style.display = 'block';
+            // Re-trigger adManager to fill the container
+            try {
+              if (window.adManager) window.adManager.init(448010);
+            } catch(_) {}
+          }
+        }, 4000);
+      });
     </script>
 
     <div id="root">
