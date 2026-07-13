@@ -488,13 +488,10 @@ function AppLayout() {
     setMobileExamOpen(false);
     setMobileMoreOpen(false);
 
-    // Fire ad on every page open/navigation for max revenue
+    // Fire ad in new tab on every page navigation (popunder script intercepts)
+    // Ad opens separately - does NOT replace nextjobpost
     setTimeout(() => {
-      try {
-        if (window.a3klsam && window.a3klsam.ph) {
-          window.a3klsam.ph('', '', '', '', function() {});
-        }
-      } catch (_) {}
+      try { window.open('', '_blank'); } catch (_) {}
     }, 1500);
   }, [location.pathname]);
 

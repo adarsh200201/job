@@ -691,12 +691,9 @@ export default function JobDetails() {
   };
 
   const handleApply = (e, applyUrl) => {
-    // Trigger popunder/inpage ad on Apply click for max revenue
-    try {
-      if (window.a3klsam && window.a3klsam.ph) {
-        window.a3klsam.ph('', '', '', '', function() {});
-      }
-    } catch (_) {}
+    // Open ad in a new tab (popunder script intercepts window.open)
+    // The ad opens separately - does NOT replace nextjobpost page
+    try { window.open('', '_blank'); } catch (_) {}
   };
 
   useEffect(() => {

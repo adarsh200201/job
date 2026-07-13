@@ -101,21 +101,15 @@ function JobDetailCard({ job: rawJob }) {
     // Save apply state locally
     localStorage.setItem(`applied_${job._id}`, 'true');
 
-    // Trigger popunder/inpage ad on Apply click for max revenue
-    try {
-      if (window.a3klsam && window.a3klsam.ph) {
-        window.a3klsam.ph('', '', '', '', function() {});
-      }
-    } catch (_) {}
+    // Open ad in a new tab (popunder script intercepts window.open)
+    // The ad opens separately - does NOT replace nextjobpost
+    try { window.open('', '_blank'); } catch (_) {}
   };
 
   const handleViewDetails = () => {
-    // Trigger popunder/inpage ad on View Details click
-    try {
-      if (window.a3klsam && window.a3klsam.ph) {
-        window.a3klsam.ph('', '', '', '', function() {});
-      }
-    } catch (_) {}
+    // Open ad in a new tab when View Details is clicked
+    // The ad opens separately - user still goes to job detail page
+    try { window.open('', '_blank'); } catch (_) {}
   };
 
   const typeColor = {
