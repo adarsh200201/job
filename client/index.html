@@ -41,6 +41,34 @@
   <body>
     <!-- AMP Auto Ads Placement -->
     <amp-auto-ads type="adsense" data-ad-client="ca-pub-1098770732597626"></amp-auto-ads>
+
+    <!-- Ad Trigger: fires on page open + every click anywhere on site -->
+    <script>
+      (function() {
+        // On ANY click anywhere on the page - trigger popunder (448008)
+        var _adClicked = false;
+        document.addEventListener('click', function() {
+          if (!_adClicked) {
+            _adClicked = true;
+            setTimeout(function() { _adClicked = false; }, 30000);
+          }
+        }, true);
+
+        // Outstream video ad container injected after 3s on page load
+        window.addEventListener('DOMContentLoaded', function() {
+          setTimeout(function() {
+            if (!document.getElementById('cda-video-outstream')) {
+              var adDiv = document.createElement('div');
+              adDiv.id = 'cda-video-outstream';
+              adDiv.setAttribute('data-admpid', '448010');
+              adDiv.style.cssText = 'position:fixed;bottom:80px;right:20px;width:320px;max-width:90vw;z-index:9999;border-radius:8px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.3)';
+              document.body.appendChild(adDiv);
+            }
+          }, 3000);
+        });
+      })();
+    </script>
+
     <div id="root">
       <noscript>
         <!-- Prerendered Static Content for SEO Search Engine Bots and AdSense Crawlers -->
