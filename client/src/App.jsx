@@ -488,11 +488,7 @@ function AppLayout() {
     setMobileExamOpen(false);
     setMobileMoreOpen(false);
 
-    // Fire ad in new tab on every page navigation (popunder script intercepts)
-    // Ad opens separately - does NOT replace nextjobpost
-    setTimeout(() => {
-      try { window.open('', '_blank'); } catch (_) {}
-    }, 1500);
+    // Close mobile menu on route change
   }, [location.pathname]);
 
   // Prevent body scroll when mobile menu is open

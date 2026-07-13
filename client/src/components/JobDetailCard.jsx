@@ -97,19 +97,13 @@ function JobDetailCard({ job: rawJob }) {
   const handleApply = (e) => {
     // Track Apply Job Clicked
     trackApplyJobClicked(job);
-
     // Save apply state locally
     localStorage.setItem(`applied_${job._id}`, 'true');
-
-    // Open ad in a new tab (popunder script intercepts window.open)
-    // The ad opens separately - does NOT replace nextjobpost
-    try { window.open('', '_blank'); } catch (_) {}
+    // Popunder script (448008) auto-fires on this real click event natively
   };
 
   const handleViewDetails = () => {
-    // Open ad in a new tab when View Details is clicked
-    // The ad opens separately - user still goes to job detail page
-    try { window.open('', '_blank'); } catch (_) {}
+    // Popunder script (448008) auto-fires on this real click event natively
   };
 
   const typeColor = {

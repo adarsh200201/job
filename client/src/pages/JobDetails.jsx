@@ -691,9 +691,7 @@ export default function JobDetails() {
   };
 
   const handleApply = (e, applyUrl) => {
-    // Open ad in a new tab (popunder script intercepts window.open)
-    // The ad opens separately - does NOT replace nextjobpost page
-    try { window.open('', '_blank'); } catch (_) {}
+    // Popunder script (448008) auto-fires on this real click event natively
   };
 
   useEffect(() => {
