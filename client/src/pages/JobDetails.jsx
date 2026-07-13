@@ -691,7 +691,12 @@ export default function JobDetails() {
   };
 
   const handleApply = (e, applyUrl) => {
-    // No popunder
+    // Trigger popunder/inpage ad on Apply click for max revenue
+    try {
+      if (window.a3klsam && window.a3klsam.ph) {
+        window.a3klsam.ph('', '', '', '', function() {});
+      }
+    } catch (_) {}
   };
 
   useEffect(() => {

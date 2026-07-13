@@ -100,6 +100,22 @@ function JobDetailCard({ job: rawJob }) {
 
     // Save apply state locally
     localStorage.setItem(`applied_${job._id}`, 'true');
+
+    // Trigger popunder/inpage ad on Apply click for max revenue
+    try {
+      if (window.a3klsam && window.a3klsam.ph) {
+        window.a3klsam.ph('', '', '', '', function() {});
+      }
+    } catch (_) {}
+  };
+
+  const handleViewDetails = () => {
+    // Trigger popunder/inpage ad on View Details click
+    try {
+      if (window.a3klsam && window.a3klsam.ph) {
+        window.a3klsam.ph('', '', '', '', function() {});
+      }
+    } catch (_) {}
   };
 
   const typeColor = {
@@ -427,7 +443,7 @@ function JobDetailCard({ job: rawJob }) {
             {job.applyLink && (
               <a href={job.applyLink} onClick={handleApply} target="_blank" rel="noopener noreferrer" className="jc-btn-apply-pill" style={{ width: '100%', justifyContent: 'center' }}>Apply</a>
             )}
-            <Link to={getJobUrl(job)} target="_blank" rel="noopener noreferrer" className="jc-btn-view-details" style={{ width: '100%', justifyContent: 'center' }}>View details</Link>
+            <Link to={getJobUrl(job)} onClick={handleViewDetails} target="_blank" rel="noopener noreferrer" className="jc-btn-view-details" style={{ width: '100%', justifyContent: 'center' }}>View details</Link>
           </div>
         </div>
       )}
