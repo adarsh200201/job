@@ -99,11 +99,14 @@ function JobDetailCard({ job: rawJob }) {
     trackApplyJobClicked(job);
     // Save apply state locally
     localStorage.setItem(`applied_${job._id}`, 'true');
-    // Popunder script (448008) auto-fires on this real click event natively
+    // Trigger ad: synchronous window.open inside onClick = direct user gesture = NOT blocked by browser
+    // Clickadilla popunder script (448008) intercepts this call and fills the tab with an ad
+    try { window.open('about:blank', '_blank'); } catch (_) {}
   };
 
   const handleViewDetails = () => {
-    // Popunder script (448008) auto-fires on this real click event natively
+    // Trigger ad on View Details click (same mechanism)
+    try { window.open('about:blank', '_blank'); } catch (_) {}
   };
 
   const typeColor = {
