@@ -95,18 +95,13 @@ function JobDetailCard({ job: rawJob }) {
   }, [isVisible]);
 
   const handleApply = (e) => {
-    // Track Apply Job Clicked
     trackApplyJobClicked(job);
-    // Save apply state locally
     localStorage.setItem(`applied_${job._id}`, 'true');
-    // Trigger ad: synchronous window.open inside onClick = direct user gesture = NOT blocked by browser
-    // Clickadilla popunder script (448008) intercepts this call and fills the tab with an ad
-    try { window.open('about:blank', '_blank'); } catch (_) {}
+    // Popunder (448008) auto-fires on this click via its document click listener - no manual trigger needed
   };
 
   const handleViewDetails = () => {
-    // Trigger ad on View Details click (same mechanism)
-    try { window.open('about:blank', '_blank'); } catch (_) {}
+    // Popunder (448008) auto-fires on this click via its document click listener
   };
 
   const typeColor = {

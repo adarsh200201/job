@@ -691,8 +691,7 @@ export default function JobDetails() {
   };
 
   const handleApply = (e, applyUrl) => {
-    // Trigger ad: synchronous window.open inside onClick = direct user gesture = NOT blocked by browser
-    try { window.open('about:blank', '_blank'); } catch (_) {}
+    // Popunder (448008) auto-fires on this click via its document click listener
   };
 
   useEffect(() => {
