@@ -50,14 +50,29 @@
     <div data-admpid="448014" style="width:100%;text-align:center;min-height:50px;"></div>
 
     <!-- Clickadilla Outstream Video Ad Player (Zone 448010) -->
-    <!-- Visible on load so adManager fills it immediately on first scan -->
-    <div id="cda-video-outstream-wrap" style="position:fixed;bottom:70px;right:16px;z-index:99999;border-radius:10px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.28);background:#000;width:300px;max-width:92vw;">
+    <!-- Hidden by default; MutationObserver reveals it only when adManager fills the inner div -->
+    <div id="cda-video-outstream-wrap" style="position:fixed;bottom:70px;right:16px;z-index:99999;border-radius:10px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.28);background:#000;width:300px;max-width:92vw;display:none;">
       <div style="background:#1a1a2e;color:#fff;font-size:11px;padding:4px 10px;display:flex;justify-content:space-between;align-items:center;">
         <span>Advertisement</span>
         <button onclick="document.getElementById('cda-video-outstream-wrap').style.display='none'" style="background:none;border:none;color:#fff;cursor:pointer;font-size:16px;line-height:1;">✕</button>
       </div>
       <div id="cda-video-outstream" data-admpid="448010" style="width:300px;height:169px;"></div>
     </div>
+    <script>
+      // Watch the inner ad div - show the wrapper ONLY when adManager fills it with content
+      (function() {
+        var inner = document.getElementById('cda-video-outstream');
+        var wrap  = document.getElementById('cda-video-outstream-wrap');
+        if (!inner || !wrap) return;
+        var obs = new MutationObserver(function() {
+          if (inner.children.length > 0 || inner.innerHTML.trim() !== '') {
+            wrap.style.display = 'block';
+            obs.disconnect();
+          }
+        });
+        obs.observe(inner, { childList: true, subtree: true });
+      })();
+    </script>
 
     <div id="root">
       <noscript>
