@@ -45,9 +45,16 @@
     <!-- AMP Auto Ads Placement -->
     <amp-auto-ads type="adsense" data-ad-client="ca-pub-1098770732597626"></amp-auto-ads>
 
-    <!-- Clickadilla In-page Sticky Banner (Zone 448014) -->
-    <!-- Must be in static HTML so adManager.js finds it on first DOM scan (not in React JSX) -->
+    <!-- Clickadilla In-page Sticky Banner (Zone 448014) - TOP placement -->
+    <!-- Static HTML so adManager.js finds it on first DOM scan -->
     <div data-admpid="448014" style="width:100%;text-align:center;min-height:50px;"></div>
+
+    <!-- Clickadilla In-page Sticky BOTTOM BAR (Zone 448014) - most visible position -->
+    <div id="cda-inpage-bottom-bar" style="position:fixed;bottom:0;left:0;width:100%;z-index:99998;background:#fff;border-top:2px solid #e2e8f0;box-shadow:0 -4px 20px rgba(0,0,0,0.12);display:flex;align-items:center;justify-content:center;min-height:60px;padding:4px 40px 4px 8px;">
+      <div data-admpid="448014" style="text-align:center;width:100%;max-width:728px;"></div>
+      <button onclick="document.getElementById('cda-inpage-bottom-bar').style.display='none'" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:#f1f5f9;border:1px solid #cbd5e1;color:#64748b;cursor:pointer;font-size:13px;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;">✕</button>
+    </div>
+
 
     <!-- Clickadilla Outstream Video Ad Player (Zone 448010) -->
     <!-- Hidden by default; MutationObserver reveals it only when adManager fills the inner div -->
