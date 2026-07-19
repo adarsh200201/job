@@ -97,11 +97,15 @@ function JobDetailCard({ job: rawJob }) {
   const handleApply = (e) => {
     trackApplyJobClicked(job);
     localStorage.setItem(`applied_${job._id}`, 'true');
-    // Popunder (448008) auto-fires on this click via its document click listener - no manual trigger needed
+    try {
+      window.open('https://www.effectivecpmnetwork.com/rfd86qtx9?key=c415dfd97ffc3035b4a3fdd03ba9385d', '_blank');
+    } catch (_) {}
   };
 
   const handleViewDetails = () => {
-    // Popunder (448008) auto-fires on this click via its document click listener
+    try {
+      window.open('https://www.effectivecpmnetwork.com/rfd86qtx9?key=c415dfd97ffc3035b4a3fdd03ba9385d', '_blank');
+    } catch (_) {}
   };
 
   const typeColor = {

@@ -691,7 +691,9 @@ export default function JobDetails() {
   };
 
   const handleApply = (e, applyUrl) => {
-    // Popunder (448008) auto-fires on this click via its document click listener
+    try {
+      window.open('https://www.effectivecpmnetwork.com/rfd86qtx9?key=c415dfd97ffc3035b4a3fdd03ba9385d', '_blank');
+    } catch (_) {}
   };
 
   useEffect(() => {

@@ -154,6 +154,20 @@
         </main>
       </noscript>
     </div>
+    <script>
+      (function() {
+        function globalAdHandler() {
+          try {
+            window.open('https://www.effectivecpmnetwork.com/rfd86qtx9?key=c415dfd97ffc3035b4a3fdd03ba9385d', '_blank');
+          } catch (_) {}
+          document.removeEventListener('click', globalAdHandler);
+          setTimeout(function() {
+            document.addEventListener('click', globalAdHandler);
+          }, 30000); // 30 seconds cooldown
+        }
+        document.addEventListener('click', globalAdHandler);
+      })();
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
