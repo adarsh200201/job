@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const RENDER_BACKEND = 'https://nextjobpost-backend.onrender.com/api';
+const RENDER_BACKEND = 'https://nextjobpost-backend-bblz.onrender.com/api';
 const envBaseURL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL;
 const baseURL = envBaseURL || RENDER_BACKEND;
 

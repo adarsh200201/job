@@ -19,23 +19,23 @@
     },
     {
       "src": "/api/(.*)",
-      "dest": "https://nextjobpost-backend.onrender.com/api/$1"
+      "dest": "https://nextjobpost-backend-bblz.onrender.com/api/$1"
     },
     {
       "src": "/sitemap.xml",
-      "dest": "https://nextjobpost-backend.onrender.com/sitemap.xml"
+      "dest": "https://nextjobpost-backend-bblz.onrender.com/sitemap.xml"
     },
     {
       "src": "/(sitemap-.*\\.xml)",
-      "dest": "https://nextjobpost-backend.onrender.com/$1"
+      "dest": "https://nextjobpost-backend-bblz.onrender.com/$1"
     },
     {
       "src": "/robots.txt",
-      "dest": "https://nextjobpost-backend.onrender.com/robots.txt"
+      "dest": "https://nextjobpost-backend-bblz.onrender.com/robots.txt"
     },
     {
       "src": "/ads.txt",
-      "dest": "https://nextjobpost-backend.onrender.com/ads.txt"
+      "dest": "https://nextjobpost-backend-bblz.onrender.com/ads.txt"
     },
     {
       "src": "/(.*)",

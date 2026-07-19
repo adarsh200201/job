@@ -2,15 +2,15 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://nextjobpost-backend.onrender.com/api/:path*"
+      "destination": "https://nextjobpost-backend-bblz.onrender.com/api/:path*"
     },
     {
       "source": "/sitemap.xml",
-      "destination": "https://nextjobpost-backend.onrender.com/sitemap.xml"
+      "destination": "https://nextjobpost-backend-bblz.onrender.com/sitemap.xml"
     },
     {
       "source": "/sitemap-:slug.xml",
-      "destination": "https://nextjobpost-backend.onrender.com/sitemap-:slug.xml"
+      "destination": "https://nextjobpost-backend-bblz.onrender.com/sitemap-:slug.xml"
     },
     {
       "source": "/:path*",
@@ -21,7 +21,7 @@
           "value": ".*(googlebot|adsbot|adidxbot|bingbot|google-co-op|mediapartners-google|adsense|crawler|facebookexternalhit|twitterbot|linkedinbot|baiduspider|yandex).*"
         }
       ],
-      "destination": "https://nextjobpost-backend.onrender.com/bot-render/:path*"
+      "destination": "https://nextjobpost-backend-bblz.onrender.com/bot-render/:path*"
     },
     {
       "source": "/(.*)",
