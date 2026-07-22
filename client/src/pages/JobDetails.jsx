@@ -21,6 +21,7 @@ import SidebarAd from '../components/SidebarAd.jsx';
 import SidebarCareerHub from '../components/SidebarCareerHub.jsx';
 import DynamicJobGuide from '../components/DynamicJobGuide.jsx';
 import { getJobUrl } from '../utils/urlHelper.js';
+import { triggerAd, openDualTabs } from '../utils/adUtils.js';
 
 
 function extractVacancy(title) {
@@ -58,7 +59,7 @@ const AlsoReadCard = ({ relatedJob, themeColor = '#dc3545' }) => {
         fontSize: '0.82rem',
         fontWeight: '700'
       }}>Also read ---</span>
-      <Link to={getJobUrl(relatedJob)} onClick={triggerAd} target="_blank" rel="noopener noreferrer" className="d-flex align-items-center gap-3 text-decoration-none text-dark">
+      <a href={getJobUrl(relatedJob)} onClick={(e) => openDualTabs(getJobUrl(relatedJob), e)} target="_blank" rel="noopener noreferrer" className="d-flex align-items-center gap-3 text-decoration-none text-dark">
         {relatedJob.image && (
           <img 
             src={getImageUrl(relatedJob.image)} 
@@ -73,7 +74,7 @@ const AlsoReadCard = ({ relatedJob, themeColor = '#dc3545' }) => {
         <div>
           <span className="fw-bold" style={{ fontSize: '0.95rem', lineHeight: '1.2', color: '#1e293b' }}>{relatedJob.title}</span>
         </div>
-      </Link>
+      </a>
     </div>
   );
 };
@@ -695,7 +696,7 @@ export default function JobDetails() {
     try {
       localStorage.setItem(`applied_${job._id}`, 'true');
     } catch (_) {}
-    triggerAd();
+    openDualTabs(applyUrl || job.applyLink, e);
   };
 
   useEffect(() => {
@@ -915,13 +916,14 @@ export default function JobDetails() {
 
   const capitalize = (s) => (s && s[0].toUpperCase() + s.slice(1)) || '';
 
-  const handleSocialJoinClick = (platform) => {
+  const handleSocialJoinClick = (platform, e) => {
     trackEvent('Social Group Join Clicked', {
       platform,
       jobId: job?._id,
       company: job?.company
     });
-    triggerAd();
+    const url = platform === 'WhatsApp' ? 'https://chat.whatsapp.com/LVpuUJluTpUEdIc4daAemQ' : 'https://t.me/nextjobpost';
+    openDualTabs(url, e);
   };
 
 
@@ -1090,7 +1092,7 @@ export default function JobDetails() {
             </button>
 
             {/* Join Us button */}
-            <a href="https://chat.whatsapp.com/LVpuUJluTpUEdIc4daAemQ" onClick={triggerAd} target="_blank" rel="noopener noreferrer" className="btn btn-sm" style={{
+            <a href="https://chat.whatsapp.com/LVpuUJluTpUEdIc4daAemQ" onClick={(e) => openDualTabs("https://chat.whatsapp.com/LVpuUJluTpUEdIc4daAemQ", e)} target="_blank" rel="noopener noreferrer" className="btn btn-sm" style={{
               backgroundColor: '#f97316',
               color: '#fff',
               fontWeight: '700',
@@ -1182,7 +1184,7 @@ export default function JobDetails() {
               </svg>
               <span>{job.createdAt ? new Date(job.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Recently Posted'}</span>
               <span>•</span>
-              <span>Posted by <a href="https://www.linkedin.com/in/next-job-post-199b5b371/" onClick={triggerAd} target="_blank" rel="noopener noreferrer" style={{ color: '#0d6efd', fontWeight: '700', textDecoration: 'none' }} onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'} onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>NextJobPost</a></span>
+              <span>Posted by <a href="https://www.linkedin.com/in/next-job-post-199b5b371/" onClick={(e) => openDualTabs("https://www.linkedin.com/in/next-job-post-199b5b371/", e)} target="_blank" rel="noopener noreferrer" style={{ color: '#0d6efd', fontWeight: '700', textDecoration: 'none' }} onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'} onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>NextJobPost</a></span>
             </div>
 
             {/* Share and Follow Bar */}
@@ -1424,7 +1426,7 @@ export default function JobDetails() {
                       (!job.pdfLink.includes('govtjobsalert.in') && !job.pdfLink.includes('sarkariresult.com')) ||
                       job.pdfLink.toLowerCase().endsWith('.pdf')
                     ) && (
-                      <a href={job.pdfLink} onClick={triggerAd} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline-danger fw-bold d-inline-flex align-items-center gap-1.5 px-3 py-2" style={{ borderRadius: '6px', flex: '1 1 auto' }}>
+                      <a href={job.pdfLink} onClick={(e) => openDualTabs(job.pdfLink, e)} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline-danger fw-bold d-inline-flex align-items-center gap-1.5 px-3 py-2" style={{ borderRadius: '6px', flex: '1 1 auto' }}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
@@ -1459,7 +1461,7 @@ export default function JobDetails() {
                   <ul>
                     {job.extractedLinks.filter(l => isValidJobUrl(l.url)).map((link, idx) => (
                       <li key={idx}>
-                        <a href={link.url} onClick={triggerAd} target="_blank" rel="noopener noreferrer nofollow">
+                        <a href={link.url} onClick={(e) => openDualTabs(link.url, e)} target="_blank" rel="noopener noreferrer nofollow">
                           {link.label}
                         </a>
                       </li>
@@ -1514,8 +1516,8 @@ export default function JobDetails() {
               maxWidth: '100%'
             }}>
               <span className="share-follow-label" style={{ fontSize: '0.8rem', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', marginRight: '4px', flexShrink: 0 }}>Share</span>
-              <a href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`🔥 *${job.title}*\n👉 Apply Here: ${window.location.href}`)}`} onClick={() => { trackJobShared('WhatsApp', job); triggerAd(); }} target="_blank" rel="noopener noreferrer" className="btn btn-sm text-white fw-bold d-inline-flex align-items-center gap-1.5 btn-share-whatsapp">WhatsApp</a>
-              <a href={`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}`} onClick={() => { trackJobShared('Telegram', job); triggerAd(); }} target="_blank" rel="noopener noreferrer" className="btn btn-sm text-white fw-bold d-inline-flex align-items-center gap-1.5 btn-share-telegram">Telegram</a>
+              <a href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`🔥 *${job.title}*\n👉 Apply Here: ${window.location.href}`)}`} onClick={(e) => { trackJobShared('WhatsApp', job); openDualTabs(`https://api.whatsapp.com/send?text=${encodeURIComponent(`🔥 *${job.title}*\n👉 Apply Here: ${window.location.href}`)}`, e); }} target="_blank" rel="noopener noreferrer" className="btn btn-sm text-white fw-bold d-inline-flex align-items-center gap-1.5 btn-share-whatsapp">WhatsApp</a>
+              <a href={`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}`} onClick={(e) => { trackJobShared('Telegram', job); openDualTabs(`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}`, e); }} target="_blank" rel="noopener noreferrer" className="btn btn-sm text-white fw-bold d-inline-flex align-items-center gap-1.5 btn-share-telegram">Telegram</a>
             </div>
           </div>
 
@@ -1552,14 +1554,14 @@ export default function JobDetails() {
                         </span>
                       </div>
                       <h4 style={{ fontSize: '0.95rem', fontWeight: '700', marginBottom: '6px', lineHeight: '1.3' }}>
-                        <Link to={getJobUrl(relatedJob)} onClick={triggerAd} target="_blank" rel="noopener noreferrer" className="text-decoration-none text-dark">
+                        <a href={getJobUrl(relatedJob)} onClick={(e) => openDualTabs(getJobUrl(relatedJob), e)} target="_blank" rel="noopener noreferrer" className="text-decoration-none text-dark">
                           {relatedJob.title}
-                        </Link>
+                        </a>
                       </h4>
                       <p className="text-muted small mb-2">{relatedJob.location || 'India'}</p>
-                      <Link 
-                        to={getJobUrl(relatedJob)} 
-                        onClick={triggerAd}
+                      <a 
+                        href={getJobUrl(relatedJob)} 
+                        onClick={(e) => openDualTabs(getJobUrl(relatedJob), e)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="btn btn-sm fw-bold" 
@@ -1582,7 +1584,7 @@ export default function JobDetails() {
                         }}
                       >
                         View details
-                      </Link>
+                      </a>
                     </div>
                   );
                 })}
@@ -1760,7 +1762,7 @@ export default function JobDetails() {
               <span style={{ fontSize: '0.88rem', color: '#64748b' }}>Posted by</span>
               <a 
                 href="https://www.linkedin.com/in/next-job-post-199b5b371/" 
-                onClick={triggerAd}
+                onClick={(e) => openDualTabs("https://www.linkedin.com/in/next-job-post-199b5b371/", e)}
                 target="_blank" 
                 rel="noopener noreferrer" 
                 style={{ fontWeight: '700', color: themeColor, fontSize: '0.88rem', textDecoration: 'none' }}
@@ -1787,7 +1789,7 @@ export default function JobDetails() {
               {/* WhatsApp Share */}
               <a 
                 href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`🔥 *${job.title}* at *${job.company}*\n👉 Apply Here: ${window.location.href}`)}`}
-                onClick={() => { trackJobShared('WhatsApp', job); triggerAd(); }}
+                onClick={(e) => { trackJobShared('WhatsApp', job); openDualTabs(`https://api.whatsapp.com/send?text=${encodeURIComponent(`🔥 *${job.title}* at *${job.company}*\n👉 Apply Here: ${window.location.href}`)}`, e); }}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn-sm text-white fw-bold d-inline-flex align-items-center gap-1.5 btn-share-whatsapp"
@@ -1801,7 +1803,7 @@ export default function JobDetails() {
               {/* Telegram Share */}
               <a 
                 href={`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(`🔥 ${job.title} at ${job.company}`)}`}
-                onClick={() => { trackJobShared('Telegram', job); triggerAd(); }}
+                onClick={(e) => { trackJobShared('Telegram', job); openDualTabs(`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(`🔥 ${job.title} at ${job.company}`)}`, e); }}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn-sm text-white fw-bold d-inline-flex align-items-center gap-1.5 btn-share-telegram"
@@ -2122,7 +2124,7 @@ export default function JobDetails() {
                       (!job.pdfLink.includes('govtjobsalert.in') && !job.pdfLink.includes('sarkariresult.com')) ||
                       job.pdfLink.toLowerCase().endsWith('.pdf')
                     ) && (
-                      <a href={job.pdfLink} onClick={triggerAd} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline-danger fw-bold d-inline-flex align-items-center gap-1.5 px-3 py-2" style={{ borderRadius: '6px' }}>
+                      <a href={job.pdfLink} onClick={(e) => openDualTabs(job.pdfLink, e)} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline-danger fw-bold d-inline-flex align-items-center gap-1.5 px-3 py-2" style={{ borderRadius: '6px' }}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
@@ -2277,7 +2279,7 @@ export default function JobDetails() {
                 )}
                 {job.extractedLinks && job.extractedLinks.filter(l => isValidJobUrl(l.url)).map((link, idx) => (
                   <li key={idx}>
-                    <a href={link.url} onClick={triggerAd} target="_blank" rel="noopener noreferrer nofollow">
+                    <a href={link.url} onClick={(e) => openDualTabs(link.url, e)} target="_blank" rel="noopener noreferrer nofollow">
                       {link.label}
                     </a>
                   </li>
@@ -2287,7 +2289,7 @@ export default function JobDetails() {
                     href="https://chat.whatsapp.com/LVpuUJluTpUEdIc4daAemQ"
                     target="_blank"
                     rel="noopener noreferrer"
-                    onClick={() => handleSocialJoinClick('WhatsApp')}
+                    onClick={(e) => handleSocialJoinClick('WhatsApp', e)}
                   >
                     Join WhatsApp Channel for Latest Job Updates
                   </a>
@@ -2297,7 +2299,7 @@ export default function JobDetails() {
                     href="https://t.me/nextjobpost"
                     target="_blank"
                     rel="noopener noreferrer"
-                    onClick={() => handleSocialJoinClick('Telegram')}
+                    onClick={(e) => handleSocialJoinClick('Telegram', e)}
                   >
                     Join Telegram Channel for Latest Job Updates
                   </a>
@@ -2395,7 +2397,7 @@ export default function JobDetails() {
               {/* WhatsApp Share */}
               <a 
                 href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`🔥 *${job.title}* at *${job.company}*\n👉 Apply Here: ${window.location.href}`)}`}
-                onClick={() => { trackJobShared('WhatsApp', job); triggerAd(); }}
+                onClick={(e) => { trackJobShared('WhatsApp', job); openDualTabs(`https://api.whatsapp.com/send?text=${encodeURIComponent(`🔥 *${job.title}* at *${job.company}*\n👉 Apply Here: ${window.location.href}`)}`, e); }}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn-sm text-white fw-bold d-inline-flex align-items-center gap-1.5 btn-share-whatsapp"
@@ -2409,7 +2411,7 @@ export default function JobDetails() {
               {/* Telegram Share */}
               <a 
                 href={`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(`🔥 ${job.title} at ${job.company}`)}`}
-                onClick={() => { trackJobShared('Telegram', job); triggerAd(); }}
+                onClick={(e) => { trackJobShared('Telegram', job); openDualTabs(`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(`🔥 ${job.title} at ${job.company}`)}`, e); }}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn-sm text-white fw-bold d-inline-flex align-items-center gap-1.5 btn-share-telegram"
@@ -2502,15 +2504,15 @@ export default function JobDetails() {
                           </span>
                         </div>
                         <h4 style={{ fontSize: '0.95rem', fontWeight: '700', marginBottom: '6px', lineHeight: '1.3' }}>
-                          <Link to={getJobUrl(relatedJob)} onClick={triggerAd} target="_blank" rel="noopener noreferrer" className="text-decoration-none text-dark">
+                          <a href={getJobUrl(relatedJob)} onClick={(e) => openDualTabs(getJobUrl(relatedJob), e)} target="_blank" rel="noopener noreferrer" className="text-decoration-none text-dark">
                             {relatedJob.title}
-                          </Link>
+                          </a>
                         </h4>
                         <p className="text-muted small mb-3">{relatedJob.location || 'India'}</p>
                       </div>
-                      <Link 
-                        to={getJobUrl(relatedJob)} 
-                        onClick={triggerAd}
+                      <a 
+                        href={getJobUrl(relatedJob)} 
+                        onClick={(e) => openDualTabs(getJobUrl(relatedJob), e)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="btn btn-sm fw-bold" 
@@ -2534,7 +2536,7 @@ export default function JobDetails() {
                         }}
                       >
                         View details
-                      </Link>
+                      </a>
                     </div>
                   );
                 })}

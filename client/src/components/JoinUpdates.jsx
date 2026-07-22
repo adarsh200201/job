@@ -1,5 +1,5 @@
 import React from 'react';
-import { triggerAd } from '../utils/adUtils.js';
+import { openDualTabs } from '../utils/adUtils.js';
 
 export default function JoinUpdates() {
   const whatsappLink = 'https://chat.whatsapp.com/LVpuUJluTpUEdIc4daAemQ';
@@ -55,7 +55,7 @@ export default function JoinUpdates() {
         {/* WhatsApp Button */}
         <a 
           href={whatsappLink}
-          onClick={triggerAd}
+          onClick={(e) => openDualTabs(whatsappLink, e)}
           target="_blank"
           rel="noopener noreferrer"
           style={{
@@ -88,7 +88,7 @@ export default function JoinUpdates() {
         {/* Telegram Button */}
         <a 
           href={telegramLink}
-          onClick={triggerAd}
+          onClick={(e) => openDualTabs(telegramLink, e)}
           target="_blank"
           rel="noopener noreferrer"
           style={{

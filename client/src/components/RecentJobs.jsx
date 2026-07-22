@@ -1,8 +1,7 @@
 import React, { useMemo, memo } from 'react';
-import { Link } from 'react-router-dom';
 import { getImageUrl } from '../utils/imageUtils.js';
 import { getJobUrl } from '../utils/urlHelper.js';
-import { triggerAd } from '../utils/adUtils.js';
+import { openDualTabs } from '../utils/adUtils.js';
 
 function timeAgo(dateStr) {
   const date = new Date(dateStr);
@@ -17,10 +16,16 @@ function timeAgo(dateStr) {
 
 const PostCard = memo(({ job }) => {
   const ago = useMemo(() => timeAgo(job.createdAt), [job.createdAt]);
+  const targetUrl = getJobUrl(job);
 
   return (
-    <Link to={getJobUrl(job)} onClick={triggerAd} target="_blank" rel="noopener noreferrer" className="rj-card">
-
+    <a 
+      href={targetUrl} 
+      onClick={(e) => openDualTabs(targetUrl, e)} 
+      target="_blank" 
+      rel="noopener noreferrer" 
+      className="rj-card"
+    >
       <div className="rj-img-wrap">
         {job.image ? (
           <img
@@ -45,7 +50,7 @@ const PostCard = memo(({ job }) => {
           <span className="rj-ago">{ago}</span>
         </span>
       </div>
-    </Link>
+    </a>
   );
 });
 

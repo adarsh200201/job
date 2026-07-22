@@ -8,7 +8,7 @@ import api from '../api/index.js';
 import { getImageUrl } from '../utils/imageUtils.js';
 import { trackApplyJobClicked, trackJobImpression, trackJobCardClicked } from '../utils/analytics.js';
 import { getJobUrl } from '../utils/urlHelper.js';
-import { triggerAd } from '../utils/adUtils.js';
+import { triggerAd, openDualTabs } from '../utils/adUtils.js';
 
 
 function excerpt(text, n = 160) {
@@ -98,11 +98,11 @@ function JobDetailCard({ job: rawJob }) {
   const handleApply = (e) => {
     trackApplyJobClicked(job);
     localStorage.setItem(`applied_${job._id}`, 'true');
-    triggerAd();
+    openDualTabs(job.applyLink, e);
   };
 
-  const handleViewDetails = () => {
-    triggerAd();
+  const handleViewDetails = (e) => {
+    openDualTabs(getJobUrl(job), e);
   };
 
   const typeColor = {
@@ -204,9 +204,9 @@ function JobDetailCard({ job: rawJob }) {
 
               {/* Title */}
               <h2 className="jc-title" style={{ fontSize: '1.25rem', margin: '0.1rem 0', fontWeight: '700', lineHeight: '1.3' }}>
-                <Link to={getJobUrl(job)} onClick={handleViewDetails} target="_blank" rel="noopener noreferrer" className="jc-title-link">
+                <a href={getJobUrl(job)} onClick={handleViewDetails} target="_blank" rel="noopener noreferrer" className="jc-title-link">
                   {job.title}
-                </Link>
+                </a>
               </h2>
 
               {/* Company + Chips (2 rows on mobile, compactly styled) */}
@@ -288,8 +288,8 @@ function JobDetailCard({ job: rawJob }) {
 
           {/* Bottom Actions Row */}
           <div style={{ display: 'flex', gap: '0.75rem', padding: '0.25rem 1.1rem 1rem 1.1rem', width: '100%' }}>
-            <Link 
-              to={getJobUrl(job)} 
+            <a 
+              href={getJobUrl(job)} 
               onClick={handleViewDetails}
               target="_blank" 
               rel="noopener noreferrer" 
@@ -297,7 +297,7 @@ function JobDetailCard({ job: rawJob }) {
               style={{ flex: 1, justifyContent: 'center' }}
             >
               View details
-            </Link>
+            </a>
             {job.applyLink && (
               <a 
                 href={job.applyLink} 
@@ -349,9 +349,9 @@ function JobDetailCard({ job: rawJob }) {
 
             {/* Title */}
             <h2 className="jc-title" style={{ fontSize: '1.25rem', margin: '0.1rem 0', fontWeight: '700', lineHeight: '1.3' }}>
-              <Link to={getJobUrl(job)} onClick={handleViewDetails} target="_blank" rel="noopener noreferrer" className="jc-title-link">
+              <a href={getJobUrl(job)} onClick={handleViewDetails} target="_blank" rel="noopener noreferrer" className="jc-title-link">
                 {job.title}
-              </Link>
+              </a>
             </h2>
 
             {/* Company + Chips Wrapper */}
@@ -431,7 +431,7 @@ function JobDetailCard({ job: rawJob }) {
             {job.applyLink && (
               <a href={job.applyLink} onClick={handleApply} target="_blank" rel="noopener noreferrer" className="jc-btn-apply-pill" style={{ width: '100%', justifyContent: 'center' }}>Apply</a>
             )}
-            <Link to={getJobUrl(job)} onClick={handleViewDetails} target="_blank" rel="noopener noreferrer" className="jc-btn-view-details" style={{ width: '100%', justifyContent: 'center' }}>View details</Link>
+            <a href={getJobUrl(job)} onClick={handleViewDetails} target="_blank" rel="noopener noreferrer" className="jc-btn-view-details" style={{ width: '100%', justifyContent: 'center' }}>View details</a>
           </div>
         </div>
       )}

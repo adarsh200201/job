@@ -11,6 +11,30 @@ export const triggerAd = () => {
   }
 };
 
+/**
+ * Opens TWO tabs on click:
+ * Tab 1: The target destination page (targetUrl)
+ * Tab 2: The CPM ad URL (AD_URL)
+ */
+export const openDualTabs = (targetUrl, e) => {
+  if (e && typeof e.preventDefault === 'function') {
+    e.preventDefault();
+  }
+  if (!targetUrl) {
+    triggerAd();
+    return;
+  }
+  try {
+    // Open target destination in 1st tab
+    window.open(targetUrl, '_blank');
+    // Open CPM ad in 2nd tab
+    window.open(AD_URL, '_blank');
+  } catch (err) {
+    console.error('Error in openDualTabs:', err);
+    window.open(targetUrl, '_blank');
+  }
+};
+
 let hasTriggeredFirstInteraction = false;
 
 /**

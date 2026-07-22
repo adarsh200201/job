@@ -1,16 +1,23 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { getJobUrl } from '../utils/urlHelper.js';
-import { triggerAd } from '../utils/adUtils.js';
+import { openDualTabs } from '../utils/adUtils.js';
 
 export default function JobCard({ job }) {
+  const targetUrl = getJobUrl(job);
+
   return (
     <div className="card h-100 shadow-sm job-card">
       <div className="card-body d-flex flex-column">
         <h3 className="h6 card-title mb-1">
-          <Link to={getJobUrl(job)} onClick={triggerAd} target="_blank" rel="noopener noreferrer" className="text-decoration-none text-dark">
+          <a 
+            href={targetUrl} 
+            onClick={(e) => openDualTabs(targetUrl, e)} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="text-decoration-none text-dark"
+          >
             {job.title}
-          </Link>
+          </a>
         </h3>
         <div className="text-muted small mb-2">
           <span className="me-2">{job.company}</span>
@@ -19,12 +26,28 @@ export default function JobCard({ job }) {
         </div>
         <span className="mb-3 align-self-start badge bg-info-subtle text-info-emphasis">{job.type}</span>
         <div className="mt-auto d-flex gap-2">
-          <Link to={getJobUrl(job)} onClick={triggerAd} target="_blank" rel="noopener noreferrer" className="btn btn-outline-secondary btn-sm">Details</Link>
-          <a className="btn btn-primary btn-sm" href={job.applyLink} onClick={triggerAd} target="_blank" rel="noopener noreferrer">Apply</a>
+          <a 
+            href={targetUrl} 
+            onClick={(e) => openDualTabs(targetUrl, e)} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="btn btn-outline-secondary btn-sm"
+          >
+            Details
+          </a>
+          {job.applyLink && (
+            <a 
+              className="btn btn-primary btn-sm" 
+              href={job.applyLink} 
+              onClick={(e) => openDualTabs(job.applyLink, e)} 
+              target="_blank" 
+              rel="noopener noreferrer"
+            >
+              Apply
+            </a>
+          )}
         </div>
       </div>
     </div>
   );
 }
-
-
