@@ -8,6 +8,7 @@ import api from '../api/index.js';
 import { getImageUrl } from '../utils/imageUtils.js';
 import { trackApplyJobClicked, trackJobImpression, trackJobCardClicked } from '../utils/analytics.js';
 import { getJobUrl } from '../utils/urlHelper.js';
+import { triggerAd } from '../utils/adUtils.js';
 
 
 function excerpt(text, n = 160) {
@@ -97,15 +98,11 @@ function JobDetailCard({ job: rawJob }) {
   const handleApply = (e) => {
     trackApplyJobClicked(job);
     localStorage.setItem(`applied_${job._id}`, 'true');
-    try {
-      window.open('https://www.effectivecpmnetwork.com/rfd86qtx9?key=c415dfd97ffc3035b4a3fdd03ba9385d', '_blank');
-    } catch (_) {}
+    triggerAd();
   };
 
   const handleViewDetails = () => {
-    try {
-      window.open('https://www.effectivecpmnetwork.com/rfd86qtx9?key=c415dfd97ffc3035b4a3fdd03ba9385d', '_blank');
-    } catch (_) {}
+    triggerAd();
   };
 
   const typeColor = {
@@ -207,7 +204,7 @@ function JobDetailCard({ job: rawJob }) {
 
               {/* Title */}
               <h2 className="jc-title" style={{ fontSize: '1.25rem', margin: '0.1rem 0', fontWeight: '700', lineHeight: '1.3' }}>
-                <Link to={getJobUrl(job)} target="_blank" rel="noopener noreferrer" className="jc-title-link">
+                <Link to={getJobUrl(job)} onClick={handleViewDetails} target="_blank" rel="noopener noreferrer" className="jc-title-link">
                   {job.title}
                 </Link>
               </h2>
@@ -293,6 +290,7 @@ function JobDetailCard({ job: rawJob }) {
           <div style={{ display: 'flex', gap: '0.75rem', padding: '0.25rem 1.1rem 1rem 1.1rem', width: '100%' }}>
             <Link 
               to={getJobUrl(job)} 
+              onClick={handleViewDetails}
               target="_blank" 
               rel="noopener noreferrer" 
               className="jc-btn-view-details"
@@ -351,7 +349,7 @@ function JobDetailCard({ job: rawJob }) {
 
             {/* Title */}
             <h2 className="jc-title" style={{ fontSize: '1.25rem', margin: '0.1rem 0', fontWeight: '700', lineHeight: '1.3' }}>
-              <Link to={getJobUrl(job)} target="_blank" rel="noopener noreferrer" className="jc-title-link">
+              <Link to={getJobUrl(job)} onClick={handleViewDetails} target="_blank" rel="noopener noreferrer" className="jc-title-link">
                 {job.title}
               </Link>
             </h2>

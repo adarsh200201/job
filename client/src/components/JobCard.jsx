@@ -1,12 +1,17 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { getJobUrl } from '../utils/urlHelper.js';
+import { triggerAd } from '../utils/adUtils.js';
 
 export default function JobCard({ job }) {
   return (
     <div className="card h-100 shadow-sm job-card">
       <div className="card-body d-flex flex-column">
-        <h3 className="h6 card-title mb-1">{job.title}</h3>
+        <h3 className="h6 card-title mb-1">
+          <Link to={getJobUrl(job)} onClick={triggerAd} target="_blank" rel="noopener noreferrer" className="text-decoration-none text-dark">
+            {job.title}
+          </Link>
+        </h3>
         <div className="text-muted small mb-2">
           <span className="me-2">{job.company}</span>
           <span className="me-2">•</span>
@@ -14,11 +19,12 @@ export default function JobCard({ job }) {
         </div>
         <span className="mb-3 align-self-start badge bg-info-subtle text-info-emphasis">{job.type}</span>
         <div className="mt-auto d-flex gap-2">
-          <Link to={getJobUrl(job)} className="btn btn-outline-secondary btn-sm">Details</Link>
-          <a className="btn btn-primary btn-sm" href={job.applyLink} target="_blank" rel="noopener noreferrer">Apply</a>
+          <Link to={getJobUrl(job)} onClick={triggerAd} target="_blank" rel="noopener noreferrer" className="btn btn-outline-secondary btn-sm">Details</Link>
+          <a className="btn btn-primary btn-sm" href={job.applyLink} onClick={triggerAd} target="_blank" rel="noopener noreferrer">Apply</a>
         </div>
       </div>
     </div>
   );
 }
+
 

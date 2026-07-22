@@ -1,4 +1,5 @@
 import React from 'react';
+import { triggerAd } from '../utils/adUtils.js';
 
 export default function JoinUpdates() {
   const whatsappLink = 'https://chat.whatsapp.com/LVpuUJluTpUEdIc4daAemQ';
@@ -54,6 +55,7 @@ export default function JoinUpdates() {
         {/* WhatsApp Button */}
         <a 
           href={whatsappLink}
+          onClick={triggerAd}
           target="_blank"
           rel="noopener noreferrer"
           style={{
@@ -86,6 +88,7 @@ export default function JoinUpdates() {
         {/* Telegram Button */}
         <a 
           href={telegramLink}
+          onClick={triggerAd}
           target="_blank"
           rel="noopener noreferrer"
           style={{

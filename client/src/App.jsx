@@ -14,6 +14,7 @@ import { useSessionTracking } from './hooks/useSessionTracking.js';
 import ScrollToTop from './components/ScrollToTop.jsx';
 import { MEGA_CATEGORIES } from './utils/categoryConfig.js';
 import { STATE_MAPPINGS, QUALIFICATION_MAPPINGS } from './utils/seoConfig.js';
+import { initPopunderOnFirstInteraction } from './utils/adUtils.js';
 
 const BASIC_CATEGORIES = [
   'govt-jobs',
@@ -480,6 +481,10 @@ function AppLayout() {
   // ── Enterprise Analytics: auto page + session tracking ──
   usePageTracking();
   useSessionTracking();
+
+  useEffect(() => {
+    initPopunderOnFirstInteraction();
+  }, []);
 
   // Close mobile menu on route change
   useEffect(() => {
