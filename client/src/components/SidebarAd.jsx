@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import Banner468x60 from './Banner468x60';
 
 export default function SidebarAd() {
   useEffect(() => {
@@ -36,6 +37,9 @@ export default function SidebarAd() {
       <div style={{ width: '100%', maxWidth: '300px', minHeight: '100px', borderRadius: '12px', overflow: 'hidden' }}>
         <div id="container-87559d9939384ac9fbf272280d62c49e"></div>
       </div>
+
+      {/* EffectiveCPMNetwork Banner 468x60 (30487071) */}
+      <Banner468x60 />
     </div>
   );
 }
