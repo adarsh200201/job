@@ -1,4 +1,4 @@
-export const AD_URL = 'https://www.effectivecpmnetwork.com/rfd86qtx9?key=c415dfd97ffc3035b4a3fdd03ba9385d';
+export const AD_URL = 'https://www.effectivecpmnetwork.com/y20e832wf?key=411fab608b9d3ee10137a4e027fe25b2';
 
 /**
  * Triggers opening the ad in a new tab alongside the user's intended navigation.
