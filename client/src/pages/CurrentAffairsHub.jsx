@@ -3,6 +3,8 @@ import { Helmet } from 'react-helmet-async';
 import api from '../api/index.js';
 import JoinUpdates from '../components/JoinUpdates.jsx';
 import SidebarAd from '../components/SidebarAd.jsx';
+import MobileTopAd from '../components/MobileTopAd.jsx';
+import InContentAd from '../components/InContentAd.jsx';
 
 // Static current affairs database 2026
 const CURRENT_AFFAIRS_DATA = [
@@ -663,7 +665,9 @@ export default function CurrentAffairsHub() {
 
       <div className="row g-4">
         <div className="col-12 col-lg-8 col-left">
-          
+          {/* Mobile-only top ad */}
+          <MobileTopAd />
+
           {/* Navigation Tabs */}
           <div className="d-flex flex-wrap gap-2 mb-4" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '12px' }}>
             {categories.map(cat => (

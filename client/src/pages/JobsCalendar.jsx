@@ -3,6 +3,8 @@ import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import JoinUpdates from '../components/JoinUpdates.jsx';
 import SidebarAd from '../components/SidebarAd.jsx';
+import MobileTopAd from '../components/MobileTopAd.jsx';
+import InContentAd from '../components/InContentAd.jsx';
 
 // Data for major exams in 2026
 const CALENDAR_DATA = [
@@ -437,6 +439,8 @@ export default function JobsCalendar({ type = 'all' }) {
 
       <div className="row g-4">
         <div className="col-12 col-lg-8 col-left">
+          {/* Mobile-only top ad */}
+          <MobileTopAd />
           <div className="premium-card">
             
             {/* Tentative Disclaimer Notice */}

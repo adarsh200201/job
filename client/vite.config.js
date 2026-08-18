@@ -10,6 +10,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       injectRegister: 'inline',
       workbox: {
+        skipWaiting: true,
+        clientsClaim: true,
         globPatterns: ['**/*.{js,css,html,png,svg,ico,json,webp}'],
         navigateFallbackDenylist: [
           /^\/ads\.txt$/,
