@@ -14,6 +14,7 @@ import HomeSEOContent from '../components/HomeSEOContent.jsx';
 import { articlesData } from '../data/articlesData.js';
 import RecommendedBooks from '../components/Affiliate/RecommendedBooks.jsx';
 import StudentEssentials from '../components/Affiliate/StudentEssentials.jsx';
+import InContentAd from '../components/InContentAd.jsx';
 
 
 function RecommendationSection({ title, emoji, description, jobs, showSeeAll, onDismiss, isLoggedIn }) {
@@ -565,6 +566,9 @@ export default function Home() {
               {sortedJobs.map((job, idx) => (
                 <React.Fragment key={job._id}>
                   <JobDetailCard job={job} />
+                  {(idx + 1) % 5 === 0 && (idx + 1) % 10 !== 0 && (
+                    <InContentAd instanceId={`home-list-${idx}`} />
+                  )}
                   {(idx + 1) % 10 === 0 && (
                     <div style={{ margin: '1.5rem 0' }}>
                       {Math.floor((idx + 1) / 10) % 2 === 1 ? (
@@ -910,6 +914,9 @@ export default function Home() {
         </div>
       </div>
       
+      {/* In-Content Ad before SEO block */}
+      <InContentAd instanceId="before-seo-content" />
+
       {/* Home SEO Directories & Content Block */}
       <HomeSEOContent />
     </div>

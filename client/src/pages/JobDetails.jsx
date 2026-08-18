@@ -22,6 +22,7 @@ import SidebarCareerHub from '../components/SidebarCareerHub.jsx';
 import DynamicJobGuide from '../components/DynamicJobGuide.jsx';
 import { getJobUrl } from '../utils/urlHelper.js';
 import { triggerAd, openDualTabs } from '../utils/adUtils.js';
+import InContentAd from '../components/InContentAd.jsx';
 
 
 function extractVacancy(title) {
@@ -1357,6 +1358,9 @@ export default function JobDetails() {
             </div>
           )}
 
+          {/* In-Content Ad after Job Description */}
+          <InContentAd instanceId="after-job-desc" />
+
           {/* About Company Section */}
           {job.aboutCompany && (
             <div id="about-company-section" className="mb-5 text-dark" style={{ scrollMarginTop: '110px' }}>
@@ -1368,6 +1372,9 @@ export default function JobDetails() {
               </div>
             </div>
           )}
+
+          {/* In-Content Ad after About Company */}
+          <InContentAd instanceId="after-about-company" />
 
           {/* Responsibilities Section */}
           {job.responsibilities && job.responsibilities.length > 0 && (
@@ -2112,6 +2119,9 @@ export default function JobDetails() {
               </div>
 
               <AlsoReadCard relatedJob={intersperseJobs[0]} themeColor={themeColor} />
+
+              {/* In-Content Ad after first AlsoRead section */}
+              <InContentAd instanceId="after-alsoread-1" />
 
               {/* Essential Links Block */}
               {(job.pdfLink || job.applyLink) && (

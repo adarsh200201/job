@@ -13,6 +13,7 @@ import { MEGA_CATEGORIES } from '../utils/categoryConfig.js';
 import SidebarCategories from '../components/SidebarCategories.jsx';
 import SidebarCareerHub from '../components/SidebarCareerHub.jsx';
 import { generateCategorySEOTemplates } from '../utils/seoConfig.js';
+import InContentAd from '../components/InContentAd.jsx';
 
 
 // Configurations for each category to ensure optimized SEO meta tags
@@ -345,8 +346,13 @@ export default function GovtJobsCategory({ categoryKey }) {
                 <p className="text-muted small">Please check back later for updates or search for other opportunities.</p>
               </div>
             )}
-            {sortedJobs.map((job) => (
-              <JobDetailCard key={job._id} job={job} />
+            {sortedJobs.map((job, idx) => (
+              <React.Fragment key={job._id}>
+                <JobDetailCard job={job} />
+                {(idx + 1) % 5 === 0 && (
+                  <InContentAd instanceId={`govtjobs-list-${idx}`} />
+                )}
+              </React.Fragment>
             ))}
             
             {/* Pagination */}
