@@ -15,6 +15,7 @@ import { articlesData } from '../data/articlesData.js';
 import RecommendedBooks from '../components/Affiliate/RecommendedBooks.jsx';
 import StudentEssentials from '../components/Affiliate/StudentEssentials.jsx';
 import InContentAd from '../components/InContentAd.jsx';
+import MobileTopAd from '../components/MobileTopAd.jsx';
 
 
 function RecommendationSection({ title, emoji, description, jobs, showSeeAll, onDismiss, isLoggedIn }) {
@@ -517,6 +518,8 @@ export default function Home() {
       </Helmet>
       <div className="row g-4">
         <div className="col-12 col-lg-8 col-left">
+          {/* Mobile-only top ad — visible immediately on phones */}
+          <MobileTopAd />
           <section aria-label="Job listings">
             {showRecommendations && (
               <div>

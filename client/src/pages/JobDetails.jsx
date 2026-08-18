@@ -23,6 +23,7 @@ import DynamicJobGuide from '../components/DynamicJobGuide.jsx';
 import { getJobUrl } from '../utils/urlHelper.js';
 import { triggerAd, openDualTabs } from '../utils/adUtils.js';
 import InContentAd from '../components/InContentAd.jsx';
+import MobileTopAd from '../components/MobileTopAd.jsx';
 
 
 function extractVacancy(title) {
@@ -1703,6 +1704,8 @@ export default function JobDetails() {
       </Helmet>
       <div className="row g-4">
         <div className="col-12 col-lg-8 col-left">
+          {/* Mobile-only top ad — shows immediately for mobile users */}
+          <MobileTopAd />
           <ExpiredBanner />
           <div className="job-header-section mb-4 mt-2">
             <div className="d-flex flex-wrap align-items-center gap-2.5 mb-3">

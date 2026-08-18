@@ -1,30 +1,28 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 /**
- * Banner468x60 — responsive ad banner.
- * Mobile: 320x50, Desktop: 468x60
+ * MobileTopAd — shows a 320x50 banner at the top of pages on mobile only.
+ * On desktop this renders nothing (sidebar ads handle desktop).
+ * This ensures mobile users see ads immediately without scrolling.
  */
-export default function Banner468x60() {
+export default function MobileTopAd() {
   const containerRef = useRef(null);
   const [isMobile, setIsMobile] = useState(false);
   const injectedRef = useRef(false);
 
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 480);
+    const checkMobile = () => setIsMobile(window.innerWidth < 992);
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!isMobile || !containerRef.current) return;
     if (injectedRef.current) return;
     injectedRef.current = true;
 
     containerRef.current.innerHTML = '';
-
-    const adWidth = isMobile ? 320 : 468;
-    const adHeight = isMobile ? 50 : 60;
 
     const script1 = document.createElement('script');
     script1.type = 'text/javascript';
@@ -32,8 +30,8 @@ export default function Banner468x60() {
       atOptions = {
         'key' : 'bc871abd6058fecb0fcafdc48804f536',
         'format' : 'iframe',
-        'height' : ${adHeight},
-        'width' : ${adWidth},
+        'height' : 50,
+        'width' : 320,
         'params' : {}
       };
     `;
@@ -46,15 +44,22 @@ export default function Banner468x60() {
     containerRef.current.appendChild(script2);
   }, [isMobile]);
 
+  if (!isMobile) return null;
+
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', margin: '16px 0', width: '100%', overflow: 'hidden' }}>
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: '100%',
+        margin: '8px 0 16px',
+        overflow: 'hidden',
+      }}
+    >
       <div
         ref={containerRef}
-        style={{
-          width: isMobile ? '320px' : '468px',
-          minHeight: isMobile ? '50px' : '60px',
-          maxWidth: '100%',
-        }}
+        style={{ width: '320px', minHeight: '50px', maxWidth: '100%' }}
       />
     </div>
   );

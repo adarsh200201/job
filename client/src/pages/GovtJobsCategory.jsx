@@ -14,6 +14,7 @@ import SidebarCategories from '../components/SidebarCategories.jsx';
 import SidebarCareerHub from '../components/SidebarCareerHub.jsx';
 import { generateCategorySEOTemplates } from '../utils/seoConfig.js';
 import InContentAd from '../components/InContentAd.jsx';
+import MobileTopAd from '../components/MobileTopAd.jsx';
 
 
 // Configurations for each category to ensure optimized SEO meta tags
@@ -332,6 +333,8 @@ export default function GovtJobsCategory({ categoryKey }) {
 
       <div className="row g-4">
         <div className="col-12 col-lg-8 col-left">
+          {/* Mobile-only top ad */}
+          <MobileTopAd />
           <section aria-label="Job listings">
             {loading && jobs.length === 0 && (
               <>

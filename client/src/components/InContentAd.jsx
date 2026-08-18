@@ -1,17 +1,26 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 /**
- * InContentAd — renders the Adsterra 468x60 banner inline within page content.
- * Placed between sections for maximum visibility and CTR.
- * Each instance gets a unique key to avoid script conflicts.
+ * InContentAd — fully responsive ad unit.
+ * - Mobile (<480px): 320x50
+ * - Tablet/Desktop (≥480px): 468x60
+ * Uses IntersectionObserver for lazy loading (only fires when visible).
  */
 export default function InContentAd({ instanceId = 'default' }) {
   const containerRef = useRef(null);
   const [visible, setVisible] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const observerRef = useRef(null);
+  const injectedRef = useRef(false);
 
   useEffect(() => {
-    // Lazy-load: only inject ad when element is near viewport
+    const checkMobile = () => setIsMobile(window.innerWidth < 480);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  useEffect(() => {
     observerRef.current = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -21,17 +30,20 @@ export default function InContentAd({ instanceId = 'default' }) {
       },
       { rootMargin: '200px' }
     );
-
-    if (containerRef.current) {
-      observerRef.current.observe(containerRef.current);
-    }
-
+    if (containerRef.current) observerRef.current.observe(containerRef.current);
     return () => observerRef.current?.disconnect();
   }, []);
 
   useEffect(() => {
     if (!visible || !containerRef.current) return;
+    // Prevent double-injection on re-render
+    if (injectedRef.current) return;
+    injectedRef.current = true;
+
     containerRef.current.innerHTML = '';
+
+    const adWidth = isMobile ? 320 : 468;
+    const adHeight = isMobile ? 50 : 60;
 
     const script1 = document.createElement('script');
     script1.type = 'text/javascript';
@@ -39,8 +51,8 @@ export default function InContentAd({ instanceId = 'default' }) {
       atOptions = {
         'key' : 'bc871abd6058fecb0fcafdc48804f536',
         'format' : 'iframe',
-        'height' : 60,
-        'width' : 468,
+        'height' : ${adHeight},
+        'width' : ${adWidth},
         'params' : {}
       };
     `;
@@ -51,7 +63,7 @@ export default function InContentAd({ instanceId = 'default' }) {
 
     containerRef.current.appendChild(script1);
     containerRef.current.appendChild(script2);
-  }, [visible]);
+  }, [visible, isMobile]);
 
   return (
     <div
@@ -59,16 +71,19 @@ export default function InContentAd({ instanceId = 'default' }) {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        margin: '20px auto',
+        margin: '16px auto',
         width: '100%',
         overflow: 'hidden',
-        minHeight: '60px',
-        background: 'transparent',
+        minHeight: isMobile ? '50px' : '60px',
       }}
     >
       <div
         ref={containerRef}
-        style={{ width: '468px', minHeight: '60px', maxWidth: '100%' }}
+        style={{
+          width: isMobile ? '320px' : '468px',
+          minHeight: isMobile ? '50px' : '60px',
+          maxWidth: '100%',
+        }}
       />
     </div>
   );
